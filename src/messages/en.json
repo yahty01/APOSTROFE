@@ -1,0 +1,120 @@
+{
+  "app": {
+    "name": "Apostrofe"
+  },
+  "nav": {
+    "models": "Models",
+    "admin": "Admin",
+    "marquee": "Marquee"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "all": "All",
+    "yes": "Yes",
+    "no": "No",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "public": {
+    "catalogTitle": "Models catalog",
+    "view": {
+      "cards": "Cards",
+      "list": "List"
+    },
+    "category": "Category",
+    "noResults": "No models found",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} / {pages}",
+      "items": "{count} total"
+    },
+    "detail": {
+      "measurements": "Measurements",
+      "details": "Details",
+      "telegramCta": "Ask in Telegram"
+    }
+  },
+  "admin": {
+    "login": {
+      "title": "Admin login",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…"
+    },
+    "accessDenied": "Access denied",
+    "signOut": "Sign out",
+    "models": {
+      "title": "Models",
+      "create": "Create model",
+      "documentId": "document_id",
+      "titleField": "Title",
+      "category": "Category",
+      "licenseType": "License",
+      "status": "Status",
+      "published": "Published",
+      "updatedAt": "Updated",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "archive": "Archive"
+    },
+    "modelForm": {
+      "createTitle": "Create model",
+      "editTitle": "Edit model",
+      "documentIdHelp": "Used in URL and Storage folder",
+      "titleHelp": "Shown in the catalog and on the details page",
+      "categoryHelp": "Used for the /models category filter (optional)",
+      "licenseHelp": "Free text (e.g. CC-BY / Royalty Free)",
+      "statusHelp": "Free text status (e.g. DRAFT / READY / ARCHIVED)",
+      "publishedHelp": "If enabled, the model is public and media becomes accessible via RLS rules",
+      "description": "Description",
+      "descriptionHelp": "Short text shown on the details page",
+      "measurements": "Measurements (JSON)",
+      "measurementsHelp": "JSON object (key → value). Leave empty if not needed",
+      "details": "Details (JSON)",
+      "detailsHelp": "JSON object of properties (key → value). Leave empty if not needed"
+    },
+    "media": {
+      "title": "Media",
+      "hero": "Hero image",
+      "gallery": "Gallery",
+      "upload": "Upload",
+      "reorderUp": "Up",
+      "reorderDown": "Down",
+      "remove": "Remove",
+      "preUploadHelp": "You can select files right away. They will be uploaded automatically after you save the model.",
+      "selectFiles": "Select files",
+      "noFilesSelected": "No files selected",
+      "filesSelected": "{count} file(s) selected",
+      "clearSelection": "Clear",
+      "howItWorksTitle": "How uploads work",
+      "howItWorksFormats": "Formats: JPG/PNG/WEBP. Max: {mb} MB per file.",
+      "howItWorksPaths": "Files are stored in bucket `assets`: {documentId}/hero/* and {documentId}/gallery/*",
+      "howItWorksPublish": "Public access to files is only available after the model is published.",
+      "emptyHero": "No hero image yet",
+      "emptyGallery": "No gallery images yet",
+      "errorOnlyImages": "Only image files are allowed",
+      "errorTooLarge": "File is too large (max {mb} MB)"
+    },
+    "marquee": {
+      "title": "Marquee settings",
+      "textRu": "Text (RU)",
+      "textEn": "Text (EN)",
+      "speed": "Speed",
+      "direction": "Direction",
+      "directionLeft": "Left",
+      "directionRight": "Right"
+    },
+    "toast": {
+      "saved": "Saved",
+      "error": "Something went wrong"
+    }
+  }
+}

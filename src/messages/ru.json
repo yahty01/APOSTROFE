@@ -1,0 +1,120 @@
+{
+  "app": {
+    "name": "Апостроф"
+  },
+  "nav": {
+    "models": "Каталог",
+    "admin": "Админка",
+    "marquee": "Бегущая строка"
+  },
+  "common": {
+    "loading": "Загрузка…",
+    "save": "Сохранить",
+    "saving": "Сохранение…",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "back": "Назад",
+    "all": "Все",
+    "yes": "Да",
+    "no": "Нет",
+    "enabled": "Включено",
+    "disabled": "Выключено"
+  },
+  "public": {
+    "catalogTitle": "Каталог моделей",
+    "view": {
+      "cards": "Карточки",
+      "list": "Таблица"
+    },
+    "category": "Категория",
+    "noResults": "Модели не найдены",
+    "pagination": {
+      "previous": "Назад",
+      "next": "Вперёд",
+      "page": "Страница {page} / {pages}",
+      "items": "Всего: {count}"
+    },
+    "detail": {
+      "measurements": "Размеры",
+      "details": "Детали",
+      "telegramCta": "Спросить в Telegram"
+    }
+  },
+  "admin": {
+    "login": {
+      "title": "Вход в админку",
+      "email": "Email",
+      "password": "Пароль",
+      "submit": "Войти",
+      "submitting": "Входим…"
+    },
+    "accessDenied": "Доступ запрещён",
+    "signOut": "Выйти",
+    "models": {
+      "title": "Модели",
+      "create": "Создать модель",
+      "documentId": "document_id",
+      "titleField": "Название",
+      "category": "Категория",
+      "licenseType": "Лицензия",
+      "status": "Статус",
+      "published": "Публикация",
+      "updatedAt": "Обновлено",
+      "publish": "Опубликовать",
+      "unpublish": "Снять с публикации",
+      "archive": "Архивировать"
+    },
+    "modelForm": {
+      "createTitle": "Создать модель",
+      "editTitle": "Редактировать модель",
+      "documentIdHelp": "Используется в URL и как папка в Storage",
+      "titleHelp": "Название для каталога и детальной страницы",
+      "categoryHelp": "Используется для фильтра в /models (можно оставить пустым)",
+      "licenseHelp": "Текстовое поле (например CC‑BY / Royalty Free)",
+      "statusHelp": "Произвольный статус (например DRAFT / READY / ARCHIVED)",
+      "publishedHelp": "Если включено — модель видна публично и медиа доступно по правилам RLS",
+      "description": "Описание",
+      "descriptionHelp": "Короткий текст, показывается на детальной странице",
+      "measurements": "Размеры (JSON)",
+      "measurementsHelp": "JSON‑объект (ключ → значение). Оставь пустым, если не нужно",
+      "details": "Детали (JSON)",
+      "detailsHelp": "JSON‑объект характеристик (ключ → значение). Оставь пустым, если не нужно"
+    },
+    "media": {
+      "title": "Медиа",
+      "hero": "Hero‑изображение",
+      "gallery": "Галерея",
+      "upload": "Загрузить",
+      "reorderUp": "Вверх",
+      "reorderDown": "Вниз",
+      "remove": "Удалить",
+      "preUploadHelp": "Можно выбрать файлы сразу. Они загрузятся автоматически после сохранения модели.",
+      "selectFiles": "Выбрать файлы",
+      "noFilesSelected": "Файлы не выбраны",
+      "filesSelected": "Выбрано файлов: {count}",
+      "clearSelection": "Сбросить",
+      "howItWorksTitle": "Как работает загрузка",
+      "howItWorksFormats": "Форматы: JPG/PNG/WEBP. Максимум: {mb} MB на файл.",
+      "howItWorksPaths": "Файлы сохраняются в bucket `assets` по пути: {documentId}/hero/* и {documentId}/gallery/*",
+      "howItWorksPublish": "Публичный доступ к файлам появляется только после публикации модели.",
+      "emptyHero": "Hero‑изображение ещё не загружено",
+      "emptyGallery": "В галерее пока нет изображений",
+      "errorOnlyImages": "Можно загружать только изображения",
+      "errorTooLarge": "Файл слишком большой (макс. {mb} MB)"
+    },
+    "marquee": {
+      "title": "Настройки marquee",
+      "textRu": "Текст (RU)",
+      "textEn": "Текст (EN)",
+      "speed": "Скорость",
+      "direction": "Направление",
+      "directionLeft": "Влево",
+      "directionRight": "Вправо"
+    },
+    "toast": {
+      "saved": "Сохранено",
+      "error": "Произошла ошибка"
+    }
+  }
+}
