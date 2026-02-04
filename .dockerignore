@@ -1,0 +1,16 @@
+.DS_Store
+.env*
+!.env.example
+.git
+.next
+.vercel
+build
+coverage
+node_modules
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+docs
+supabase

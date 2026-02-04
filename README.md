@@ -1,6 +1,6 @@
 # APOSTROFE (MVP)
 
-Next.js (App Router) + Supabase (DB/Auth/Storage) + Vercel.
+Next.js (App Router) + Supabase (DB/Auth/Storage) + Timeweb Cloud.
 
 ## Что реализовано
 
@@ -65,6 +65,6 @@ cp .env.example .env.local
 - Публичные: `/models`, `/models/[document_id]`
 - Админка: `/admin/login`, `/admin/models`, `/admin/settings/marquee`
 
-## Deploy (Vercel)
+## Deploy (Timeweb)
 
-В Vercel добавь те же env vars (Preview/Production) и деплой автоматически заработает.
+См. пошаговый гайд: `docs/deploy/README.md`.

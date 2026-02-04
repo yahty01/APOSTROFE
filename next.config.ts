@@ -22,15 +22,24 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    remotePatterns: supabaseHostname
-      ? [
-          {
-            protocol: "https",
-            hostname: supabaseHostname,
-            pathname: "/storage/v1/**",
-          },
-        ]
-      : [],
+    // Allow Supabase Storage images without requiring build-time env injection.
+    // If you use a custom Supabase domain, set NEXT_PUBLIC_SUPABASE_URL so we can add it too.
+    remotePatterns: [
+      {
+        protocol: "https" as const,
+        hostname: "**.supabase.co",
+        pathname: "/storage/v1/**",
+      },
+      ...(supabaseHostname
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: supabaseHostname,
+              pathname: "/storage/v1/**",
+            },
+          ]
+        : []),
+    ],
   },
 };
 
