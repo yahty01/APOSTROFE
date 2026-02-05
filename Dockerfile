@@ -24,4 +24,6 @@ EXPOSE 3000
 
 COPY --from=build /app ./
 
-CMD ["pnpm","start","--","-H","0.0.0.0","-p","3000"]
+# Next.js `next start` already defaults to hostname 0.0.0.0 and port 3000
+# (and also respects env PORT), so no extra args are needed here.
+CMD ["pnpm","start"]

@@ -10,7 +10,7 @@
 Сделать демонстрационно‑готовый продукт:
 - публичный каталог моделей `/models` + детальная `/models/[document_id]`;
 - админ‑часть `/admin` для управления моделями и marquee;
-- деплой на Vercel + Supabase (DB/Auth/Storage) с корректной безопасностью (RLS).
+- деплой на Timeweb + Supabase (DB/Auth/Storage) с корректной безопасностью (RLS).
 
 ### Термины
 - **Model / Asset**: запись в таблице `assets` (далее “модель”).
@@ -54,7 +54,7 @@
 
 - **INF-001**: Next.js App Router + TypeScript репозиторий.
 - **INF-002**: Supabase проект (на MVP достаточно одного для staging/preview, но желательно сразу продумать prod).
-- **INF-003**: Vercel проект + автодеплой.
+- **INF-003**: Timeweb Cloud App Platform (Dockerfile/SSR) + автодеплой из GitHub. _(опционально: отдельное staging‑приложение на ветке `develop`/`staging`)_
 - **INF-004**: env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (или `NEXT_PUBLIC_SUPABASE_ANON_KEY`), серверно `SUPABASE_SERVICE_ROLE_KEY` (только сервер).
 - **DB-001**: таблицы: `profiles`, `assets`, `asset_media`, `settings_marquee` (минимальная схема — ниже).
 - **DB-002**: Storage bucket `assets` (или `media`) и структура `document_id/...`.
@@ -78,7 +78,7 @@
 ### 3.1 Стек
 - Next.js (App Router) + TypeScript.
 - Supabase: Postgres + Auth + Storage.
-- Vercel: Preview/Production deploy.
+- Timeweb: App Platform деплой из Dockerfile (SSR) + автодеплой из GitHub. _(опционально: staging/prod как два приложения)_
 - `@supabase/ssr`: SSR‑auth через cookies для `/admin`.
 - `next-intl`: минимальная RU/EN локализация (без изменения публичных URL, чтобы сохранить `/models/...`).
 - Формы админки: React Hook Form + Zod.
@@ -110,8 +110,8 @@
 - [x] Инициализировать Next.js App Router + TS (eslint, базовая структура, `src/` — по вкусу).
 - [x] Выбрать пакетный менеджер (желательно `pnpm`) и зафиксировать в README (минимально).
 - [x] Создать Supabase проект и сохранить параметры подключения. _(проверено: публичный клиент читает `settings_marquee`/`assets` по `.env.local`)_
-- [ ] Создать Vercel проект, подключить репозиторий. _(вне репозитория; нет артефактов, позволяющих подтвердить)_
-- [ ] Настроить env vars для Preview/Production: _(локально настроено через `.env.local`/`.env.example`, но в Vercel нужно подтвердить отдельно)_
+- [ ] Создать приложение в Timeweb Cloud (App Platform → Dockerfile) и подключить GitHub‑репозиторий. _(вне репозитория; нет артефактов, позволяющих подтвердить)_
+- [ ] Настроить env vars в Timeweb (и, если есть два приложения, отдельно для staging/prod): _(локально настроено через `.env.local`/`.env.example`, но в Timeweb нужно подтвердить отдельно)_
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (или `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
   - `SUPABASE_SERVICE_ROLE_KEY` (только server runtime)
@@ -119,7 +119,7 @@
 
 **Definition of Done**
 - `pnpm dev`/`npm run dev` запускается локально.
-- Vercel Preview билдится (даже до готовой DB — со stub‑страницами).
+- Timeweb деплой (App Platform/Dockerfile) успешно собирается и открывается на техническом домене `*.timeweb.cloud`.
 
 ---
 
@@ -365,9 +365,9 @@
 ### Шаг 7 — Деплой и финальная демонстрация (из tech‑plan)
 
 **Задачи**
-- [ ] Настроить Vercel Production + Preview deployments (авто) (INF-003).
+- [ ] Настроить Timeweb автодеплой из GitHub (INF-003). _(опционально: staging‑приложение отдельной веткой)_
 - [x] Проверить редирект `/` → `/models` (PUB-001). _(проверено локально через Playwright)_
-- [ ] Проверить env vars для Preview и Production (INF-004). _(локально есть `.env.local`, но Vercel не проверен)_
+- [ ] Проверить env vars на Timeweb (INF-004). _(локально есть `.env.local`, но в Timeweb не проверено)_
 - [ ] Smoke‑проверки:
   - [x] публичные страницы открываются;
   - [ ] админ‑логин работает;
