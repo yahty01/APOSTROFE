@@ -19,6 +19,14 @@ export function NewModelClient() {
   const [heroFile, setHeroFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
 
+  const MB = 1024 * 1024;
+  const softWarnSingleBytes = 4 * MB;
+  const softWarnTotalBytes = 15 * MB;
+
+  function bytesToMb(bytes: number) {
+    return Math.round((bytes / MB) * 10) / 10;
+  }
+
   async function uploadSelected(assetId: string) {
     if (heroFile) {
       const fd = new FormData();
@@ -82,7 +90,21 @@ export function NewModelClient() {
               {tMedia('selectFiles')}
             </label>
             <div className="text-xs text-black/60">
-              {heroFile ? heroFile.name : tMedia('noFilesSelected')}
+              {heroFile ? (
+                <div className="space-y-1">
+                  <div className="truncate">{heroFile.name}</div>
+                  <div>
+                    {tMedia('sizeLabel', {mb: bytesToMb(heroFile.size)})}
+                  </div>
+                  {heroFile.size >= softWarnSingleBytes ? (
+                    <div className="text-amber-700">
+                      {tMedia('warningLargeFile', {mb: bytesToMb(heroFile.size)})}
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                tMedia('noFilesSelected')
+              )}
             </div>
           </div>
 
@@ -99,11 +121,27 @@ export function NewModelClient() {
               {tMedia('selectFiles')}
             </label>
             <div className="text-xs text-black/60">
-              {galleryFiles.length ? (
-                <span>
-                  {tMedia('filesSelected', {count: galleryFiles.length})}
-                </span>
-              ) : (
+              {galleryFiles.length ? (() => {
+                const totalBytes = galleryFiles.reduce((sum, file) => sum + file.size, 0);
+                const showWarn =
+                  totalBytes >= softWarnTotalBytes ||
+                  galleryFiles.some((f) => f.size >= softWarnSingleBytes);
+
+                return (
+                  <div className="space-y-1">
+                    <div>{tMedia('filesSelected', {count: galleryFiles.length})}</div>
+                    <div>{tMedia('sizeTotalLabel', {mb: bytesToMb(totalBytes)})}</div>
+                    {showWarn ? (
+                      <div className="text-amber-700">
+                        {tMedia('warningLargeSelection', {
+                          count: galleryFiles.length,
+                          mb: bytesToMb(totalBytes)
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })() : (
                 <span>{tMedia('noFilesSelected')}</span>
               )}
             </div>

@@ -8,6 +8,7 @@
 2) [02-domain.md](02-domain.md) — подключение домена и DNS (апекс + `www`)
 3) [03-supabase.md](03-supabase.md) — Supabase: env, миграции, Auth, Storage, проверки
 4) [04-ci-cd.md](04-ci-cd.md) — быстрый CI (GitHub Actions) + CD на Timeweb
+5) [05-s3-storage.md](05-s3-storage.md) — план миграции медиа на Timeweb S3 (когда Supabase Storage станет тесным)
 
 ## Мини-чеклист (после прочтения)
 

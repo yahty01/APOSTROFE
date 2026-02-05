@@ -38,8 +38,16 @@ export function MediaManager({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  const MB = 1024 * 1024;
   const maxBytes = 10 * 1024 * 1024;
   const acceptImages = 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp';
+
+  const softWarnSingleBytes = 4 * MB;
+  const softWarnTotalBytes = 15 * MB;
+
+  function bytesToMb(bytes: number) {
+    return Math.round((bytes / MB) * 10) / 10;
+  }
 
   function validateFile(file: File): string | null {
     if (!file.type.startsWith('image/')) return t('errorOnlyImages');
@@ -54,6 +62,11 @@ export function MediaManager({
       toast.error(err);
       return;
     }
+
+    if (file.size >= softWarnSingleBytes) {
+      toast(t('warningLargeFile', {mb: bytesToMb(file.size)}));
+    }
+
     startTransition(async () => {
       const fd = new FormData();
       fd.set('asset_id', assetId);
@@ -73,6 +86,15 @@ export function MediaManager({
       toast.error(firstError);
       return;
     }
+
+    const totalBytes = list.reduce((sum, file) => sum + file.size, 0);
+    if (totalBytes >= softWarnTotalBytes) {
+      toast(t('warningLargeSelection', {count: list.length, mb: bytesToMb(totalBytes)}));
+    } else {
+      const large = list.find((f) => f.size >= softWarnSingleBytes) ?? null;
+      if (large) toast(t('warningLargeFile', {mb: bytesToMb(large.size)}));
+    }
+
     startTransition(async () => {
       const fd = new FormData();
       fd.set('asset_id', assetId);
@@ -109,6 +131,7 @@ export function MediaManager({
           <div>{t('howItWorksFormats', {mb: 10})}</div>
           <div>{t('howItWorksPaths', {documentId})}</div>
           <div>{t('howItWorksPublish')}</div>
+          <div>{t('storageNote')}</div>
         </div>
       </div>
 
