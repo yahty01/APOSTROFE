@@ -85,3 +85,67 @@ export async function archiveAssetAction(formData: FormData) {
   revalidatePath('/admin/models');
   revalidatePath(`/admin/models/${asset_id}`);
 }
+
+const deleteSchema = z.object({
+  asset_id: z.string().uuid()
+});
+
+type DeleteResult = {ok: true; warning?: string} | {ok: false; error: string};
+
+function chunkArray<T>(items: T[], size: number) {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+export async function deleteAssetAction(formData: FormData): Promise<DeleteResult> {
+  const parsed = deleteSchema.safeParse({
+    asset_id: formData.get('asset_id')
+  });
+  if (!parsed.success) return {ok: false, error: 'Invalid form data'};
+
+  const supabase = await requireAdminOrEditor();
+
+  const {data: asset, error: assetError} = await supabase
+    .from('assets')
+    .select('id,document_id')
+    .eq('id', parsed.data.asset_id)
+    .maybeSingle();
+
+  if (assetError || !asset) {
+    return {ok: false, error: assetError?.message ?? 'Not found'};
+  }
+
+  const {data: media, error: mediaError} = await supabase
+    .from('asset_media')
+    .select('path')
+    .eq('asset_id', parsed.data.asset_id);
+
+  if (mediaError) return {ok: false, error: mediaError.message};
+
+  const paths = (media ?? [])
+    .map((m) => m.path)
+    .filter((p): p is string => typeof p === 'string' && p.length > 0);
+
+  let warning: string | undefined;
+  for (const chunk of chunkArray(paths, 100)) {
+    const {error: removeError} = await supabase.storage.from('assets').remove(chunk);
+    if (removeError && !warning) warning = removeError.message;
+  }
+
+  const {error: deleteError} = await supabase
+    .from('assets')
+    .delete()
+    .eq('id', parsed.data.asset_id);
+
+  if (deleteError) return {ok: false, error: deleteError.message};
+
+  revalidatePath('/models');
+  revalidatePath(`/models/${asset.document_id}`);
+  revalidatePath('/admin/models');
+  revalidatePath(`/admin/models/${asset.id}`);
+
+  return warning ? {ok: true, warning} : {ok: true};
+}

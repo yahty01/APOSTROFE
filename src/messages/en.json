@@ -63,7 +63,9 @@
       "updatedAt": "Updated",
       "publish": "Publish",
       "unpublish": "Unpublish",
-      "archive": "Archive"
+      "archive": "Archive",
+      "delete": "Delete",
+      "deleteConfirm": "Delete model \"{title}\"? This will also delete its media."
     },
     "modelForm": {
       "createTitle": "Create model",
@@ -119,7 +121,9 @@
     },
     "toast": {
       "saved": "Saved",
-      "error": "Something went wrong"
+      "deleted": "Deleted",
+      "error": "Something went wrong",
+      "warningWithDetails": "Some files couldn't be removed: {details}"
     }
   }
 }

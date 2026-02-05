@@ -4,6 +4,7 @@ import {getTranslations} from 'next-intl/server';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
 
 import {archiveAssetAction, setPublishAction} from './actions';
+import {DeleteAssetButton} from './DeleteAssetButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,6 +97,8 @@ export default async function AdminModelsPage({}: {
                   {t('archive')}
                 </button>
               </form>
+
+              <DeleteAssetButton assetId={a.id} title={a.title} />
 
               <Link
                 href={`/admin/models/${a.id}`}

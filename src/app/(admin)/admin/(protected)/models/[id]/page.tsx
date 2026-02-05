@@ -5,6 +5,7 @@ import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
 
 import {AssetForm} from '../AssetForm';
+import {DeleteAssetButton} from '../DeleteAssetButton';
 import {MediaManager, type AdminMediaItem} from '../MediaManager';
 
 export const dynamic = 'force-dynamic';
@@ -75,9 +76,12 @@ export default async function AdminEditModelPage({
 
   return (
     <div className="space-y-10">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{t('editTitle')}</h1>
-        <p className="text-sm text-black/60 font-mono">{asset.id}</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">{t('editTitle')}</h1>
+          <p className="text-sm text-black/60 font-mono">{asset.id}</p>
+        </div>
+        <DeleteAssetButton assetId={asset.id} title={asset.title} />
       </div>
 
       <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
