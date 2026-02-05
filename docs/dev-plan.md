@@ -46,7 +46,7 @@
 - **ADM-004**: `/admin/models` — список моделей.
 - **ADM-005**: `/admin/models` — создать/редактировать модель.
 - **ADM-006**: `/admin/models` — `publish/unpublish`.
-- **ADM-007**: `/admin/models` — `archive` (status=ARCHIVED + is_published=false).
+- **ADM-007**: `/admin/models` — `delete` (удаление модели и её медиа).
 - **ADM-008**: загрузка медиа (hero + gallery) + reorder (order_index).
 - **ADM-009**: `/admin/settings/marquee` — настройки (text/enabled/speed/direction; speed/direction можно применить минимально).
 
@@ -310,7 +310,7 @@
   - колонки: document_id/title/category/is_published/status/updated_at.
 - [x] Действия:
   - [x] Publish/Unpublish (ADM-006).
-  - [x] Archive: выставить `status=ARCHIVED` и `is_published=false` (ADM-007).
+  - [x] Delete: удалить запись `assets`, связанные `asset_media` и файлы в Storage (ADM-007).
   - [x] Edit → `/admin/models/[id]`.
   - [x] Create → `/admin/models/new`.
 - [x] После мутаций:
@@ -411,7 +411,7 @@
 | §1 Админка | `/admin/models` список | ADM-004 | Шаг 5.2 |
 | §1 Админка | создать/редактировать | ADM-005 | Шаг 5.3 |
 | §1 Админка | publish/unpublish | ADM-006 | Шаг 5.2 |
-| §1 Админка | archive | ADM-007 | Шаг 5.2 |
+| §1 Админка | delete | ADM-007 | Шаг 5.2 |
 | §1 Админка | upload + reorder | ADM-008 | Шаг 5.4 |
 | §1 Админка | settings marquee | ADM-009 | Шаг 5.5 |
 | §3 План работ | окружения/env/deploy | INF-001…INF-004 | Шаг 0 + Шаг 7 |

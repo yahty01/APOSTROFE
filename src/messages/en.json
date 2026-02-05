@@ -63,7 +63,6 @@
       "updatedAt": "Updated",
       "publish": "Publish",
       "unpublish": "Unpublish",
-      "archive": "Archive",
       "delete": "Delete",
       "deleteConfirm": "Delete model \"{title}\"? This will also delete its media."
     },
@@ -74,7 +73,7 @@
       "titleHelp": "Shown in the catalog and on the details page",
       "categoryHelp": "Used for the /models category filter (optional)",
       "licenseHelp": "Free text (e.g. CC-BY / Royalty Free)",
-      "statusHelp": "Free text status (e.g. DRAFT / READY / ARCHIVED)",
+      "statusHelp": "Free text status (e.g. DRAFT / READY)",
       "publishedHelp": "If enabled, the model is public and media becomes accessible via RLS rules",
       "description": "Description",
       "descriptionHelp": "Short text shown on the details page",

@@ -110,7 +110,7 @@ export default async function ModelDetailPage({
                   src={heroUrl}
                   alt={asset.title}
                   fill
-                  className="object-cover"
+                  className="object-contain object-center"
                   sizes="(max-width: 1024px) 100vw, 60vw"
                   priority
                 />
@@ -132,7 +132,7 @@ export default async function ModelDetailPage({
                       src={url}
                       alt={`${asset.title} ${idx + 1}`}
                       fill
-                      className="object-cover"
+                      className="object-contain object-center"
                       sizes="120px"
                     />
                   </div>
@@ -206,4 +206,3 @@ export default async function ModelDetailPage({
     notFound();
   }
 }
-

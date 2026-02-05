@@ -30,7 +30,7 @@
   - [x] список моделей
   - [x] создать / редактировать
   - [x] `publish/unpublish`
-  - [x] `archive` (status=ARCHIVED + is_published=false)
+  - [x] `delete` (удаление модели и её медиа)
 - [x] Загрузка медиа (hero + gallery) + reorder (order_index)
 - [x] `/admin/settings/marquee` (text/enabled/speed/direction — speed/direction можно оставить “в интерфейсе”, но применить минимально)
 
@@ -175,7 +175,7 @@ _(✅ схема/политики и bucket реализованы миграц�
   - create
   - edit
   - publish/unpublish
-  - archive
+  - delete
 - [x] после каждого действия → `revalidatePath('/models')` + `revalidatePath(`/models/${document_id}`)`
 
 **/admin/models/new и /admin/models/[id]**

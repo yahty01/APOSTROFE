@@ -152,7 +152,13 @@ export function MediaManager({
 
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-black/10 bg-zinc-100">
           {hero?.url ? (
-            <Image src={hero.url} alt="Hero" fill className="object-cover" />
+            <Image
+              src={hero.url}
+              alt="Hero"
+              fill
+              className="object-contain object-center"
+              sizes="(max-width: 1024px) 100vw, 60vw"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-sm text-black/40">
               {t('emptyHero')}
@@ -204,7 +210,7 @@ export function MediaManager({
                         src={item.url}
                         alt={`Gallery ${idx + 1}`}
                         fill
-                        className="object-cover"
+                        className="object-contain object-center"
                         sizes="200px"
                       />
                     ) : null}

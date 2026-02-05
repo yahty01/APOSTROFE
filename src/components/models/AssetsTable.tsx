@@ -49,7 +49,7 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
                         src={item.preview_url}
                         alt={item.title}
                         fill
-                        className="object-cover"
+                        className="object-cover object-top"
                         sizes="64px"
                       />
                     ) : null}
@@ -87,4 +87,3 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
     </div>
   );
 }
-
