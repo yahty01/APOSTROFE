@@ -21,7 +21,7 @@ export default async function AdminMarqueeSettingsPage({}: {
 
   if (error || !data) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+      <div className="border border-red-300 bg-red-50 p-4 font-doc text-[11px] uppercase tracking-[0.16em] text-red-900">
         {error?.message ?? 'Missing settings'}
       </div>
     );
@@ -31,8 +31,10 @@ export default async function AdminMarqueeSettingsPage({}: {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
-      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+      <h1 className="font-condensed text-[clamp(32px,4vw,52px)] leading-[0.9] uppercase tracking-[0.14em]">
+        {t('title')}
+      </h1>
+      <div className="ui-panel p-6">
         <MarqueeForm
           initialValues={{
             enabled: data.enabled,

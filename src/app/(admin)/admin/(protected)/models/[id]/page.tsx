@@ -78,13 +78,17 @@ export default async function AdminEditModelPage({
     <div className="space-y-10">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t('editTitle')}</h1>
-          <p className="text-sm text-black/60 font-mono">{asset.id}</p>
+          <h1 className="font-condensed text-[clamp(32px,4vw,52px)] leading-[0.9] uppercase tracking-[0.14em]">
+            {t('editTitle')}
+          </h1>
+          <p className="font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+            {asset.id}
+          </p>
         </div>
         <DeleteAssetButton assetId={asset.id} title={asset.title} />
       </div>
 
-      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+      <div className="ui-panel p-6">
         <AssetForm
           assetId={asset.id}
           initialValues={{
@@ -101,7 +105,7 @@ export default async function AdminEditModelPage({
         />
       </div>
 
-      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+      <div className="ui-panel p-6">
         <MediaManager
           assetId={asset.id}
           documentId={asset.document_id}

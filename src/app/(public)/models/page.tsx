@@ -7,6 +7,7 @@ import {ModelsToolbar} from '@/components/models/ModelsToolbar';
 import type {AssetListItem} from '@/components/models/types';
 import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
+import {buildGenericLicenseRequestText, buildTelegramShareUrl} from '@/lib/telegram';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,7 +81,7 @@ export default async function ModelsPage({
       supabase
         .from('assets')
         .select(
-          'id,document_id,title,category,license_type,status,updated_at',
+          'id,document_id,title,description,category,license_type,status,updated_at',
           {count: 'exact'}
         )
         .order('updated_at', {ascending: false})
@@ -147,6 +148,7 @@ export default async function ModelsPage({
             id: a.id,
             document_id: a.document_id,
             title: a.title,
+            description: a.description,
             category: a.category,
             license_type: a.license_type,
             status: a.status,
@@ -165,29 +167,39 @@ export default async function ModelsPage({
   const prevPage = page > 1 ? page - 1 : null;
   const nextPage = page < pages ? page + 1 : null;
 
+  const genericTelegramHref = buildTelegramShareUrl(
+    buildGenericLicenseRequestText()
+  );
+
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t('catalogTitle')}
-          </h1>
-          <p className="mt-1 text-sm text-black/60">
-            {t('pagination.items', {count})}
-          </p>
-        </div>
+    <div className="space-y-12">
+      <header className="space-y-4">
+        <h1 className="font-condensed text-[clamp(48px,6vw,72px)] leading-[0.88] uppercase tracking-[0.12em]">
+          {t('catalogTitle')}
+        </h1>
+        <p className="max-w-3xl font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+          {t('catalogSubtitle')}
+        </p>
       </header>
 
-      <ModelsToolbar categories={categories} />
+      <div className="grid grid-cols-1 gap-px bg-[var(--color-line)] md:grid-cols-[1fr_auto]">
+        <div className="bg-[var(--color-surface)] p-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+          <div>{t('pagination.items', {count})}</div>
+          <div className="mt-1">{t('pagination.page', {page, pages})}</div>
+        </div>
+        <div className="bg-[var(--color-surface)] p-4">
+          <ModelsToolbar categories={categories} />
+        </div>
+      </div>
 
       {errorMessage ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+        <div className="ui-panel p-4 font-doc text-[11px] uppercase tracking-[0.16em] text-red-800">
           {errorMessage}
         </div>
       ) : null}
 
       {!errorMessage && items.length === 0 ? (
-        <div className="rounded-xl border border-black/10 bg-white p-10 text-center text-sm text-black/60">
+        <div className="ui-panel p-10 text-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
           {t('noResults')}
         </div>
       ) : null}
@@ -200,17 +212,17 @@ export default async function ModelsPage({
         )
       ) : null}
 
-      <div className="flex flex-col gap-3 border-t border-black/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-black/60">
+      <div className="flex flex-col gap-3 border-t ui-line pt-6 md:flex-row md:items-center md:justify-between">
+        <div className="font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
           {t('pagination.page', {page, pages})}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link
             aria-disabled={!prevPage}
-            className={`inline-flex h-10 items-center justify-center rounded-full border px-4 text-sm ${
+            className={`flex h-10 items-center justify-center border px-4 font-doc text-[11px] uppercase tracking-[0.18em] ${
               prevPage
-                ? 'border-black/10 bg-white hover:bg-black/5'
-                : 'cursor-not-allowed border-black/5 bg-black/5 text-black/30'
+                ? 'border-[color:var(--color-line)] bg-[var(--color-paper)] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]'
+                : 'cursor-not-allowed border-[color:var(--color-line)] bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] text-[var(--color-muted)] opacity-60'
             }`}
             href={
               prevPage
@@ -224,10 +236,10 @@ export default async function ModelsPage({
           </Link>
           <Link
             aria-disabled={!nextPage}
-            className={`inline-flex h-10 items-center justify-center rounded-full border px-4 text-sm ${
+            className={`flex h-10 items-center justify-center border px-4 font-doc text-[11px] uppercase tracking-[0.18em] ${
               nextPage
-                ? 'border-black/10 bg-white hover:bg-black/5'
-                : 'cursor-not-allowed border-black/5 bg-black/5 text-black/30'
+                ? 'border-[color:var(--color-line)] bg-[var(--color-paper)] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]'
+                : 'cursor-not-allowed border-[color:var(--color-line)] bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] text-[var(--color-muted)] opacity-60'
             }`}
             href={
               nextPage
@@ -240,11 +252,24 @@ export default async function ModelsPage({
             {t('pagination.next')}
           </Link>
           <Link
-            className="hidden h-10 items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm hover:bg-black/5 sm:inline-flex"
+            className="hidden h-10 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] md:flex"
             href={`/models?${buildSearchParams(sp, {page: null, category: null}).toString()}`}
           >
             {tCommon('all')}
           </Link>
+        </div>
+      </div>
+
+      <div className="py-16">
+        <div className="flex justify-center">
+          <a
+            href={genericTelegramHref}
+            target="_blank"
+            rel="noreferrer"
+            className="ui-btn-primary h-14 px-10 text-[16px]"
+          >
+            {t('cta.requestLicense')}
+          </a>
         </div>
       </div>
     </div>

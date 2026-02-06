@@ -22,7 +22,12 @@
     "disabled": "Выключено"
   },
   "public": {
-    "catalogTitle": "Каталог моделей",
+    "catalogTitle": "КАТАЛОГ АКТИВОВ",
+    "catalogSubtitle": "РЕЕСТР ЛИЦЕНЗИРОВАННЫХ ЦИФРОВЫХ ИДЕНТИЧНОСТЕЙ.",
+    "cta": {
+      "requestLicense": "[ ЗАПРОСИТЬ ЛИЦЕНЗИЮ ]"
+    },
+    "comingSoon": "СКОРО",
     "view": {
       "cards": "Карточки",
       "list": "Таблица"

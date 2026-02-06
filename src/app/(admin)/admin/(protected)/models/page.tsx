@@ -22,82 +22,104 @@ export default async function AdminModelsPage({}: {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+      <div className="border border-red-300 bg-red-50 p-4 font-doc text-[11px] uppercase tracking-[0.16em] text-red-900">
         {error.message}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+    <div className="space-y-10">
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <h1 className="font-condensed text-[clamp(32px,4vw,52px)] leading-[0.9] uppercase tracking-[0.14em]">
+          {t('title')}
+        </h1>
         <Link
           href="/admin/models/new"
-          className="inline-flex h-10 items-center justify-center rounded-full bg-black px-4 text-sm font-medium text-white hover:bg-black/90"
+          className="ui-btn-primary"
         >
           {t('create')}
         </Link>
       </div>
 
-      <div className="overflow-x-auto overflow-y-hidden rounded-xl border border-black/10 bg-white shadow-sm">
-        <div className="grid grid-cols-[160px_1fr_160px_120px_120px_320px] gap-3 border-b border-black/10 px-4 py-3 text-xs font-medium text-black/60">
-          <div>{t('documentId')}</div>
-          <div>{t('titleField')}</div>
-          <div>{t('category')}</div>
-          <div>{t('published')}</div>
-          <div>{t('status')}</div>
-          <div className="text-right">Actions</div>
-        </div>
-
-        {(assets ?? []).map((a) => (
-          <div
-            key={a.id}
-            className="grid grid-cols-[160px_1fr_160px_120px_120px_320px] items-center gap-3 border-b border-black/5 px-4 py-3 text-sm"
-          >
-            <div className="truncate font-mono text-xs text-black/70">
-              {a.document_id}
+      <div className="overflow-x-auto overflow-y-hidden border border-[color:var(--color-line)] bg-[var(--color-paper)]">
+        <div className="min-w-[980px]">
+          <div className="grid grid-cols-[160px_1fr_160px_120px_120px_320px] items-center bg-black">
+            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+              {t('documentId')}
             </div>
+            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+              {t('titleField')}
+            </div>
+            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+              {t('category')}
+            </div>
+            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+              {t('published')}
+            </div>
+            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+              {t('status')}
+            </div>
+            <div className="px-4 py-3 text-right font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+              ACTIONS
+            </div>
+          </div>
 
-            <Link
-              href={`/admin/models/${a.id}`}
-              className="min-w-0 truncate font-medium text-black hover:underline"
+          {(assets ?? []).map((a) => (
+            <div
+              key={a.id}
+              className="grid grid-cols-[160px_1fr_160px_120px_120px_320px] items-center border-b border-[color:var(--color-line)] bg-[var(--color-surface)]"
             >
-              {a.title}
-            </Link>
-
-            <div className="truncate text-black/70">{a.category ?? '—'}</div>
-            <div className="text-black/70">{a.is_published ? '✅' : '—'}</div>
-            <div className="truncate text-black/70">{a.status ?? '—'}</div>
-
-            <div className="flex justify-end gap-2">
-              <form action={setPublishAction}>
-                <input type="hidden" name="asset_id" value={a.id} />
-                <input type="hidden" name="document_id" value={a.document_id} />
-                <input
-                  type="hidden"
-                  name="next_published"
-                  value={a.is_published ? 'false' : 'true'}
-                />
-                <button
-                  type="submit"
-                  className="inline-flex h-9 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5"
-                >
-                  {a.is_published ? t('unpublish') : t('publish')}
-                </button>
-              </form>
-
-              <DeleteAssetButton assetId={a.id} title={a.title} />
+              <div className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                {a.document_id}
+              </div>
 
               <Link
                 href={`/admin/models/${a.id}`}
-                className="inline-flex h-9 items-center justify-center rounded-full bg-black px-3 text-xs text-white hover:bg-black/90"
+                className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink)] hover:underline"
               >
-                Edit
+                {a.title}
               </Link>
+
+              <div className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                {a.category ?? '—'}
+              </div>
+              <div className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                {a.is_published ? 'PUBLISHED' : '—'}
+              </div>
+              <div className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                {a.status ?? '—'}
+              </div>
+
+              <div className="flex justify-end gap-2 px-4 py-3">
+                <form action={setPublishAction}>
+                  <input type="hidden" name="asset_id" value={a.id} />
+                  <input type="hidden" name="document_id" value={a.document_id} />
+                  <input
+                    type="hidden"
+                    name="next_published"
+                    value={a.is_published ? 'false' : 'true'}
+                  />
+                  <button
+                    type="submit"
+                    className="flex h-9 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]"
+                  >
+                    {a.is_published ? t('unpublish') : t('publish')}
+                  </button>
+                </form>
+
+                <DeleteAssetButton assetId={a.id} title={a.title} />
+
+                <Link
+                  href={`/admin/models/${a.id}`}
+                  className="flex h-9 items-center justify-center border border-black bg-black px-3 font-doc text-[11px] uppercase tracking-[0.18em] text-white hover:bg-[color-mix(in_oklab,#000,#fff_10%)]"
+                >
+                  EDIT
+                </Link>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

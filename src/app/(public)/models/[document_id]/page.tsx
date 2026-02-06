@@ -1,26 +1,35 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {getTranslations} from 'next-intl/server';
 
 import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
+import {
+  buildLicenseRequestText,
+  buildRequestInfoText,
+  buildTelegramShareUrl
+} from '@/lib/telegram';
 
 export const dynamic = 'force-dynamic';
+
+function formatIsoDate(value: string | null | undefined) {
+  if (!value) return '—';
+  const d = value.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
+}
 
 function renderKeyValue(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   const entries = Object.entries(value as Record<string, unknown>);
   if (!entries.length) return null;
   return (
-    <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <dl className="grid grid-cols-1 gap-px bg-[var(--color-line)] sm:grid-cols-2">
       {entries.map(([k, v]) => (
-        <div
-          key={k}
-          className="rounded-lg border border-black/10 bg-white px-3 py-2"
-        >
-          <dt className="text-xs font-medium text-black/60">{k}</dt>
-          <dd className="mt-1 text-sm text-black">
+        <div key={k} className="bg-[var(--color-paper)] px-3 py-2">
+          <dt className="font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+            {k}
+          </dt>
+          <dd className="mt-1 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink)]">
             {typeof v === 'string' || typeof v === 'number' ? String(v) : '—'}
           </dd>
         </div>
@@ -36,7 +45,6 @@ export default async function ModelDetailPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const {document_id} = await params;
-  const t = await getTranslations('public.detail');
 
   let heroUrl: string | null = null;
   let galleryUrls: string[] = [];
@@ -46,7 +54,7 @@ export default async function ModelDetailPage({
     const {data: asset, error: assetError} = await supabase
       .from('assets')
       .select(
-        'id,document_id,title,description,measurements,details,category,license_type,status'
+        'id,document_id,title,description,measurements,details,category,license_type,status,updated_at'
       )
       .eq('document_id', document_id)
       .maybeSingle();
@@ -78,127 +86,138 @@ export default async function ModelDetailPage({
       )
     ).filter((u): u is string => Boolean(u));
 
-    const message = encodeURIComponent(
-      `Здравствуйте! Интересует модель ${asset.document_id} — ${asset.title}`
-    );
-    const telegramHref = `https://t.me/share/url?text=${message}`;
+    const timestamp = formatIsoDate(asset.updated_at);
+    const license = (asset.license_type || 'STANDARD').toUpperCase();
+    const status = (asset.status || 'AVAILABLE').toUpperCase();
+    const description = (asset.description || asset.title || '').trim() || '—';
+
+    const acquireHref = buildTelegramShareUrl(buildLicenseRequestText(asset));
+    const requestInfoHref = buildTelegramShareUrl(buildRequestInfoText(asset));
+
+    const thumbs = galleryUrls.slice(0, 4);
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-10">
         <div className="flex items-center justify-between gap-4">
           <Link
             href="/models"
-            className="text-sm text-black/70 hover:text-black"
+            className="font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)] hover:text-[var(--color-ink)]"
           >
-            ← Back
+            ← BACK
           </Link>
-          <a
-            href={telegramHref}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex h-10 items-center justify-center rounded-full bg-black px-4 text-sm font-medium text-white hover:bg-black/90"
-          >
-            {t('telegramCta')}
-          </a>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-4">
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-black/10 bg-zinc-100">
+        <div className="grid grid-cols-1 gap-px bg-[var(--color-line)] lg:grid-cols-2">
+          <section className="bg-[var(--color-surface)] p-4">
+            <div className="relative aspect-[4/5] w-full bg-[var(--color-paper)]">
               {heroUrl ? (
                 <Image
                   src={heroUrl}
                   alt={asset.title}
                   fill
-                  className="object-contain object-center"
-                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  className="object-cover object-top"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm text-black/40">
-                  No hero image
+                <div className="flex h-full w-full items-center justify-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                  NO HERO IMAGE
                 </div>
               )}
             </div>
 
-            {galleryUrls.length ? (
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-                {galleryUrls.slice(0, 10).map((url, idx) => (
+            <div className="mt-4 grid grid-cols-2 gap-px bg-[var(--color-line)] sm:grid-cols-4">
+              {thumbs.length ? (
+                thumbs.map((url, idx) => (
                   <div
                     key={url}
-                    className="relative aspect-square overflow-hidden rounded-xl border border-black/10 bg-zinc-100"
+                    className="relative aspect-square bg-[var(--color-paper)]"
                   >
                     <Image
                       src={url}
                       alt={`${asset.title} ${idx + 1}`}
                       fill
-                      className="object-contain object-center"
-                      sizes="120px"
+                      className="object-cover object-center"
+                      sizes="160px"
                     />
                   </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
+                ))
+              ) : (
+                <div className="col-span-full bg-[var(--color-paper)] p-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                  NO THUMBNAILS
+                </div>
+              )}
+            </div>
+          </section>
 
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                {asset.title}
-              </h1>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs text-black/60">
-                <span className="rounded-full bg-black/5 px-2 py-1">
-                  {asset.document_id}
-                </span>
-                {asset.category ? (
-                  <span className="rounded-full bg-black/5 px-2 py-1">
-                    {asset.category}
-                  </span>
-                ) : null}
-                {asset.license_type ? (
-                  <span className="rounded-full bg-black/5 px-2 py-1">
-                    {asset.license_type}
-                  </span>
-                ) : null}
-                {asset.status ? (
-                  <span className="rounded-full bg-black/5 px-2 py-1">
-                    {asset.status}
-                  </span>
-                ) : null}
+          <section className="bg-[var(--color-surface)] p-6">
+            <h1 className="font-condensed text-[clamp(32px,4vw,52px)] leading-[0.9] uppercase tracking-[0.14em]">
+              {asset.document_id}
+            </h1>
+            <div className="mt-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+              {status} · {license} · {timestamp}
+            </div>
+
+            <div className="mt-6 divide-y divide-[color:var(--color-line)]">
+              <div className="py-5">
+                <div className="font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                  DESCRIPTION
+                </div>
+                <div className="mt-2 font-doc text-[11px] uppercase tracking-[0.14em]">
+                  {description}
+                </div>
               </div>
-              {asset.description ? (
-                <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-black/80">
-                  {asset.description}
-                </p>
+
+              {asset.measurements ? (
+                <div className="py-5">
+                  <div className="font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                    MEASUREMENTS
+                  </div>
+                  <div className="mt-3">
+                    {renderKeyValue(asset.measurements) ?? (
+                      <pre className="overflow-auto bg-[var(--color-paper)] p-3 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-muted)]">
+                        {JSON.stringify(asset.measurements, null, 2)}
+                      </pre>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+
+              {asset.details ? (
+                <div className="py-5">
+                  <div className="font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                    DETAILS
+                  </div>
+                  <div className="mt-3">
+                    {renderKeyValue(asset.details) ?? (
+                      <pre className="overflow-auto bg-[var(--color-paper)] p-3 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-muted)]">
+                        {JSON.stringify(asset.details, null, 2)}
+                      </pre>
+                    )}
+                  </div>
+                </div>
               ) : null}
             </div>
 
-            {asset.measurements ? (
-              <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
-                <h2 className="text-base font-semibold">{t('measurements')}</h2>
-                <div className="mt-3">
-                  {renderKeyValue(asset.measurements) ?? (
-                    <pre className="overflow-auto rounded-lg bg-zinc-50 p-3 text-xs text-black/70">
-                      {JSON.stringify(asset.measurements, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              </div>
-            ) : null}
-
-            {asset.details ? (
-              <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
-                <h2 className="text-base font-semibold">{t('details')}</h2>
-                <div className="mt-3">
-                  {renderKeyValue(asset.details) ?? (
-                    <pre className="overflow-auto rounded-lg bg-zinc-50 p-3 text-xs text-black/70">
-                      {JSON.stringify(asset.details, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              </div>
-            ) : null}
-          </div>
+            <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <a
+                href={acquireHref}
+                target="_blank"
+                rel="noreferrer"
+                className="ui-btn-primary w-full"
+              >
+                [ ACQUIRE LICENSE ]
+              </a>
+              <a
+                href={requestInfoHref}
+                target="_blank"
+                rel="noreferrer"
+                className="ui-btn-outline w-full"
+              >
+                [ REQUEST INFO ]
+              </a>
+            </div>
+          </section>
         </div>
       </div>
     );

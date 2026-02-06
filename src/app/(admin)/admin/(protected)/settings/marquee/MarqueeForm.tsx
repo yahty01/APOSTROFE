@@ -49,41 +49,41 @@ export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-      <label className="flex items-center gap-2 text-sm text-black/80">
+      <label className="flex items-center gap-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
         <input
           type="checkbox"
           {...form.register('enabled')}
-          className="h-4 w-4 rounded border-black/20"
+          className="h-4 w-4 border border-[color:var(--color-line)] bg-[var(--color-paper)]"
         />
         {tCommon('enabled')}
       </label>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-black/80">
+          <label className="block font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
             {t('textRu')}
           </label>
           <textarea
             {...form.register('text_ru')}
             rows={6}
-            className="mt-1 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+            className="ui-textarea mt-2 font-doc text-[11px] tracking-[0.06em]"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-black/80">
+          <label className="block font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
             {t('textEn')}
           </label>
           <textarea
             {...form.register('text_en')}
             rows={6}
-            className="mt-1 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+            className="ui-textarea mt-2 font-doc text-[11px] tracking-[0.06em]"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-black/80">
+          <label className="block font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
             {t('speed')}
           </label>
           <input
@@ -97,19 +97,21 @@ export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
                 return Number.isFinite(n) ? n : null;
               }
             })}
-            className="mt-1 h-11 w-full rounded-lg border border-black/10 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+            className="ui-input mt-2 h-11 font-doc text-[11px] tracking-[0.06em]"
             placeholder="20"
           />
-          <p className="mt-1 text-xs text-black/50">Seconds per loop</p>
+          <p className="mt-2 font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+            SECONDS PER LOOP
+          </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-black/80">
+          <label className="block font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
             {t('direction')}
           </label>
           <select
             {...form.register('direction')}
-            className="mt-1 h-11 w-full rounded-lg border border-black/10 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+            className="ui-select mt-2 h-11 font-doc text-[11px] uppercase tracking-[0.18em]"
           >
             <option value="left">{t('directionLeft')}</option>
             <option value="right">{t('directionRight')}</option>
@@ -120,7 +122,7 @@ export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex h-11 items-center justify-center rounded-full bg-black px-5 text-sm font-medium text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="ui-btn-primary disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending ? tCommon('saving') : tCommon('save')}
       </button>

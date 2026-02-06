@@ -125,9 +125,11 @@ export function MediaManager({
 
   return (
     <div className="space-y-8">
-      <div className="rounded-2xl border border-black/10 bg-white p-4 text-sm text-black/70">
-        <div className="font-medium text-black/80">{t('howItWorksTitle')}</div>
-        <div className="mt-1 space-y-1 text-xs">
+      <div className="ui-panel p-4">
+        <div className="font-condensed text-[12px] uppercase tracking-[0.18em] text-[var(--color-ink)]">
+          {t('howItWorksTitle')}
+        </div>
+        <div className="mt-3 space-y-1 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-muted)]">
           <div>{t('howItWorksFormats', {mb: 10})}</div>
           <div>{t('howItWorksPaths', {documentId})}</div>
           <div>{t('howItWorksPublish')}</div>
@@ -137,8 +139,10 @@ export function MediaManager({
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold tracking-tight">{t('hero')}</h2>
-          <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm hover:bg-black/5">
+          <h2 className="font-condensed text-xl uppercase tracking-[0.12em]">
+            {t('hero')}
+          </h2>
+          <label className="flex h-10 cursor-pointer items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]">
             <input
               type="file"
               accept={acceptImages}
@@ -150,7 +154,7 @@ export function MediaManager({
           </label>
         </div>
 
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-black/10 bg-zinc-100">
+        <div className="relative aspect-[4/3] w-full overflow-hidden border border-[color:var(--color-line)] bg-[var(--color-paper)]">
           {hero?.url ? (
             <Image
               src={hero.url}
@@ -160,7 +164,7 @@ export function MediaManager({
               sizes="(max-width: 1024px) 100vw, 60vw"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-black/40">
+            <div className="flex h-full w-full items-center justify-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
               {t('emptyHero')}
             </div>
           )}
@@ -171,7 +175,7 @@ export function MediaManager({
             type="button"
             disabled={isPending}
             onClick={() => remove(hero.id)}
-            className="inline-flex h-9 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5 disabled:opacity-60"
+            className="flex h-9 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] disabled:opacity-60"
           >
             {t('remove')}
           </button>
@@ -180,8 +184,10 @@ export function MediaManager({
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold tracking-tight">{t('gallery')}</h2>
-          <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm hover:bg-black/5">
+          <h2 className="font-condensed text-xl uppercase tracking-[0.12em]">
+            {t('gallery')}
+          </h2>
+          <label className="flex h-10 cursor-pointer items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]">
             <input
               type="file"
               accept={acceptImages}
@@ -202,9 +208,9 @@ export function MediaManager({
               .map((item, idx, arr) => (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-black/10 bg-white p-3 shadow-sm"
+                  className="ui-panel p-3"
                 >
-                  <div className="relative aspect-square overflow-hidden rounded-xl bg-zinc-100">
+                  <div className="relative aspect-square overflow-hidden border border-[color:var(--color-line)] bg-[var(--color-paper)]">
                     {item.url ? (
                       <Image
                         src={item.url}
@@ -217,7 +223,7 @@ export function MediaManager({
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-2">
-                    <div className="text-xs font-mono text-black/60 truncate">
+                    <div className="truncate font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
                       {item.order_index}
                     </div>
                     <div className="flex gap-2">
@@ -225,7 +231,7 @@ export function MediaManager({
                         type="button"
                         disabled={isPending || idx === 0}
                         onClick={() => move(item.id, 'up')}
-                        className="inline-flex h-8 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5 disabled:opacity-50"
+                        className="flex h-8 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] disabled:opacity-50"
                       >
                         {t('reorderUp')}
                       </button>
@@ -233,7 +239,7 @@ export function MediaManager({
                         type="button"
                         disabled={isPending || idx === arr.length - 1}
                         onClick={() => move(item.id, 'down')}
-                        className="inline-flex h-8 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5 disabled:opacity-50"
+                        className="flex h-8 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] disabled:opacity-50"
                       >
                         {t('reorderDown')}
                       </button>
@@ -241,7 +247,7 @@ export function MediaManager({
                         type="button"
                         disabled={isPending}
                         onClick={() => remove(item.id)}
-                        className="inline-flex h-8 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5 disabled:opacity-50"
+                        className="flex h-8 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] disabled:opacity-50"
                       >
                         {t('remove')}
                       </button>
@@ -251,7 +257,7 @@ export function MediaManager({
               ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-black/10 bg-white p-8 text-center text-sm text-black/60">
+          <div className="ui-panel p-8 text-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
             {t('emptyGallery')}
           </div>
         )}

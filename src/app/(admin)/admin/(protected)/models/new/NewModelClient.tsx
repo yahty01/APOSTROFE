@@ -47,7 +47,7 @@ export function NewModelClient() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+      <div className="ui-panel p-6">
         <AssetForm
           initialValues={{}}
           redirectToEdit={false}
@@ -59,11 +59,15 @@ export function NewModelClient() {
         />
       </div>
 
-      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+      <div className="ui-panel p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-lg font-semibold tracking-tight">{tMedia('title')}</div>
-            <div className="mt-1 text-xs text-black/60">{tMedia('preUploadHelp')}</div>
+            <div className="font-condensed text-xl uppercase tracking-[0.12em]">
+              {tMedia('title')}
+            </div>
+            <div className="mt-2 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-muted)]">
+              {tMedia('preUploadHelp')}
+            </div>
           </div>
           <button
             type="button"
@@ -71,7 +75,7 @@ export function NewModelClient() {
               setHeroFile(null);
               setGalleryFiles([]);
             }}
-            className="inline-flex h-9 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5"
+            className="flex h-9 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]"
           >
             {tMedia('clearSelection')}
           </button>
@@ -79,8 +83,10 @@ export function NewModelClient() {
 
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <div className="text-sm font-medium text-black/80">{tMedia('hero')}</div>
-            <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm hover:bg-black/5">
+            <div className="font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+              {tMedia('hero')}
+            </div>
+            <label className="flex h-10 cursor-pointer items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]">
               <input
                 type="file"
                 accept={acceptImages}
@@ -89,7 +95,7 @@ export function NewModelClient() {
               />
               {tMedia('selectFiles')}
             </label>
-            <div className="text-xs text-black/60">
+            <div className="font-doc text-[11px] tracking-[0.06em] text-[var(--color-muted)]">
               {heroFile ? (
                 <div className="space-y-1">
                   <div className="truncate">{heroFile.name}</div>
@@ -109,8 +115,10 @@ export function NewModelClient() {
           </div>
 
           <div className="space-y-2">
-            <div className="text-sm font-medium text-black/80">{tMedia('gallery')}</div>
-            <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm hover:bg-black/5">
+            <div className="font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+              {tMedia('gallery')}
+            </div>
+            <label className="flex h-10 cursor-pointer items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]">
               <input
                 type="file"
                 accept={acceptImages}
@@ -120,7 +128,7 @@ export function NewModelClient() {
               />
               {tMedia('selectFiles')}
             </label>
-            <div className="text-xs text-black/60">
+            <div className="font-doc text-[11px] tracking-[0.06em] text-[var(--color-muted)]">
               {galleryFiles.length ? (() => {
                 const totalBytes = galleryFiles.reduce((sum, file) => sum + file.size, 0);
                 const showWarn =
@@ -148,7 +156,9 @@ export function NewModelClient() {
           </div>
         </div>
 
-        <div className="mt-4 text-xs text-black/50">{t('documentIdHelp')}</div>
+        <div className="mt-4 font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+          {t('documentIdHelp')}
+        </div>
       </div>
     </div>
   );

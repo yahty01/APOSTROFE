@@ -10,6 +10,8 @@ export type MarqueeSettings = {
   direction: string | null;
 };
 
+const FALLBACK_TEXT = 'WE LICENSE IDENTITY';
+
 function pickText(settings: MarqueeSettings, locale: string) {
   return locale === 'ru' ? settings.text_ru : settings.text_en;
 }
@@ -35,7 +37,8 @@ export function Marquee({
   );
 
   const direction = settings.direction === 'right' ? 'right' : 'left';
-  const text = pickText(settings, locale).trim();
+  const rawText = pickText(settings, locale).trim();
+  const text = rawText || FALLBACK_TEXT;
   const style: React.CSSProperties & {
     '--marquee-duration': string;
     '--marquee-direction': string;
@@ -75,14 +78,19 @@ export function Marquee({
     };
   }, []);
 
-  if (!settings.enabled || !text) return null;
+  if (!settings.enabled) return null;
 
   return (
-    <div className="border-b border-black/10 bg-black text-white">
+    <div className="border-b ui-line bg-black text-white">
       <div className="marquee">
         <div className="marquee__inner" style={style}>
-          <span className="marquee__content">{text}</span>
-          <span className="marquee__content" aria-hidden>
+          <span className="marquee__content font-condensed uppercase tracking-[0.24em]">
+            {text}
+          </span>
+          <span
+            className="marquee__content font-condensed uppercase tracking-[0.24em]"
+            aria-hidden
+          >
             {text}
           </span>
         </div>

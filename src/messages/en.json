@@ -22,7 +22,12 @@
     "disabled": "Disabled"
   },
   "public": {
-    "catalogTitle": "Models catalog",
+    "catalogTitle": "ASSET CATALOG",
+    "catalogSubtitle": "REGISTRY OF LICENSED DIGITAL IDENTITIES.",
+    "cta": {
+      "requestLicense": "[ REQUEST LICENSE ]"
+    },
+    "comingSoon": "COMING SOON",
     "view": {
       "cards": "Cards",
       "list": "List"

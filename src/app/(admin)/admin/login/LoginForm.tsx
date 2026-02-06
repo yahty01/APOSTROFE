@@ -18,7 +18,7 @@ export function LoginForm() {
   return (
     <form action={formAction} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-black/80">
+        <label className="block font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
           {t('email')}
         </label>
         <input
@@ -26,12 +26,12 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           required
-          className="mt-1 h-11 w-full rounded-lg border border-black/10 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+          className="ui-input mt-2 h-11 font-doc text-[11px] uppercase tracking-[0.14em]"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-black/80">
+        <label className="block font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
           {t('password')}
         </label>
         <input
@@ -39,12 +39,12 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="mt-1 h-11 w-full rounded-lg border border-black/10 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+          className="ui-input mt-2 h-11 font-doc text-[11px] uppercase tracking-[0.14em]"
         />
       </div>
 
       {state.error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+        <div className="border border-red-300 bg-red-50 p-3 font-doc text-[11px] uppercase tracking-[0.14em] text-red-900">
           {state.error}
         </div>
       ) : null}
@@ -52,11 +52,10 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex h-11 w-full items-center justify-center rounded-full bg-black px-4 text-sm font-medium text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="ui-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending ? t('submitting') : t('submit')}
       </button>
     </form>
   );
 }
-
