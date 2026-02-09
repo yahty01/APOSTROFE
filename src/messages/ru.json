@@ -71,22 +71,22 @@
     }
   },
   "footer": {
-    "legalTitle": "ЮРИДИЧЕСКАЯ ИНФОРМАЦИЯ",
+    "legalTitle": "LEGAL INFORMATION",
     "legalCompany": "APOSTROPHE DIGITAL ASSETS LLC",
-    "legalRegNo": "РЕГ. №: 2024-DA-01420",
-    "legalJurisdiction": "ЮРИСДИКЦИЯ: МЕЖДУНАРОДНАЯ",
-    "contactsTitle": "КОНТАКТЫ",
-    "contactsEmail": "ПОЧТА: LICENSE@APOSTROPHE.DIGITAL",
-    "contactsPhone": "ТЕЛЕФОН: +1 (555) 000-1420",
-    "contactsSupport": "ПОДДЕРЖКА: ДОСТУПНО 24/7",
-    "docsTitle": "ДОКУМЕНТАЦИЯ",
-    "docsTerms": "УСЛОВИЯ ИСПОЛЬЗОВАНИЯ",
-    "docsPrivacy": "ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ",
-    "docsLicensing": "ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ",
-    "rights": "© 2024 APOSTROPHE. ВСЕ ПРАВА ЗАЩИЩЕНЫ.",
-    "systemVersion": "ВЕРСИЯ СИСТЕМЫ: {version} | СБОРКА: {build}",
-    "poweredBy": "СДЕЛАНО НА READDY |",
-    "createdBy": "САЙТ СОЗДАЛ ЕГОР САВЕЛЬЕВ"
+    "legalRegNo": "REG. NO: 2024-DA-01420",
+    "legalJurisdiction": "JURISDICTION: INTERNATIONAL",
+    "contactsTitle": "CONTACTS",
+    "contactsEmail": "EMAIL: LICENSE@APOSTROPHE.DIGITAL",
+    "contactsPhone": "PHONE: +1 (555) 000-1420",
+    "contactsSupport": "SUPPORT: 24/7 AVAILABLE",
+    "docsTitle": "DOCUMENTATION",
+    "docsTerms": "TERMS OF SERVICE",
+    "docsPrivacy": "PRIVACY POLICY",
+    "docsLicensing": "LICENSING AGREEMENT",
+    "rights": "© 2024 APOSTROPHE. ALL RIGHTS RESERVED.",
+    "systemVersion": "SYSTEM VERSION: {version} | BUILD: {build}",
+    "poweredBy": "POWERED BY READDY |",
+    "createdBy": "WEBSITE CREATED BY EGOR SAVELEV"
   },
   "admin": {
     "login": {
