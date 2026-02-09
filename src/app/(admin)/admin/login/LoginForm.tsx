@@ -3,10 +3,21 @@
 import {useActionState} from 'react';
 import {useTranslations} from 'next-intl';
 
-import {loginAction, type LoginActionState} from './actions';
+import {useReportPending} from '@/lib/pending';
 
+import {loginAction, type LoginActionState} from './actions';
+import {loginFormClasses} from './LoginForm.styles';
+
+/**
+ * Начальное состояние формы для `useActionState`.
+ * Храним ошибку отдельно, чтобы форма могла рендериться полностью на клиенте.
+ */
 const initialState: LoginActionState = {error: null};
 
+/**
+ * Клиентская форма логина админки.
+ * Вызывает server action `loginAction` и отображает ошибку/состояние загрузки.
+ */
 export function LoginForm() {
   const t = useTranslations('admin.login');
 
@@ -14,11 +25,12 @@ export function LoginForm() {
     loginAction,
     initialState
   );
+  useReportPending(isPending);
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className={loginFormClasses.form}>
       <div>
-        <label className="block font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+        <label className={loginFormClasses.label}>
           {t('email')}
         </label>
         <input
@@ -26,12 +38,12 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           required
-          className="ui-input mt-2 h-11 font-doc text-[11px] uppercase tracking-[0.14em]"
+          className={loginFormClasses.input}
         />
       </div>
 
       <div>
-        <label className="block font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+        <label className={loginFormClasses.label}>
           {t('password')}
         </label>
         <input
@@ -39,12 +51,12 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="ui-input mt-2 h-11 font-doc text-[11px] uppercase tracking-[0.14em]"
+          className={loginFormClasses.input}
         />
       </div>
 
       {state.error ? (
-        <div className="border border-red-300 bg-red-50 p-3 font-doc text-[11px] uppercase tracking-[0.14em] text-red-900">
+        <div className={loginFormClasses.error}>
           {state.error}
         </div>
       ) : null}
@@ -52,7 +64,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="ui-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
+        className={loginFormClasses.submit}
       >
         {isPending ? t('submitting') : t('submit')}
       </button>

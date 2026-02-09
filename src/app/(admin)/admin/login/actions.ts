@@ -5,15 +5,28 @@ import {z} from 'zod';
 
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 
+/**
+ * Схема валидации логина из `<form>`.
+ * Используется в server action, чтобы не принимать "плохие" значения из FormData.
+ */
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(1)
 });
 
+/**
+ * Состояние для `useActionState()` в `LoginForm`.
+ * Храним только человекочитаемую ошибку, чтобы не протаскивать лишние детали в UI.
+ */
 export type LoginActionState = {
   error: string | null;
 };
 
+/**
+ * Server Action: логин через Supabase email/password.
+ * Используется формой `/admin/login`; валидирует FormData, выполняет `signInWithPassword`,
+ * и редиректит на `/admin/models` при успехе.
+ */
 export async function loginAction(
   _prevState: LoginActionState,
   formData: FormData
@@ -34,4 +47,3 @@ export async function loginAction(
 
   redirect('/admin/models');
 }
-

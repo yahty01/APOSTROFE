@@ -7,6 +7,10 @@ import {z} from 'zod';
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 import type {Json} from '@/lib/supabase/database.types';
 
+/**
+ * Схема валидации данных формы ассета.
+ * Используется в `saveAssetAction()` чтобы обрабатывать и create, и update одним контрактом.
+ */
 const schema = z.object({
   id: z.string().uuid().optional(),
   document_id: z
@@ -27,6 +31,10 @@ type SaveResult =
   | {ok: true; id: string; document_id: string}
   | {ok: false; error: string};
 
+/**
+ * Гейт по роли для действий редактирования моделей.
+ * Общий для create/update, чтобы не дублировать проверку по всем server actions.
+ */
 async function requireAdminOrEditor() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -47,12 +55,21 @@ async function requireAdminOrEditor() {
   return supabase;
 }
 
+/**
+ * Парсит JSON из textarea и возвращает `null` для пустого значения.
+ * Используется для полей `measurements`/`details`, которые хранятся как JSON в базе.
+ */
 function parseJsonOrNull(value: string | undefined): Json | null {
   const trimmed = (value ?? '').trim();
   if (!trimmed) return null;
   return JSON.parse(trimmed) as Json;
 }
 
+/**
+ * Server Action: создаёт/обновляет ассет.
+ * Вызывается из `AssetForm`: валидирует входные данные, нормализует строки, парсит JSON-поля,
+ * и делает `revalidatePath` для публичных и админских маршрутов.
+ */
 export async function saveAssetAction(input: unknown): Promise<SaveResult> {
   const parsed = schema.safeParse(input);
   if (!parsed.success) {

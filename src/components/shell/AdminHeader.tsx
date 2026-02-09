@@ -1,66 +1,82 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import {usePathname} from 'next/navigation';
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 
-import {signOutAction} from '@/app/(admin)/admin/actions';
+import { signOutAction } from "@/app/(admin)/admin/actions";
+import { PendingFormStatusReporter } from "@/components/pending/PendingFormStatusReporter";
 
-import {LanguageDropdown} from './LanguageDropdown';
-import {SystemStatus} from './SystemStatus';
+import { LanguageDropdown } from "./LanguageDropdown";
+import { SystemStatus } from "./SystemStatus";
+import { adminHeaderClasses } from "./AdminHeader.styles";
 
-const TABS: {href: string; label: string}[] = [
-  {href: '/admin/models', label: "MODELS’"},
-  {href: '/admin/settings/marquee', label: "MARQUEE’"},
-  {href: '/models', label: "PUBLIC’"}
+/**
+ * Таб-навигация админского раздела.
+ * Используется для генерации ссылок и подсветки активного таба.
+ */
+const TABS: { href: string; key: "models" | "marquee" | "public" }[] = [
+  { href: "/admin/models", key: "models" },
+  { href: "/admin/settings/marquee", key: "marquee" },
+  { href: "/models", key: "public" },
 ];
 
+/**
+ * Подсветка активного таба по pathname.
+ * "PUBLIC’" сознательно не подсвечиваем как активный таб, чтобы не путать контексты.
+ */
 function isActiveTab(pathname: string, href: string) {
-  if (href === '/models') return false;
+  if (href === "/models") return false;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/**
+ * Верхняя панель админки: бренд, навигация, переключатель языка, системный статус и кнопка выхода.
+ * Кнопка "SIGN OUT" скрыта на странице логина, чтобы не рендерить бессмысленную форму.
+ */
 export function AdminHeader() {
+  const tNav = useTranslations("nav");
+  const tAdmin = useTranslations("admin");
   const pathname = usePathname();
-  const showSignOut = !pathname.startsWith('/admin/login');
+  const showSignOut = !pathname.startsWith("/admin/login");
 
   return (
-    <header className="border-b ui-line">
-      <div className="grid gap-3 px-4 py-4 md:grid-cols-[1fr_auto_1fr] md:items-center">
-        <div className="flex items-center gap-3">
-          <div aria-hidden className="h-5 w-5 bg-black" />
-          <Link
-            href="/admin/models"
-            className="font-condensed text-sm uppercase tracking-[0.22em]"
-          >
+    <header className={adminHeaderClasses.header}>
+      <div className={adminHeaderClasses.grid}>
+        <div className={adminHeaderClasses.brandWrap}>
+          <div aria-hidden className={adminHeaderClasses.mark} />
+          <Link href="/admin/models" className={adminHeaderClasses.brandLink}>
             APOSTROPHE
           </Link>
         </div>
 
-        <nav className="flex flex-wrap items-center gap-2 md:justify-center">
+        <nav className={adminHeaderClasses.nav}>
           {TABS.map((tab) => {
             const active = isActiveTab(pathname, tab.href);
             return (
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`ui-tab ${active ? 'ui-tab--active' : ''}`}
+                className={`${adminHeaderClasses.tab} ${
+                  active ? adminHeaderClasses.tabActive : ""
+                }`}
               >
-                {tab.label}
+                {tNav(tab.key).toUpperCase()}’
               </Link>
             );
           })}
         </nav>
 
-        <div className="flex flex-wrap items-center gap-2 md:justify-end">
+        <div className={adminHeaderClasses.actions}>
           <LanguageDropdown />
-          <SystemStatus />
           {showSignOut ? (
             <form action={signOutAction}>
+              <PendingFormStatusReporter />
               <button
                 type="submit"
-                className="flex h-10 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]"
+                className={adminHeaderClasses.signOutButton}
               >
-                SIGN OUT
+                {tAdmin("signOut").toUpperCase()}
               </button>
             </form>
           ) : null}

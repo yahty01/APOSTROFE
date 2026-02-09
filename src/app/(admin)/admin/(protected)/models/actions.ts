@@ -6,6 +6,10 @@ import {z} from 'zod';
 
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 
+/**
+ * Гейт для всех server actions в этом модуле.
+ * Используется для проверки Supabase auth + роли профиля (admin/editor) перед изменениями в БД/Storage.
+ */
 async function requireAdminOrEditor() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -28,12 +32,19 @@ async function requireAdminOrEditor() {
   return supabase;
 }
 
+/**
+ * Схема формы publish/unpublish в списке ассетов (`/admin/models`).
+ */
 const publishSchema = z.object({
   asset_id: z.string().uuid(),
   document_id: z.string().min(1),
   next_published: z.enum(['true', 'false'])
 });
 
+/**
+ * Server Action: переключает флаг публикации ассета.
+ * Вызывается формой в таблице `/admin/models`; валидирует FormData через Zod и делает `revalidatePath`.
+ */
 export async function setPublishAction(formData: FormData) {
   const parsed = publishSchema.safeParse({
     asset_id: formData.get('asset_id'),
@@ -64,6 +75,10 @@ const deleteSchema = z.object({
 
 type DeleteResult = {ok: true; warning?: string} | {ok: false; error: string};
 
+/**
+ * Разбивает список на чанки фиксированного размера.
+ * Используется при удалении файлов из Supabase Storage, чтобы не превысить лимиты на размер запроса.
+ */
 function chunkArray<T>(items: T[], size: number) {
   const chunks: T[][] = [];
   for (let i = 0; i < items.length; i += size) {
@@ -72,6 +87,11 @@ function chunkArray<T>(items: T[], size: number) {
   return chunks;
 }
 
+/**
+ * Server Action: удаляет ассет + связанные медиа-файлы.
+ * Вызывается из `DeleteAssetButton`; старается удалить storage-файлы "best effort" и возвращает warning,
+ * если storage cleanup частично не удался.
+ */
 export async function deleteAssetAction(formData: FormData): Promise<DeleteResult> {
   const parsed = deleteSchema.safeParse({
     asset_id: formData.get('asset_id')

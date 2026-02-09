@@ -1,18 +1,25 @@
 import Link from 'next/link';
 import {getTranslations} from 'next-intl/server';
 
+import {PendingFormStatusReporter} from '@/components/pending/PendingFormStatusReporter';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
 
 import {setPublishAction} from './actions';
 import {DeleteAssetButton} from './DeleteAssetButton';
+import {adminModelsPageClasses} from './page.styles';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Список ассетов в админке (`/admin/models`).
+ * Загружает данные на сервере и рендерит таблицу с действиями publish/unpublish, edit и delete.
+ */
 export default async function AdminModelsPage({}: {
   params: Promise<Record<string, string | string[] | undefined>>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const t = await getTranslations('admin.models');
+  const tCommon = await getTranslations('common');
 
   const supabase = await createSupabaseServerClientReadOnly();
   const {data: assets, error} = await supabase
@@ -22,77 +29,78 @@ export default async function AdminModelsPage({}: {
 
   if (error) {
     return (
-      <div className="border border-red-300 bg-red-50 p-4 font-doc text-[11px] uppercase tracking-[0.16em] text-red-900">
+      <div className={adminModelsPageClasses.error}>
         {error.message}
       </div>
     );
   }
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <h1 className="font-condensed text-[clamp(32px,4vw,52px)] leading-[0.9] uppercase tracking-[0.14em]">
+    <div className={adminModelsPageClasses.root}>
+      <div className={adminModelsPageClasses.header}>
+        <h1 className={adminModelsPageClasses.title}>
           {t('title')}
         </h1>
         <Link
           href="/admin/models/new"
-          className="ui-btn-primary"
+          className={adminModelsPageClasses.createLink}
         >
           {t('create')}
         </Link>
       </div>
 
-      <div className="overflow-x-auto overflow-y-hidden border border-[color:var(--color-line)] bg-[var(--color-paper)]">
-        <div className="min-w-[980px]">
-          <div className="grid grid-cols-[160px_1fr_160px_120px_120px_320px] items-center bg-black">
-            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+      <div className={adminModelsPageClasses.tableWrap}>
+        <div className={adminModelsPageClasses.tableInner}>
+          <div className={adminModelsPageClasses.tableHeaderRow}>
+            <div className={adminModelsPageClasses.headerCell}>
               {t('documentId')}
             </div>
-            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+            <div className={adminModelsPageClasses.headerCell}>
               {t('titleField')}
             </div>
-            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+            <div className={adminModelsPageClasses.headerCell}>
               {t('category')}
             </div>
-            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+            <div className={adminModelsPageClasses.headerCell}>
               {t('published')}
             </div>
-            <div className="border-r border-white/20 px-4 py-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
+            <div className={adminModelsPageClasses.headerCell}>
               {t('status')}
             </div>
-            <div className="px-4 py-3 text-right font-condensed text-[12px] uppercase tracking-[0.18em] text-white">
-              ACTIONS
+            <div className={adminModelsPageClasses.headerCellLast}>
+              {tCommon('actions')}
             </div>
           </div>
 
           {(assets ?? []).map((a) => (
             <div
               key={a.id}
-              className="grid grid-cols-[160px_1fr_160px_120px_120px_320px] items-center border-b border-[color:var(--color-line)] bg-[var(--color-surface)]"
+              className={adminModelsPageClasses.row}
             >
-              <div className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+              <div className={adminModelsPageClasses.cellMuted}>
                 {a.document_id}
               </div>
 
               <Link
                 href={`/admin/models/${a.id}`}
-                className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink)] hover:underline"
+                className={adminModelsPageClasses.cellTitleLink}
               >
                 {a.title}
               </Link>
 
-              <div className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+              <div className={adminModelsPageClasses.cellMuted}>
                 {a.category ?? '—'}
               </div>
-              <div className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                {a.is_published ? 'PUBLISHED' : '—'}
+              <div className={adminModelsPageClasses.cellMuted}>
+                {a.is_published ? t('publishedYes') : '—'}
               </div>
-              <div className="border-r border-[color:var(--color-line)] px-4 py-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+              <div className={adminModelsPageClasses.cellMuted}>
                 {a.status ?? '—'}
               </div>
 
-              <div className="flex justify-end gap-2 px-4 py-3">
+              <div className={adminModelsPageClasses.actions}>
                 <form action={setPublishAction}>
+                  <PendingFormStatusReporter />
                   <input type="hidden" name="asset_id" value={a.id} />
                   <input type="hidden" name="document_id" value={a.document_id} />
                   <input
@@ -102,7 +110,7 @@ export default async function AdminModelsPage({}: {
                   />
                   <button
                     type="submit"
-                    className="flex h-9 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]"
+                    className={adminModelsPageClasses.actionButton}
                   >
                     {a.is_published ? t('unpublish') : t('publish')}
                   </button>
@@ -112,9 +120,9 @@ export default async function AdminModelsPage({}: {
 
                 <Link
                   href={`/admin/models/${a.id}`}
-                  className="flex h-9 items-center justify-center border border-black bg-black px-3 font-doc text-[11px] uppercase tracking-[0.18em] text-white hover:bg-[color-mix(in_oklab,#000,#fff_10%)]"
+                  className={adminModelsPageClasses.actionEditLink}
                 >
-                  EDIT
+                  {tCommon('edit').toUpperCase()}
                 </Link>
               </div>
             </div>

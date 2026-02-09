@@ -1,20 +1,32 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import {getTranslations} from 'next-intl/server';
 
 import {buildLicenseRequestText, buildTelegramShareUrl} from '@/lib/telegram';
 
 import type {AssetListItem} from './types';
+import {assetCardsClasses} from './AssetCards.styles';
 
+/**
+ * Вытаскивает YYYY-MM-DD из ISO-строки, чтобы отображение было компактным и одинаковым в UI.
+ * Используется в карточках (и повторяется в таблице) для отображения `updated_at`.
+ */
 function formatIsoDate(value: string) {
   if (!value) return '—';
   const d = value.slice(0, 10);
   return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
 }
 
-export function AssetCards({items}: {items: AssetListItem[]}) {
+/**
+ * Карточный вид каталога моделей.
+ * Используется на `/models` при `view=cards`: показывает превью, краткие метаданные и CTA на запрос лицензии.
+ */
+export async function AssetCards({items}: {items: AssetListItem[]}) {
+  const t = await getTranslations('public');
+
   return (
-    <div className="border border-[color:var(--color-line)] bg-[var(--color-line)] p-px">
-      <div className="grid grid-cols-1 gap-px bg-[var(--color-line)] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className={assetCardsClasses.root}>
+      <div className={assetCardsClasses.grid}>
         {items.map((item) => {
           const timestamp = formatIsoDate(item.updated_at);
           const license = (item.license_type || 'STANDARD').toUpperCase();
@@ -26,58 +38,58 @@ export function AssetCards({items}: {items: AssetListItem[]}) {
           return (
             <article
               key={item.id}
-              className="group flex flex-col bg-[var(--color-surface)]"
+              className={assetCardsClasses.card}
             >
               <Link
                 href={`/models/${encodeURIComponent(item.document_id)}`}
-                className="relative aspect-[4/5] w-full bg-[var(--color-paper)]"
+                className={assetCardsClasses.mediaLink}
               >
                 {item.preview_url ? (
                   <Image
                     src={item.preview_url}
                     alt={item.title}
                     fill
-                    className="object-cover object-top"
+                    className={assetCardsClasses.mediaImage}
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                    NO IMAGE
+                  <div className={assetCardsClasses.mediaFallback}>
+                    {t('asset.noImage')}
                   </div>
                 )}
               </Link>
 
-              <div className="mt-px flex flex-1 flex-col gap-px bg-[var(--color-line)]">
-                <div className="flex-1 divide-y divide-[color:var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] group-hover:divide-white/30 group-hover:bg-black group-hover:text-white">
-                  <div className="flex items-start justify-between gap-4 px-3 py-2 font-doc text-[10px] uppercase tracking-[0.18em]">
-                    <div className="text-[var(--color-muted)] group-hover:text-white/70">
-                      DOCUMENT_ID
+              <div className={assetCardsClasses.body}>
+                <div className={assetCardsClasses.table}>
+                  <div className={assetCardsClasses.row}>
+                    <div className={assetCardsClasses.rowKey}>
+                      {t('asset.documentId')}
                     </div>
-                    <div className="text-right">{item.document_id}</div>
+                    <div className={assetCardsClasses.rowValue}>{item.document_id}</div>
                   </div>
-                  <div className="flex items-start justify-between gap-4 px-3 py-2 font-doc text-[10px] uppercase tracking-[0.18em]">
-                    <div className="text-[var(--color-muted)] group-hover:text-white/70">
-                      TIMESTAMP
+                  <div className={assetCardsClasses.row}>
+                    <div className={assetCardsClasses.rowKey}>
+                      {t('asset.timestamp')}
                     </div>
-                    <div className="text-right">{timestamp}</div>
+                    <div className={assetCardsClasses.rowValue}>{timestamp}</div>
                   </div>
-                  <div className="flex items-start justify-between gap-4 px-3 py-2 font-doc text-[10px] uppercase tracking-[0.18em]">
-                    <div className="text-[var(--color-muted)] group-hover:text-white/70">
-                      LICENSE
+                  <div className={assetCardsClasses.row}>
+                    <div className={assetCardsClasses.rowKey}>
+                      {t('asset.license')}
                     </div>
-                    <div className="text-right">{license}</div>
+                    <div className={assetCardsClasses.rowValue}>{license}</div>
                   </div>
-                  <div className="flex items-start justify-between gap-4 px-3 py-2 font-doc text-[10px] uppercase tracking-[0.18em]">
-                    <div className="text-[var(--color-muted)] group-hover:text-white/70">
-                      STATUS
+                  <div className={assetCardsClasses.row}>
+                    <div className={assetCardsClasses.rowKey}>
+                      {t('asset.status')}
                     </div>
-                    <div className="text-right">{status}</div>
+                    <div className={assetCardsClasses.rowValue}>{status}</div>
                   </div>
-                  <div className="px-3 py-2">
-                    <div className="font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)] group-hover:text-white/70">
-                      DESCRIPTION
+                  <div className={assetCardsClasses.description}>
+                    <div className={assetCardsClasses.descriptionLabel}>
+                      {t('asset.description')}
                     </div>
-                    <div className="mt-1 line-clamp-4 font-doc text-[11px] uppercase tracking-[0.14em]">
+                    <div className={assetCardsClasses.descriptionValue}>
                       {description || '—'}
                     </div>
                   </div>
@@ -87,9 +99,9 @@ export function AssetCards({items}: {items: AssetListItem[]}) {
                   href={telegramHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="ui-btn-primary w-full"
+                  className={assetCardsClasses.cta}
                 >
-                  [ ACQUIRE LICENSE ]
+                  {t('cta.requestLicense')}
                 </a>
               </div>
             </article>

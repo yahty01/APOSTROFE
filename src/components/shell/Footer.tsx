@@ -1,61 +1,80 @@
 import Link from 'next/link';
+import {getTranslations} from 'next-intl/server';
 
-export function Footer() {
+import {footerClasses} from './Footer.styles';
+
+/**
+ * Общий футер проекта (публичная часть и админка).
+ * Содержит юридическую информацию, контакты и ссылочные заглушки для документов.
+ */
+export async function Footer() {
+  const t = await getTranslations('footer');
+
+  const version = '1.0.0';
+  const build = '20240815';
+
   return (
-    <footer className="border-t ui-line">
-      <div className="grid grid-cols-1 gap-px bg-[var(--color-line)] md:grid-cols-3">
-        <div className="bg-[var(--color-paper)] p-6">
-          <div className="font-condensed text-xs uppercase tracking-[0.18em]">
-            ЮРИДИЧЕСКАЯ ИНФОРМАЦИЯ
+    <footer className={footerClasses.footer}>
+      <div className={footerClasses.topGrid}>
+        <div className={footerClasses.topPanel}>
+          <div className={footerClasses.topTitle}>
+            {t('legalTitle')}
           </div>
-          <div className="mt-3 space-y-1 font-doc text-[11px] uppercase text-[var(--color-muted)]">
-            <div>APOSTROPHE DIGITAL ASSETS LLC</div>
-            <div>REG. NO: 2024-DA-01420</div>
-            <div>JURISDICTION: INTERNATIONAL</div>
-          </div>
-        </div>
-
-        <div className="bg-[var(--color-paper)] p-6">
-          <div className="font-condensed text-xs uppercase tracking-[0.18em]">
-            КОНТАКТЫ
-          </div>
-          <div className="mt-3 space-y-1 font-doc text-[11px] uppercase text-[var(--color-muted)]">
-            <div>EMAIL: LICENSE@APOSTROPHE.DIGITAL</div>
-            <div>PHONE: +1 (555) 000-1420</div>
-            <div>SUPPORT: 24/7 AVAILABLE</div>
+          <div className={footerClasses.topList}>
+            <div>{t('legalCompany')}</div>
+            <div>{t('legalRegNo')}</div>
+            <div>{t('legalJurisdiction')}</div>
           </div>
         </div>
 
-        <div className="bg-[var(--color-paper)] p-6">
-          <div className="font-condensed text-xs uppercase tracking-[0.18em]">
-            ДОКУМЕНТАЦИЯ
+        <div className={footerClasses.topPanel}>
+          <div className={footerClasses.topTitle}>
+            {t('contactsTitle')}
           </div>
-          <div className="mt-3 space-y-1 font-doc text-[11px] uppercase text-[var(--color-muted)]">
-            <Link className="block hover:text-[var(--color-ink)]" href="#">
-              TERMS OF SERVICE
+          <div className={footerClasses.topList}>
+            <div>{t('contactsEmail')}</div>
+            <div>{t('contactsPhone')}</div>
+            <div>{t('contactsSupport')}</div>
+          </div>
+        </div>
+
+        <div className={footerClasses.topPanel}>
+          <div className={footerClasses.topTitle}>
+            {t('docsTitle')}
+          </div>
+          <div className={footerClasses.topList}>
+            <Link className={footerClasses.topLink} href="#">
+              {t('docsTerms')}
             </Link>
-            <Link className="block hover:text-[var(--color-ink)]" href="#">
-              PRIVACY POLICY
+            <Link className={footerClasses.topLink} href="#">
+              {t('docsPrivacy')}
             </Link>
-            <Link className="block hover:text-[var(--color-ink)]" href="#">
-              LICENSING AGREEMENT
+            <Link className={footerClasses.topLink} href="#">
+              {t('docsLicensing')}
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 border-t ui-line bg-[var(--color-paper)] px-6 py-4 md:grid-cols-3 md:items-center">
-        <div className="font-doc text-[11px] uppercase text-[var(--color-muted)]">
-          © 2024 APOSTROPHE. ALL RIGHTS RESERVED.
+      <div className={footerClasses.bottomGrid}>
+        <div className={footerClasses.bottomText}>
+          {t('rights')}
         </div>
-        <div className="text-left font-doc text-[11px] uppercase text-[var(--color-muted)] md:text-center">
-          SYSTEM VERSION: 1.0.0 | BUILD: 20240815
+        <div className={footerClasses.bottomTextCenter}>
+          {t('systemVersion', {version, build})}
         </div>
-        <div className="text-left font-doc text-[11px] uppercase text-[var(--color-muted)] md:text-right">
-          POWERED BY READDY
+        <div className={footerClasses.bottomTextRight}>
+          {t('poweredBy')}{' '}
+          <Link
+            className={footerClasses.bottomLink}
+            href="https://t.me/Sonolbol"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {t('createdBy')}
+          </Link>
         </div>
       </div>
     </footer>
   );
 }
-

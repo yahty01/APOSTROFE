@@ -7,8 +7,13 @@ import {AdminHeader} from '@/components/shell/AdminHeader';
 import {Footer} from '@/components/shell/Footer';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
 
+import {adminProtectedLayoutClasses} from './layout.styles';
+
 export const dynamic = 'force-dynamic';
 
+/**
+ * Fallback-настройки marquee для админских layout’ов на случай ошибок Supabase.
+ */
 const DEFAULT_MARQUEE: MarqueeSettings = {
   enabled: true,
   text_ru: '',
@@ -17,6 +22,10 @@ const DEFAULT_MARQUEE: MarqueeSettings = {
   direction: null
 };
 
+/**
+ * Layout для защищённой части админки (`/admin/...` кроме `/admin/login`).
+ * Проверяет авторизацию и роль пользователя, затем оборачивает контент в `AppShell`.
+ */
 export default async function AdminProtectedLayout({
   children
 }: {
@@ -33,6 +42,7 @@ export default async function AdminProtectedLayout({
 
   if (!user) redirect('/admin/login');
 
+  // Роль хранится в `profiles.role` и используется для разграничения доступа к админским функциям.
   const {data: profile} = await supabase
     .from('profiles')
     .select('role')
@@ -61,12 +71,13 @@ export default async function AdminProtectedLayout({
         ticker={<Marquee initial={marquee} locale={locale} />}
         footer={<Footer />}
       >
-        <div className="mx-auto max-w-2xl py-16">
-          <div className="ui-panel p-6">
-            <h1 className="font-condensed text-xl uppercase tracking-[0.12em]">
+        {/* Отдельный UI для "нет доступа", чтобы не показывать админские страницы без прав. */}
+        <div className={adminProtectedLayoutClasses.deniedWrap}>
+          <div className={adminProtectedLayoutClasses.deniedPanel}>
+            <h1 className={adminProtectedLayoutClasses.deniedTitle}>
               {tAdmin('accessDenied')}
             </h1>
-            <p className="mt-3 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-muted)]">
+            <p className={adminProtectedLayoutClasses.deniedSubtitle}>
               {user.email ?? user.id}
             </p>
           </div>

@@ -2,6 +2,12 @@
 
 import {useEffect, useMemo, useState} from 'react';
 
+import {getMarqueeVars, marqueeClasses} from './Marquee.styles';
+
+/**
+ * Контракт настроек marquee, совпадающий со схемой таблицы `settings_marquee`.
+ * Используется в layout’ах (для initial SSR) и в `/api/marquee` (для client refresh).
+ */
 export type MarqueeSettings = {
   enabled: boolean;
   text_ru: string;
@@ -10,18 +16,37 @@ export type MarqueeSettings = {
   direction: string | null;
 };
 
-const FALLBACK_TEXT = 'WE LICENSE IDENTITY';
+/**
+ * Текст по умолчанию, если админ ещё не заполнил строку или она пустая для текущей локали.
+ */
+function getFallbackText(locale: string) {
+  return locale === 'ru'
+    ? 'ЛИЦЕНЗИРУЕМ ИДЕНТИЧНОСТЬ'
+    : 'WE LICENSE IDENTITY';
+}
 
+/**
+ * Выбирает поле текста по локали без дополнительной логики форматирования.
+ * Используется в компоненте `Marquee` перед нормализацией и fallback.
+ */
 function pickText(settings: MarqueeSettings, locale: string) {
   return locale === 'ru' ? settings.text_ru : settings.text_en;
 }
 
+/**
+ * Нормализует скорость marquee (секунд на полный цикл) и ограничивает диапазон.
+ * Это защищает анимацию от слишком быстрых/медленных значений из базы.
+ */
 function normalizeDurationSeconds(speed: number | null | undefined) {
   const value = typeof speed === 'number' ? speed : null;
   if (!value || !Number.isFinite(value)) return 20;
   return Math.min(120, Math.max(6, value));
 }
 
+/**
+ * Бегущая строка (ticker) для публичной и админской частей.
+ * initial значения приходят с сервера из layout’а, а затем компонент сам подтягивает обновления из `/api/marquee`.
+ */
 export function Marquee({
   initial,
   locale
@@ -38,18 +63,14 @@ export function Marquee({
 
   const direction = settings.direction === 'right' ? 'right' : 'left';
   const rawText = pickText(settings, locale).trim();
-  const text = rawText || FALLBACK_TEXT;
-  const style: React.CSSProperties & {
-    '--marquee-duration': string;
-    '--marquee-direction': string;
-  } = {
-    '--marquee-duration': `${durationSeconds}s`,
-    '--marquee-direction': direction === 'right' ? 'reverse' : 'normal'
-  };
+  const text = rawText || getFallbackText(locale);
+  const style = getMarqueeVars(durationSeconds, direction);
 
+  // Периодически обновляем настройки, чтобы изменения из админки появлялись без перезагрузки страницы.
   useEffect(() => {
     let isMounted = true;
 
+    // Best-effort загрузка актуальных настроек; ошибки/плохие ответы просто игнорируем.
     async function refetch() {
       try {
         const res = await fetch('/api/marquee', {cache: 'no-store'});
@@ -65,6 +86,7 @@ export function Marquee({
     refetch();
     const interval = window.setInterval(refetch, 8000);
 
+    // При возвращении на вкладку/окно — обновляем сразу, чтобы ticker был актуальным.
     function onFocus() {
       void refetch();
     }
@@ -81,14 +103,14 @@ export function Marquee({
   if (!settings.enabled) return null;
 
   return (
-    <div className="border-b ui-line bg-black text-white">
-      <div className="marquee">
-        <div className="marquee__inner" style={style}>
-          <span className="marquee__content font-condensed uppercase tracking-[0.24em]">
+    <div className={marqueeClasses.wrapper}>
+      <div className={marqueeClasses.marquee}>
+        <div className={marqueeClasses.inner} style={style}>
+          <span className={marqueeClasses.content}>
             {text}
           </span>
           <span
-            className="marquee__content font-condensed uppercase tracking-[0.24em]"
+            className={marqueeClasses.content}
             aria-hidden
           >
             {text}

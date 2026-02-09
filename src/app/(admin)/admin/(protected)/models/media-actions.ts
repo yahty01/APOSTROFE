@@ -6,6 +6,10 @@ import {z} from 'zod';
 
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 
+/**
+ * Гейт по роли для загрузок/удаления медиа.
+ * Используется во всех server actions ниже, чтобы ограничить доступ к Storage/DB.
+ */
 async function requireAdminOrEditor() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -26,6 +30,10 @@ async function requireAdminOrEditor() {
   return supabase;
 }
 
+/**
+ * Определяет "безопасное" расширение изображения на основе имени файла и mime type.
+ * Используется в upload actions, чтобы не принимать неожиданные форматы и корректно формировать путь.
+ */
 function getSafeImageExt(fileName: string, mimeType: string) {
   const ext = fileName.split('.').pop()?.toLowerCase();
   const allowed = new Set(['jpg', 'jpeg', 'png', 'webp']);
@@ -44,6 +52,10 @@ const uploadSchema = z.object({
 
 type ActionResult = {ok: true} | {ok: false; error: string};
 
+/**
+ * Достаёт `document_id` ассета — он используется как "папка" для хранения файлов в Supabase Storage.
+ * Вынесено отдельно, чтобы upload/delete/reorder могли переиспользовать и единообразно падать.
+ */
 async function getAssetDocumentId(supabase: Awaited<ReturnType<typeof requireAdminOrEditor>>, assetId: string) {
   const {data, error} = await supabase
     .from('assets')
@@ -55,8 +67,16 @@ async function getAssetDocumentId(supabase: Awaited<ReturnType<typeof requireAdm
   return data.document_id;
 }
 
+/**
+ * Жёсткий лимит на размер файла, чтобы не принимать слишком большие аплоады в server actions.
+ * Значение согласовано с `experimental.serverActions.bodySizeLimit` в `next.config.ts`.
+ */
 const maxUploadBytes = 10 * 1024 * 1024;
 
+/**
+ * Server Action: загружает hero изображение (одна штука) и заменяет старое.
+ * Используется в `MediaManager` и `NewModelClient`; обновляет Storage + таблицу `asset_media` и делает revalidate.
+ */
 export async function uploadHeroAction(formData: FormData): Promise<ActionResult> {
   const parsed = uploadSchema.safeParse({asset_id: formData.get('asset_id')});
   if (!parsed.success) return {ok: false, error: 'Invalid asset id'};
@@ -115,6 +135,10 @@ export async function uploadHeroAction(formData: FormData): Promise<ActionResult
   }
 }
 
+/**
+ * Server Action: загружает набор gallery изображений и добавляет их в конец по `order_index`.
+ * Используется в `MediaManager` и `NewModelClient`.
+ */
 export async function uploadGalleryAction(formData: FormData): Promise<ActionResult> {
   const parsed = uploadSchema.safeParse({asset_id: formData.get('asset_id')});
   if (!parsed.success) return {ok: false, error: 'Invalid asset id'};
@@ -181,6 +205,10 @@ const moveSchema = z.object({
   direction: z.enum(['up', 'down'])
 });
 
+/**
+ * Server Action: меняет порядок gallery-элементов (swap с соседним по `order_index`).
+ * Используется кнопками "UP/DOWN" в `MediaManager`.
+ */
 export async function moveGalleryMediaAction(input: unknown): Promise<ActionResult> {
   const parsed = moveSchema.safeParse(input);
   if (!parsed.success) return {ok: false, error: 'Invalid request'};
@@ -227,6 +255,10 @@ const deleteSchema = z.object({
   media_id: z.string().uuid()
 });
 
+/**
+ * Server Action: удаляет элемент медиа (storage + строка в `asset_media`).
+ * Используется в `MediaManager` (кнопки remove для hero и gallery).
+ */
 export async function deleteMediaAction(input: unknown): Promise<ActionResult> {
   const parsed = deleteSchema.safeParse(input);
   if (!parsed.success) return {ok: false, error: 'Invalid request'};

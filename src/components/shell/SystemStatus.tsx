@@ -1,9 +1,20 @@
+'use client';
+
+import {useTranslations} from 'next-intl';
+
+import {systemStatusClasses} from './SystemStatus.styles';
+
+/**
+ * Небольшой "индикатор системы" в шапке.
+ * Сейчас значения статичны (заглушка), но компонент выделен отдельно для будущего подключения реальных метрик.
+ */
 export function SystemStatus() {
+  const t = useTranslations('common');
+
   return (
-    <div className="flex h-10 flex-col justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[10px] uppercase tracking-[0.18em] leading-tight text-[var(--color-ink)]">
-      <div>СИСТЕМА: В СЕТИ</div>
-      <div>АКТИВЫ: 1420</div>
+    <div className={systemStatusClasses.root}>
+      <div>{t('systemOnline')}</div>
+      <div>{t('assetsCount', {count: 1420})}</div>
     </div>
   );
 }
-

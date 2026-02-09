@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import {cookies} from 'next/headers';
 import {getTranslations} from 'next-intl/server';
 
 import {AssetCards} from '@/components/models/AssetCards';
@@ -9,10 +10,20 @@ import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 import {buildGenericLicenseRequestText, buildTelegramShareUrl} from '@/lib/telegram';
 
+import {modelsPageClasses} from './page.styles';
+
 export const dynamic = 'force-dynamic';
 
+/**
+ * Размер страницы каталога моделей (публичная часть).
+ * Используется для вычисления диапазона `.range(from, to)` в Supabase запросе.
+ */
 const PAGE_SIZE = 12;
 
+/**
+ * Нормализует значение query-параметра Next.js (string | string[]) к одиночной строке.
+ * Используется на сервере для `searchParams`.
+ */
 function firstString(
   value: string | string[] | undefined
 ): string | undefined {
@@ -20,11 +31,19 @@ function firstString(
   return value;
 }
 
+/**
+ * Безопасный парсер положительного int из строки.
+ * Используется для `page`, чтобы не падать на мусорных query-параметрах.
+ */
 function asInt(value: string | undefined, fallback: number) {
   const parsed = Number.parseInt(value ?? '', 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+/**
+ * Строит строку query параметров на основе текущих и patch-изменений.
+ * Используется для ссылок пагинации и кнопки "ALL", сохраняя остальные параметры.
+ */
 function buildSearchParams(
   current: Record<string, string | string[] | undefined>,
   patch: Record<string, string | null>
@@ -45,6 +64,10 @@ function buildSearchParams(
   return params;
 }
 
+/**
+ * Публичная страница каталога моделей (`/models`).
+ * Загружает данные из Supabase на сервере, строит превью-ссылки на изображения и рендерит list/cards view.
+ */
 export default async function ModelsPage({
   searchParams
 }: {
@@ -56,8 +79,17 @@ export default async function ModelsPage({
   const t = await getTranslations('public');
   const tCommon = await getTranslations('common');
 
-  const view = firstString(sp.view);
-  const viewMode = view === 'list' ? 'list' : 'cards';
+  const viewRaw = firstString(sp.view);
+  const cookieStore = await cookies();
+  const cookieView = cookieStore.get('models_view')?.value;
+  const viewMode =
+    viewRaw === 'list'
+      ? 'list'
+      : viewRaw === 'cards'
+        ? 'cards'
+        : cookieView === 'list'
+          ? 'list'
+          : 'cards';
 
   const page = asInt(firstString(sp.page), 1);
   const categoryRaw = firstString(sp.category);
@@ -70,6 +102,7 @@ export default async function ModelsPage({
   let count = 0;
   let errorMessage: string | null = null;
 
+  // Загружаем категории и ассеты параллельно; медиа подтягиваем отдельным запросом только если есть результаты.
   try {
     const supabase = createSupabasePublicClient();
 
@@ -172,34 +205,36 @@ export default async function ModelsPage({
   );
 
   return (
-    <div className="space-y-12">
-      <header className="space-y-4">
-        <h1 className="font-condensed text-[clamp(48px,6vw,72px)] leading-[0.88] uppercase tracking-[0.12em]">
+    <div className={modelsPageClasses.root}>
+      <header className={modelsPageClasses.header}>
+        <h1 className={modelsPageClasses.title}>
           {t('catalogTitle')}
         </h1>
-        <p className="max-w-3xl font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+        <p className={modelsPageClasses.subtitle}>
           {t('catalogSubtitle')}
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-px bg-[var(--color-line)] md:grid-cols-[1fr_auto]">
-        <div className="bg-[var(--color-surface)] p-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+      <div className={modelsPageClasses.toolbarGrid}>
+        <div className={modelsPageClasses.statsPanel}>
           <div>{t('pagination.items', {count})}</div>
-          <div className="mt-1">{t('pagination.page', {page, pages})}</div>
+          <div className={modelsPageClasses.statsPageRow}>
+            {t('pagination.page', {page, pages})}
+          </div>
         </div>
-        <div className="bg-[var(--color-surface)] p-4">
+        <div className={modelsPageClasses.toolbarPanel}>
           <ModelsToolbar categories={categories} />
         </div>
       </div>
 
       {errorMessage ? (
-        <div className="ui-panel p-4 font-doc text-[11px] uppercase tracking-[0.16em] text-red-800">
+        <div className={modelsPageClasses.errorPanel}>
           {errorMessage}
         </div>
       ) : null}
 
       {!errorMessage && items.length === 0 ? (
-        <div className="ui-panel p-10 text-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+        <div className={modelsPageClasses.emptyPanel}>
           {t('noResults')}
         </div>
       ) : null}
@@ -212,17 +247,17 @@ export default async function ModelsPage({
         )
       ) : null}
 
-      <div className="flex flex-col gap-3 border-t ui-line pt-6 md:flex-row md:items-center md:justify-between">
-        <div className="font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+      <div className={modelsPageClasses.paginationWrap}>
+        <div className={modelsPageClasses.paginationLabel}>
           {t('pagination.page', {page, pages})}
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className={modelsPageClasses.paginationButtons}>
           <Link
             aria-disabled={!prevPage}
-            className={`flex h-10 items-center justify-center border px-4 font-doc text-[11px] uppercase tracking-[0.18em] ${
+            className={`${modelsPageClasses.pageButtonBase} ${
               prevPage
-                ? 'border-[color:var(--color-line)] bg-[var(--color-paper)] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]'
-                : 'cursor-not-allowed border-[color:var(--color-line)] bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] text-[var(--color-muted)] opacity-60'
+                ? modelsPageClasses.pageButtonEnabled
+                : modelsPageClasses.pageButtonDisabled
             }`}
             href={
               prevPage
@@ -236,10 +271,10 @@ export default async function ModelsPage({
           </Link>
           <Link
             aria-disabled={!nextPage}
-            className={`flex h-10 items-center justify-center border px-4 font-doc text-[11px] uppercase tracking-[0.18em] ${
+            className={`${modelsPageClasses.pageButtonBase} ${
               nextPage
-                ? 'border-[color:var(--color-line)] bg-[var(--color-paper)] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]'
-                : 'cursor-not-allowed border-[color:var(--color-line)] bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] text-[var(--color-muted)] opacity-60'
+                ? modelsPageClasses.pageButtonEnabled
+                : modelsPageClasses.pageButtonDisabled
             }`}
             href={
               nextPage
@@ -252,7 +287,7 @@ export default async function ModelsPage({
             {t('pagination.next')}
           </Link>
           <Link
-            className="hidden h-10 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] md:flex"
+            className={modelsPageClasses.allButton}
             href={`/models?${buildSearchParams(sp, {page: null, category: null}).toString()}`}
           >
             {tCommon('all')}
@@ -260,13 +295,13 @@ export default async function ModelsPage({
         </div>
       </div>
 
-      <div className="py-16">
-        <div className="flex justify-center">
+      <div className={modelsPageClasses.ctaWrap}>
+        <div className={modelsPageClasses.ctaInner}>
           <a
             href={genericTelegramHref}
             target="_blank"
             rel="noreferrer"
-            className="ui-btn-primary h-14 px-10 text-[16px]"
+            className={modelsPageClasses.ctaButton}
           >
             {t('cta.requestLicense')}
           </a>

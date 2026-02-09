@@ -1,51 +1,117 @@
 'use client';
 
-import Link from 'next/link';
 import {useLocale} from 'next-intl';
-import {usePathname, useSearchParams} from 'next/navigation';
+import {usePathname, useRouter, useSearchParams} from 'next/navigation';
+import {useRef, useTransition} from 'react';
 
+import {useReportPending} from '@/lib/pending';
+
+import {languageDropdownClasses} from './LanguageDropdown.styles';
+
+/**
+ * Собирает строку редиректа для `/api/locale`, сохраняя query-параметры.
+ * Используется в `LanguageDropdown`, чтобы после смены языка пользователь оставался на той же странице.
+ */
 function buildRedirect(pathname: string, searchParams: URLSearchParams): string {
   const query = searchParams.toString();
   return query ? `${pathname}?${query}` : pathname;
 }
 
+function buildLocaleHref(nextLocale: 'ru' | 'en', redirect: string) {
+  const params = new URLSearchParams();
+  params.set('locale', nextLocale);
+  params.set('redirect', redirect);
+  return `/api/locale?${params.toString()}`;
+}
+
+function isPlainLeftClick(event: React.MouseEvent<HTMLAnchorElement>) {
+  return (
+    event.button === 0 &&
+    !event.defaultPrevented &&
+    !event.metaKey &&
+    !event.altKey &&
+    !event.ctrlKey &&
+    !event.shiftKey
+  );
+}
+
+/**
+ * Переключатель языка через cookie `locale`.
+ * Используется в шапках (`TopHeader`, `AdminHeader`) и меняет язык через `/api/locale?locale=...&redirect=...`.
+ */
 export function LanguageDropdown() {
   const locale = useLocale();
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const detailsRef = useRef<HTMLDetailsElement | null>(null);
+  const [isPending, startTransition] = useTransition();
+  useReportPending(isPending);
 
   const redirect = buildRedirect(pathname, searchParams);
+  const hrefRu = buildLocaleHref('ru', redirect);
+  const hrefEn = buildLocaleHref('en', redirect);
+
+  function onLocaleClick(
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) {
+    if (isPending) {
+      event.preventDefault();
+      return;
+    }
+
+    if (!isPlainLeftClick(event)) return;
+
+    event.preventDefault();
+    startTransition(async () => {
+      try {
+        await fetch(href, {
+          headers: {'x-locale-switch': '1'},
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+      } catch {
+        // ignore
+      }
+      if (detailsRef.current) detailsRef.current.open = false;
+      router.refresh();
+    });
+  }
 
   return (
-    <details className="relative">
-      <summary className="flex h-10 cursor-pointer list-none items-center gap-2 border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]">
+    <details ref={detailsRef} className={languageDropdownClasses.root}>
+      <summary className={languageDropdownClasses.summary}>
         <span>{locale.toUpperCase()}</span>
-        <span aria-hidden className="text-[10px]">
+        <span aria-hidden className={languageDropdownClasses.caret}>
           ▼
         </span>
       </summary>
 
-      <div className="absolute right-0 top-full z-30 mt-px w-28 border border-[color:var(--color-line)] bg-[var(--color-paper)]">
-        <div className="grid gap-px bg-[var(--color-line)] p-px">
-          <Link
-            href={{pathname: '/api/locale', query: {locale: 'ru', redirect}}}
-            className={`flex h-9 items-center justify-between bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] ${
-              locale === 'ru' ? 'bg-black text-white hover:bg-black' : ''
+      <div className={languageDropdownClasses.menu}>
+        <div className={languageDropdownClasses.menuInner}>
+          <a
+            href={hrefRu}
+            aria-disabled={isPending}
+            onClick={(e) => onLocaleClick(e, hrefRu)}
+            className={`${languageDropdownClasses.linkBase} ${
+              locale === 'ru' ? languageDropdownClasses.linkActive : ''
             }`}
           >
             RU
-          </Link>
-          <Link
-            href={{pathname: '/api/locale', query: {locale: 'en', redirect}}}
-            className={`flex h-9 items-center justify-between bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] ${
-              locale === 'en' ? 'bg-black text-white hover:bg-black' : ''
+          </a>
+          <a
+            href={hrefEn}
+            aria-disabled={isPending}
+            onClick={(e) => onLocaleClick(e, hrefEn)}
+            className={`${languageDropdownClasses.linkBase} ${
+              locale === 'en' ? languageDropdownClasses.linkActive : ''
             }`}
           >
             EN
-          </Link>
+          </a>
         </div>
       </div>
     </details>
   );
 }
-

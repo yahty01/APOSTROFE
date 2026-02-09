@@ -7,9 +7,14 @@ import {Footer} from '@/components/shell/Footer';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 
 import {LoginForm} from './LoginForm';
+import {adminLoginPageClasses} from './page.styles';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Fallback-настройки marquee на случай ошибок Supabase.
+ * Используется для initial рендера, чтобы шапка/тикер не ломались без данных.
+ */
 const DEFAULT_MARQUEE: MarqueeSettings = {
   enabled: true,
   text_ru: '',
@@ -18,6 +23,10 @@ const DEFAULT_MARQUEE: MarqueeSettings = {
   direction: null
 };
 
+/**
+ * Страница логина админки (`/admin/login`).
+ * Подгружает locale и initial-настройки marquee на сервере и рендерит `LoginForm`.
+ */
 export default async function AdminLoginPage({}: {
   params: Promise<Record<string, string | string[] | undefined>>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -44,15 +53,15 @@ export default async function AdminLoginPage({}: {
       ticker={<Marquee initial={marquee} locale={locale} />}
       footer={<Footer />}
     >
-      <div className="mx-auto flex min-h-[70vh] max-w-md items-center">
-        <div className="ui-panel w-full p-6">
-          <h1 className="font-condensed text-xl uppercase tracking-[0.12em]">
+      <div className={adminLoginPageClasses.root}>
+        <div className={adminLoginPageClasses.panel}>
+          <h1 className={adminLoginPageClasses.title}>
             {t('title')}
           </h1>
-          <p className="mt-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
-            USE YOUR SUPABASE AUTH EMAIL/PASSWORD.
+          <p className={adminLoginPageClasses.subtitle}>
+            {t('subtitle')}
           </p>
-          <div className="mt-6">
+          <div className={adminLoginPageClasses.form}>
             <LoginForm />
           </div>
         </div>

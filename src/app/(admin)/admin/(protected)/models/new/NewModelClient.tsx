@@ -8,8 +8,18 @@ import {toast} from 'sonner';
 import {AssetForm} from '../AssetForm';
 import {uploadGalleryAction, uploadHeroAction} from '../media-actions';
 
+import {newModelClientClasses} from './NewModelClient.styles';
+
+/**
+ * Список типов, разрешённых в file input.
+ * Используется в `NewModelClient` как подсказка браузеру и базовый фильтр выбора файлов.
+ */
 const acceptImages = 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp';
 
+/**
+ * Клиентская часть страницы создания модели.
+ * Помимо `AssetForm` позволяет заранее выбрать hero/gallery файлы и загрузить их сразу после сохранения ассета.
+ */
 export function NewModelClient() {
   const t = useTranslations('admin.modelForm');
   const tMedia = useTranslations('admin.media');
@@ -23,10 +33,18 @@ export function NewModelClient() {
   const softWarnSingleBytes = 4 * MB;
   const softWarnTotalBytes = 15 * MB;
 
+  /**
+   * Удобный перевод байт → мегабайты для UI-подсказок.
+   * Используется только для отображения (не влияет на фактические лимиты аплоада).
+   */
   function bytesToMb(bytes: number) {
     return Math.round((bytes / MB) * 10) / 10;
   }
 
+  /**
+   * Загружает выбранные файлы в Storage после того, как ассет создан и у нас есть его `assetId`.
+   * Используется как `afterSave` callback из `AssetForm`.
+   */
   async function uploadSelected(assetId: string) {
     if (heroFile) {
       const fd = new FormData();
@@ -46,8 +64,8 @@ export function NewModelClient() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="ui-panel p-6">
+    <div className={newModelClientClasses.root}>
+      <div className={newModelClientClasses.panel}>
         <AssetForm
           initialValues={{}}
           redirectToEdit={false}
@@ -59,13 +77,13 @@ export function NewModelClient() {
         />
       </div>
 
-      <div className="ui-panel p-6">
-        <div className="flex items-start justify-between gap-4">
+      <div className={newModelClientClasses.panel}>
+        <div className={newModelClientClasses.panelHeaderRow}>
           <div>
-            <div className="font-condensed text-xl uppercase tracking-[0.12em]">
+            <div className={newModelClientClasses.panelTitle}>
               {tMedia('title')}
             </div>
-            <div className="mt-2 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-muted)]">
+            <div className={newModelClientClasses.panelSubtitle}>
               {tMedia('preUploadHelp')}
             </div>
           </div>
@@ -75,35 +93,37 @@ export function NewModelClient() {
               setHeroFile(null);
               setGalleryFiles([]);
             }}
-            className="flex h-9 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]"
+            className={newModelClientClasses.clearButton}
           >
             {tMedia('clearSelection')}
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <div className="font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+        <div className={newModelClientClasses.inputsGrid}>
+          <div className={newModelClientClasses.field}>
+            <div className={newModelClientClasses.fieldLabel}>
               {tMedia('hero')}
             </div>
-            <label className="flex h-10 cursor-pointer items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]">
+            <label className={newModelClientClasses.fileLabel}>
               <input
                 type="file"
                 accept={acceptImages}
-                className="hidden"
+                className={newModelClientClasses.fileInputHidden}
                 onChange={(e) => setHeroFile(e.target.files?.[0] ?? null)}
               />
               {tMedia('selectFiles')}
             </label>
-            <div className="font-doc text-[11px] tracking-[0.06em] text-[var(--color-muted)]">
+            <div className={newModelClientClasses.fileInfo}>
               {heroFile ? (
-                <div className="space-y-1">
-                  <div className="truncate">{heroFile.name}</div>
+                <div className={newModelClientClasses.fileInfoList}>
+                  <div className={newModelClientClasses.fileName}>
+                    {heroFile.name}
+                  </div>
                   <div>
                     {tMedia('sizeLabel', {mb: bytesToMb(heroFile.size)})}
                   </div>
                   {heroFile.size >= softWarnSingleBytes ? (
-                    <div className="text-amber-700">
+                    <div className={newModelClientClasses.warn}>
                       {tMedia('warningLargeFile', {mb: bytesToMb(heroFile.size)})}
                     </div>
                   ) : null}
@@ -114,21 +134,21 @@ export function NewModelClient() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+          <div className={newModelClientClasses.field}>
+            <div className={newModelClientClasses.fieldLabel}>
               {tMedia('gallery')}
             </div>
-            <label className="flex h-10 cursor-pointer items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]">
+            <label className={newModelClientClasses.fileLabel}>
               <input
                 type="file"
                 accept={acceptImages}
                 multiple
-                className="hidden"
+                className={newModelClientClasses.fileInputHidden}
                 onChange={(e) => setGalleryFiles(Array.from(e.target.files ?? []))}
               />
               {tMedia('selectFiles')}
             </label>
-            <div className="font-doc text-[11px] tracking-[0.06em] text-[var(--color-muted)]">
+            <div className={newModelClientClasses.fileInfo}>
               {galleryFiles.length ? (() => {
                 const totalBytes = galleryFiles.reduce((sum, file) => sum + file.size, 0);
                 const showWarn =
@@ -136,11 +156,11 @@ export function NewModelClient() {
                   galleryFiles.some((f) => f.size >= softWarnSingleBytes);
 
                 return (
-                  <div className="space-y-1">
+                  <div className={newModelClientClasses.fileInfoList}>
                     <div>{tMedia('filesSelected', {count: galleryFiles.length})}</div>
                     <div>{tMedia('sizeTotalLabel', {mb: bytesToMb(totalBytes)})}</div>
                     {showWarn ? (
-                      <div className="text-amber-700">
+                      <div className={newModelClientClasses.warn}>
                         {tMedia('warningLargeSelection', {
                           count: galleryFiles.length,
                           mb: bytesToMb(totalBytes)
@@ -156,7 +176,7 @@ export function NewModelClient() {
           </div>
         </div>
 
-        <div className="mt-4 font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+        <div className={newModelClientClasses.note}>
           {t('documentIdHelp')}
         </div>
       </div>

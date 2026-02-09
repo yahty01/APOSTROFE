@@ -1,3 +1,4 @@
+import {cookies} from 'next/headers';
 import {getLocale} from 'next-intl/server';
 
 import {Marquee, type MarqueeSettings} from '@/components/Marquee';
@@ -8,6 +9,10 @@ import {createSupabasePublicClient} from '@/lib/supabase/public';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Значения по умолчанию для marquee, если Supabase недоступен или настройки ещё не созданы.
+ * Используется в public/admin layout’ах как безопасный fallback.
+ */
 const DEFAULT_MARQUEE: MarqueeSettings = {
   enabled: true,
   text_ru: '',
@@ -16,12 +21,27 @@ const DEFAULT_MARQUEE: MarqueeSettings = {
   direction: null
 };
 
+type ViewMode = 'cards' | 'list';
+
+function asViewMode(value: string | undefined): ViewMode | null {
+  if (value === 'cards' || value === 'list') return value;
+  return null;
+}
+
+/**
+ * Layout публичной части (сегмент `(public)`).
+ * Оборачивает все публичные страницы в `AppShell` и подмешивает ticker `Marquee` с initial данными из Supabase.
+ */
 export default async function PublicLayout({
   children
 }: {
   children: React.ReactNode;
   params: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const cookieStore = await cookies();
+  const initialModelsView =
+    asViewMode(cookieStore.get('models_view')?.value) ?? 'cards';
+
   const locale = await getLocale();
 
   let marquee: MarqueeSettings = DEFAULT_MARQUEE;
@@ -39,7 +59,7 @@ export default async function PublicLayout({
 
   return (
     <AppShell
-      header={<TopHeader />}
+      header={<TopHeader initialModelsView={initialModelsView} />}
       ticker={<Marquee initial={marquee} locale={locale} />}
       footer={<Footer />}
     >

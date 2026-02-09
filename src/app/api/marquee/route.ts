@@ -4,6 +4,11 @@ import {createSupabasePublicClient} from '@/lib/supabase/public';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Возвращает актуальные настройки marquee из Supabase.
+ * Используется клиентским компонентом `Marquee` для периодического обновления текста/скорости без reload.
+ * Всегда отвечает с `cache-control: no-store`, чтобы изменения из админки подхватывались сразу.
+ */
 export async function GET() {
   try {
     const supabase = createSupabasePublicClient();
@@ -28,4 +33,3 @@ export async function GET() {
     );
   }
 }
-

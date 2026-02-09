@@ -1,3 +1,7 @@
+/**
+ * Нормализованный формат элемента каталога для публичного UI.
+ * Собирается на сервере (`/models`) и прокидывается в `AssetsTable` / `AssetCards`.
+ */
 export type AssetListItem = {
   id: string;
   document_id: string;

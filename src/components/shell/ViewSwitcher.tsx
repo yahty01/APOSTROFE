@@ -1,73 +1,98 @@
-'use client';
+"use client";
 
-import {useEffect, useMemo} from 'react';
-import {usePathname, useRouter, useSearchParams} from 'next/navigation';
+import { useEffect, useMemo, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useReportPending } from "@/lib/pending";
 
-type ViewMode = 'cards' | 'list';
+import { viewSwitcherClasses } from "./ViewSwitcher.styles";
 
+type ViewMode = "cards" | "list";
+
+/**
+ * Безопасно парсит значение `view` из query/cookie.
+ * Используется в `ViewSwitcher`, чтобы не поломаться на произвольных строках.
+ */
 function asViewMode(value: string | null): ViewMode | null {
-  if (value === 'cards' || value === 'list') return value;
+  if (value === "cards" || value === "list") return value;
   return null;
 }
 
+/**
+ * Утилита для кнопки "SWITCH": переключает режим таблица/карточки.
+ */
 function nextView(current: ViewMode): ViewMode {
-  return current === 'cards' ? 'list' : 'cards';
+  return current === "cards" ? "list" : "cards";
 }
 
-export function ViewSwitcher() {
+/**
+ * Переключатель режима отображения каталога моделей.
+ * Используется на странице `/models`: пишет `view` в query и запоминает выбор в cookie `models_view`.
+ */
+function setModelsViewCookie(mode: ViewMode) {
+  const maxAge = 60 * 60 * 24 * 365; // 1 год
+  document.cookie = `models_view=${mode}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+}
+
+export function ViewSwitcher({
+  initialView = "cards",
+}: {
+  initialView?: ViewMode;
+}) {
+  const t = useTranslations("public");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  useReportPending(isPending);
 
-  const view = asViewMode(searchParams.get('view')) ?? 'cards';
+  const view = asViewMode(searchParams.get("view")) ?? initialView;
 
   const url = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
     return (nextMode: ViewMode) => {
-      sessionStorage.setItem('models_view', nextMode);
-      params.set('view', nextMode);
-      router.push(`${pathname}?${params.toString()}`);
+      setModelsViewCookie(nextMode);
+      params.set("view", nextMode);
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
     };
-  }, [pathname, router, searchParams]);
+  }, [pathname, router, searchParams, startTransition]);
 
   useEffect(() => {
-    if (searchParams.get('view')) return;
-    const stored = asViewMode(sessionStorage.getItem('models_view'));
-    if (!stored) return;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('view', stored);
-    router.replace(`${pathname}?${params.toString()}`);
-  }, [pathname, router, searchParams]);
-
-  const segmentBase =
-    'flex h-10 items-center justify-center px-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]';
-
-  const segmentActive = 'bg-black text-white hover:bg-black';
+    setModelsViewCookie(view);
+  }, [view]);
 
   return (
-    <div className="inline-flex h-10 items-stretch gap-px border border-[color:var(--color-line)] bg-[var(--color-line)]">
+    <div className={viewSwitcherClasses.root}>
       <button
         type="button"
-        onClick={() => url('cards')}
-        className={`${segmentBase} bg-[var(--color-paper)] ${view === 'cards' ? segmentActive : ''}`}
+        disabled={isPending}
+        onClick={() => url("cards")}
+        className={`${viewSwitcherClasses.segmentBase} ${
+          viewSwitcherClasses.segmentBg
+        } ${view === "cards" ? viewSwitcherClasses.segmentActive : ""}`}
       >
-        VIEW: CARDS
+        {t("view.label")}: {t("view.cards").toUpperCase()}
       </button>
       <button
         type="button"
-        onClick={() => url('list')}
-        className={`${segmentBase} bg-[var(--color-paper)] ${view === 'list' ? segmentActive : ''}`}
+        disabled={isPending}
+        onClick={() => url("list")}
+        className={`${viewSwitcherClasses.segmentBase} ${
+          viewSwitcherClasses.segmentBg
+        } ${view === "list" ? viewSwitcherClasses.segmentActive : ""}`}
       >
-        VIEW: LIST
+        {t("view.label")}: {t("view.list").toUpperCase()}
       </button>
       <button
         type="button"
+        disabled={isPending}
         onClick={() => url(nextView(view))}
-        className={`${segmentBase} bg-[var(--color-paper)]`}
+        className={`${viewSwitcherClasses.segmentBase} ${viewSwitcherClasses.segmentBg}`}
       >
-        SWITCH
+        {t("view.switch")}
       </button>
     </div>
   );
 }
-

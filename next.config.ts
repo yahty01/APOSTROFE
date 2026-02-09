@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import path from "node:path";
 
+/**
+ * Достаёт hostname Supabase из env, чтобы разрешить `next/image` загрузку с кастомного домена.
+ * Используется как optional-добавка к стандартному `**.supabase.co`.
+ */
 function getSupabaseHostname() {
   try {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -43,5 +47,9 @@ const nextConfig: NextConfig = {
   },
 };
 
+/**
+ * next-intl подключает i18n конфиг через отдельный файл (App Router).
+ * Важно: путь здесь — относительный от корня проекта.
+ */
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 export default withNextIntl(nextConfig);

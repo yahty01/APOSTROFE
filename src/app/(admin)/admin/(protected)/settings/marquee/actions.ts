@@ -6,6 +6,10 @@ import {z} from 'zod';
 
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 
+/**
+ * Схема валидации настроек marquee перед сохранением в Supabase.
+ * Используется в `saveMarqueeSettingsAction()` (server action).
+ */
 const schema = z.object({
   enabled: z.boolean(),
   text_ru: z.string().max(5000).optional(),
@@ -16,6 +20,10 @@ const schema = z.object({
 
 type SaveResult = {ok: true} | {ok: false; error: string};
 
+/**
+ * Гейт по роли (admin/editor) для админских настроек.
+ * Используется перед записью в таблицу `settings_marquee`.
+ */
 async function requireAdminOrEditor() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -36,6 +44,10 @@ async function requireAdminOrEditor() {
   return supabase;
 }
 
+/**
+ * Server Action: сохраняет настройки marquee и инвалидирует публичный `/models`.
+ * Используется формой `/admin/settings/marquee`.
+ */
 export async function saveMarqueeSettingsAction(input: unknown): Promise<SaveResult> {
   const parsed = schema.safeParse(input);
   if (!parsed.success) return {ok: false, error: 'Validation failed'};

@@ -1,0 +1,30 @@
+/* Компонентные глобальные стили для `src/components/Marquee.tsx` (анимация и базовая разметка). */
+
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee__inner {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform;
+  animation: marquee-x var(--marquee-duration, 20s) linear infinite;
+  animation-direction: var(--marquee-direction, normal);
+}
+
+.marquee__content {
+  padding: 10px 24px;
+  font-weight: 500;
+  opacity: 0.9;
+}

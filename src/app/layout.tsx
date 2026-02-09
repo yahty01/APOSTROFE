@@ -6,6 +6,12 @@ import {Toaster} from 'sonner';
 
 import './globals.css';
 
+import {rootLayoutClasses} from './layout.styles';
+
+/**
+ * Подключаем шрифты через `next/font`, чтобы иметь CSS variables и корректную оптимизацию загрузки.
+ * Используется в `body.className`.
+ */
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -21,6 +27,10 @@ export const metadata: Metadata = {
   description: "Models catalog + admin",
 };
 
+/**
+ * Root layout всего приложения.
+ * Подключает global CSS, next-intl провайдер, шрифты и Toaster для уведомлений.
+ */
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -32,7 +42,7 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${rootLayoutClasses.body}`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}

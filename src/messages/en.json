@@ -4,8 +4,12 @@
   },
   "nav": {
     "models": "Models",
+    "creators": "Creators",
+    "generators": "Generators",
+    "influencers": "Influencers",
     "admin": "Admin",
-    "marquee": "Marquee"
+    "marquee": "Marquee",
+    "public": "Public"
   },
   "common": {
     "loading": "Loading…",
@@ -19,18 +23,36 @@
     "yes": "Yes",
     "no": "No",
     "enabled": "Enabled",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "actions": "ACTIONS",
+    "systemOnline": "SYSTEM: ONLINE",
+    "assetsCount": "ASSETS: {count}"
   },
   "public": {
     "catalogTitle": "ASSET CATALOG",
     "catalogSubtitle": "REGISTRY OF LICENSED DIGITAL IDENTITIES.",
+    "registry": {
+      "section": "REGISTRY SECTION — {status}."
+    },
     "cta": {
-      "requestLicense": "[ REQUEST LICENSE ]"
+      "requestLicense": "[ REQUEST LICENSE ]",
+      "requestInfo": "[ REQUEST INFO ]"
     },
     "comingSoon": "COMING SOON",
     "view": {
       "cards": "Cards",
-      "list": "List"
+      "list": "List",
+      "label": "VIEW",
+      "switch": "SWITCH"
+    },
+    "asset": {
+      "noImage": "NO IMAGE",
+      "documentId": "DOCUMENT_ID",
+      "timestamp": "TIMESTAMP",
+      "licenseType": "LICENSE_TYPE",
+      "license": "LICENSE",
+      "status": "STATUS",
+      "description": "DESCRIPTION"
     },
     "category": "Category",
     "noResults": "No models found",
@@ -43,12 +65,33 @@
     "detail": {
       "measurements": "Measurements",
       "details": "Details",
-      "telegramCta": "Ask in Telegram"
+      "telegramCta": "Ask in Telegram",
+      "noHeroImage": "NO HERO IMAGE",
+      "noThumbnails": "NO THUMBNAILS"
     }
+  },
+  "footer": {
+    "legalTitle": "LEGAL INFORMATION",
+    "legalCompany": "APOSTROPHE DIGITAL ASSETS LLC",
+    "legalRegNo": "REG. NO: 2024-DA-01420",
+    "legalJurisdiction": "JURISDICTION: INTERNATIONAL",
+    "contactsTitle": "CONTACTS",
+    "contactsEmail": "EMAIL: LICENSE@APOSTROPHE.DIGITAL",
+    "contactsPhone": "PHONE: +1 (555) 000-1420",
+    "contactsSupport": "SUPPORT: 24/7 AVAILABLE",
+    "docsTitle": "DOCUMENTATION",
+    "docsTerms": "TERMS OF SERVICE",
+    "docsPrivacy": "PRIVACY POLICY",
+    "docsLicensing": "LICENSING AGREEMENT",
+    "rights": "© 2024 APOSTROPHE. ALL RIGHTS RESERVED.",
+    "systemVersion": "SYSTEM VERSION: {version} | BUILD: {build}",
+    "poweredBy": "POWERED BY READDY |",
+    "createdBy": "WEBSITE CREATED BY EGOR SAVELEV"
   },
   "admin": {
     "login": {
       "title": "Admin login",
+      "subtitle": "USE YOUR SUPABASE AUTH EMAIL/PASSWORD.",
       "email": "Email",
       "password": "Password",
       "submit": "Sign in",
@@ -65,6 +108,7 @@
       "licenseType": "License",
       "status": "Status",
       "published": "Published",
+      "publishedYes": "PUBLISHED",
       "updatedAt": "Updated",
       "publish": "Publish",
       "unpublish": "Unpublish",
@@ -85,7 +129,13 @@
       "measurements": "Measurements (JSON)",
       "measurementsHelp": "JSON object (key → value). Leave empty if not needed",
       "details": "Details (JSON)",
-      "detailsHelp": "JSON object of properties (key → value). Leave empty if not needed"
+      "detailsHelp": "JSON object of properties (key → value). Leave empty if not needed",
+      "errors": {
+        "documentIdRequired": "Enter document_id",
+        "documentIdInvalid": "Only letters, numbers, _ and -",
+        "titleRequired": "Enter a title",
+        "invalidJson": "Invalid JSON"
+      }
     },
     "media": {
       "title": "Media",
@@ -119,9 +169,11 @@
       "textRu": "Text (RU)",
       "textEn": "Text (EN)",
       "speed": "Speed",
+      "secondsPerLoop": "SECONDS PER LOOP",
       "direction": "Direction",
       "directionLeft": "Left",
-      "directionRight": "Right"
+      "directionRight": "Right",
+      "missingSettings": "Missing settings"
     },
     "toast": {
       "saved": "Saved",

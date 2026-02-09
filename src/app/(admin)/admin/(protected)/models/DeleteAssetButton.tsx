@@ -5,8 +5,15 @@ import {useTranslations} from 'next-intl';
 import {useTransition} from 'react';
 import {toast} from 'sonner';
 
-import {deleteAssetAction} from './actions';
+import {useReportPending} from '@/lib/pending';
 
+import {deleteAssetAction} from './actions';
+import {deleteAssetButtonClasses} from './DeleteAssetButton.styles';
+
+/**
+ * Кнопка удаления ассета в админке.
+ * Используется на `/admin/models` и `/admin/models/[id]`: показывает confirm и вызывает `deleteAssetAction`.
+ */
 export function DeleteAssetButton({
   assetId,
   title
@@ -18,7 +25,12 @@ export function DeleteAssetButton({
   const tToast = useTranslations('admin.toast');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  useReportPending(isPending);
 
+  /**
+   * Обрабатывает клик по "DELETE": подтверждение и выполнение server action в transition.
+   * После успешного удаления возвращаем в список моделей.
+   */
   function onDelete() {
     const ok = window.confirm(t('deleteConfirm', {title}));
     if (!ok) return;
@@ -44,7 +56,7 @@ export function DeleteAssetButton({
       type="button"
       disabled={isPending}
       onClick={onDelete}
-      className="flex h-9 items-center justify-center border border-red-300 bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] text-red-800 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+      className={deleteAssetButtonClasses.button}
     >
       {t('delete')}
     </button>

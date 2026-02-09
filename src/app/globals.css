@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "../styles/ui.css";
+@import "../components/Marquee.css";
+
+/* Глобальные стили: тема (CSS variables), базовый фон/цвета и Tailwind utilities. */
 
 :root {
   color-scheme: light;
@@ -24,151 +28,22 @@ body {
   font-family: var(--font-sans);
 }
 
-@keyframes marquee-x {
-  from {
-    transform: translateX(0);
+@keyframes route-loading-progress {
+  0% {
+    scale: 0% 100%;
   }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.marquee {
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.marquee__inner {
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  will-change: transform;
-  animation: marquee-x var(--marquee-duration, 20s) linear infinite;
-  animation-direction: var(--marquee-direction, normal);
-}
-
-.marquee__content {
-  padding: 10px 24px;
-  font-weight: 500;
-  opacity: 0.9;
-}
-
-@layer components {
-  .ui-frame {
-    border: 1px solid var(--color-line);
-    background: var(--color-paper);
-  }
-
-  .ui-panel {
-    border: 1px solid var(--color-line);
-    background: var(--color-surface);
-  }
-
-  .ui-line {
-    border-color: var(--color-line);
-  }
-
-  .ui-tab {
-    display: inline-flex;
-    height: 40px;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: 1px solid var(--color-line);
-    background: var(--color-paper);
-    padding: 0 14px;
-    font-family: var(--font-condensed);
-    font-size: 14px;
-    line-height: 1;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-ink);
-    user-select: none;
-  }
-
-  .ui-tab:hover {
-    background: color-mix(in oklab, var(--color-paper), #000 6%);
-  }
-
-  .ui-tab--active {
-    border-color: #000;
-    background: #000;
-    color: #fff;
-  }
-
-  .ui-btn-primary {
-    display: inline-flex;
-    height: 44px;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: 1px solid #000;
-    background: #000;
-    padding: 0 16px;
-    font-family: var(--font-condensed);
-    font-size: 14px;
-    line-height: 1;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #fff;
-    user-select: none;
-  }
-
-  .ui-btn-primary:hover {
-    background: color-mix(in oklab, #000, #fff 10%);
-  }
-
-  .ui-btn-outline {
-    display: inline-flex;
-    height: 44px;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: 1px solid var(--color-line-strong);
-    background: var(--color-paper);
-    padding: 0 16px;
-    font-family: var(--font-condensed);
-    font-size: 14px;
-    line-height: 1;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-ink);
-    user-select: none;
-  }
-
-  .ui-btn-outline:hover {
-    background: color-mix(in oklab, var(--color-paper), #000 6%);
-  }
-
-  .ui-input,
-  .ui-select,
-  .ui-textarea {
-    width: 100%;
-    border: 1px solid var(--color-line);
-    background: var(--color-paper);
-    padding: 10px 12px;
-    font-size: 14px;
-    line-height: 1.2;
-    color: var(--color-ink);
-    outline: none;
-  }
-
-  .ui-input:focus,
-  .ui-select:focus,
-  .ui-textarea:focus {
-    border-color: #000;
+  60%,
+  100% {
+    scale: 100% 100%;
   }
 }
 
-@layer utilities {
-  .font-condensed {
-    font-family: var(--font-condensed);
-    font-stretch: condensed;
-    font-variation-settings: "wdth" 85;
+@keyframes loading-bar-pulse {
+  0%,
+  100% {
+    opacity: 0.2;
   }
-
-  .font-doc {
-    font-family: var(--font-mono);
-    letter-spacing: 0.08em;
+  50% {
+    opacity: 1;
   }
 }

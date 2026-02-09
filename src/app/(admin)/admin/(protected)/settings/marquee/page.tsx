@@ -3,9 +3,14 @@ import {getTranslations} from 'next-intl/server';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
 
 import {MarqueeForm} from './MarqueeForm';
+import {adminMarqueeSettingsPageClasses} from './page.styles';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Админская страница настроек marquee (`/admin/settings/marquee`).
+ * Загружает текущие настройки на сервере и передаёт их в клиентскую форму `MarqueeForm`.
+ */
 export default async function AdminMarqueeSettingsPage({}: {
   params: Promise<Record<string, string | string[] | undefined>>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -21,8 +26,8 @@ export default async function AdminMarqueeSettingsPage({}: {
 
   if (error || !data) {
     return (
-      <div className="border border-red-300 bg-red-50 p-4 font-doc text-[11px] uppercase tracking-[0.16em] text-red-900">
-        {error?.message ?? 'Missing settings'}
+      <div className={adminMarqueeSettingsPageClasses.error}>
+        {error?.message ?? t('missingSettings')}
       </div>
     );
   }
@@ -30,11 +35,11 @@ export default async function AdminMarqueeSettingsPage({}: {
   const direction = data.direction === 'right' ? 'right' : 'left';
 
   return (
-    <div className="space-y-6">
-      <h1 className="font-condensed text-[clamp(32px,4vw,52px)] leading-[0.9] uppercase tracking-[0.14em]">
+    <div className={adminMarqueeSettingsPageClasses.root}>
+      <h1 className={adminMarqueeSettingsPageClasses.title}>
         {t('title')}
       </h1>
-      <div className="ui-panel p-6">
+      <div className={adminMarqueeSettingsPageClasses.panel}>
         <MarqueeForm
           initialValues={{
             enabled: data.enabled,

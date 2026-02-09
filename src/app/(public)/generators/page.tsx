@@ -1,25 +1,32 @@
 import {getTranslations} from 'next-intl/server';
 
+import {registryPageClasses} from '../registryPage.styles';
+
 export const dynamic = 'force-dynamic';
 
+/**
+ * Раздел "Generators" (публичная часть).
+ * Сейчас страница-заглушка, чтобы таб-навигация была полной и можно было постепенно наполнять контент.
+ */
 export default async function GeneratorsPage({}: {
   params: Promise<Record<string, string | string[] | undefined>>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const t = await getTranslations('public');
+  const tNav = await getTranslations('nav');
 
   return (
-    <div className="space-y-12">
-      <header className="space-y-4">
-        <h1 className="font-condensed text-[clamp(48px,6vw,72px)] leading-[0.88] uppercase tracking-[0.12em]">
-          GENERATORS’
+    <div className={registryPageClasses.root}>
+      <header className={registryPageClasses.header}>
+        <h1 className={registryPageClasses.title}>
+          {tNav('generators').toUpperCase()}’
         </h1>
-        <p className="max-w-3xl font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
-          REGISTRY SECTION — {t('comingSoon')}.
+        <p className={registryPageClasses.subtitle}>
+          {t('registry.section', {status: t('comingSoon')})}
         </p>
       </header>
 
-      <div className="ui-panel p-10 text-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+      <div className={registryPageClasses.panel}>
         {t('comingSoon')}
       </div>
     </div>

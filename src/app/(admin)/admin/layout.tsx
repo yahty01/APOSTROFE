@@ -1,5 +1,9 @@
 export const dynamic = 'force-dynamic';
 
+/**
+ * Внешний layout сегмента `(admin)`.
+ * Сейчас не добавляет обёрток, но оставлен как точка расширения для будущих глобальных админских настроек.
+ */
 export default async function AdminLayout({
   children
 }: {
@@ -8,4 +12,3 @@ export default async function AdminLayout({
 }) {
   return <>{children}</>;
 }
-
