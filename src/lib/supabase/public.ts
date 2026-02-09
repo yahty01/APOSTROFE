@@ -4,6 +4,10 @@ import {getSupabasePublicEnv} from '@/lib/env';
 
 import type {Database} from './database.types';
 
+/**
+ * Проверяет наличие обязательных переменных окружения Supabase и даёт понятную ошибку.
+ * Используется только внутри `createSupabasePublicClient()`, чтобы не разносить проверки по всему коду.
+ */
 function getEnvOrThrow() {
   const env = getSupabasePublicEnv();
   if (!env) {
@@ -14,6 +18,10 @@ function getEnvOrThrow() {
   return env;
 }
 
+/**
+ * Создаёт "публичный" Supabase клиент (anon key) без сохранения/авто-обновления сессии.
+ * Используется в Server Components и route handlers публичной части для чтения данных.
+ */
 export function createSupabasePublicClient() {
   const env = getEnvOrThrow();
 
@@ -25,4 +33,3 @@ export function createSupabasePublicClient() {
     }
   });
 }
-

@@ -8,8 +8,18 @@ import {toast} from 'sonner';
 import {AssetForm} from '../AssetForm';
 import {uploadGalleryAction, uploadHeroAction} from '../media-actions';
 
+import {newModelClientClasses} from './NewModelClient.styles';
+
+/**
+ * Список типов, разрешённых в file input.
+ * Используется в `NewModelClient` как подсказка браузеру и базовый фильтр выбора файлов.
+ */
 const acceptImages = 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp';
 
+/**
+ * Клиентская часть страницы создания модели.
+ * Помимо `AssetForm` позволяет заранее выбрать hero/gallery файлы и загрузить их сразу после сохранения ассета.
+ */
 export function NewModelClient() {
   const t = useTranslations('admin.modelForm');
   const tMedia = useTranslations('admin.media');
@@ -23,10 +33,18 @@ export function NewModelClient() {
   const softWarnSingleBytes = 4 * MB;
   const softWarnTotalBytes = 15 * MB;
 
+  /**
+   * Удобный перевод байт → мегабайты для UI-подсказок.
+   * Используется только для отображения (не влияет на фактические лимиты аплоада).
+   */
   function bytesToMb(bytes: number) {
     return Math.round((bytes / MB) * 10) / 10;
   }
 
+  /**
+   * Загружает выбранные файлы в Storage после того, как ассет создан и у нас есть его `assetId`.
+   * Используется как `afterSave` callback из `AssetForm`.
+   */
   async function uploadSelected(assetId: string) {
     if (heroFile) {
       const fd = new FormData();
@@ -46,8 +64,8 @@ export function NewModelClient() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+    <div className={newModelClientClasses.root}>
+      <div className={newModelClientClasses.panel}>
         <AssetForm
           initialValues={{}}
           redirectToEdit={false}
@@ -59,11 +77,15 @@ export function NewModelClient() {
         />
       </div>
 
-      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
-        <div className="flex items-start justify-between gap-4">
+      <div className={newModelClientClasses.panel}>
+        <div className={newModelClientClasses.panelHeaderRow}>
           <div>
-            <div className="text-lg font-semibold tracking-tight">{tMedia('title')}</div>
-            <div className="mt-1 text-xs text-black/60">{tMedia('preUploadHelp')}</div>
+            <div className={newModelClientClasses.panelTitle}>
+              {tMedia('title')}
+            </div>
+            <div className={newModelClientClasses.panelSubtitle}>
+              {tMedia('preUploadHelp')}
+            </div>
           </div>
           <button
             type="button"
@@ -71,33 +93,37 @@ export function NewModelClient() {
               setHeroFile(null);
               setGalleryFiles([]);
             }}
-            className="inline-flex h-9 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5"
+            className={newModelClientClasses.clearButton}
           >
             {tMedia('clearSelection')}
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-black/80">{tMedia('hero')}</div>
-            <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm hover:bg-black/5">
+        <div className={newModelClientClasses.inputsGrid}>
+          <div className={newModelClientClasses.field}>
+            <div className={newModelClientClasses.fieldLabel}>
+              {tMedia('hero')}
+            </div>
+            <label className={newModelClientClasses.fileLabel}>
               <input
                 type="file"
                 accept={acceptImages}
-                className="hidden"
+                className={newModelClientClasses.fileInputHidden}
                 onChange={(e) => setHeroFile(e.target.files?.[0] ?? null)}
               />
               {tMedia('selectFiles')}
             </label>
-            <div className="text-xs text-black/60">
+            <div className={newModelClientClasses.fileInfo}>
               {heroFile ? (
-                <div className="space-y-1">
-                  <div className="truncate">{heroFile.name}</div>
+                <div className={newModelClientClasses.fileInfoList}>
+                  <div className={newModelClientClasses.fileName}>
+                    {heroFile.name}
+                  </div>
                   <div>
                     {tMedia('sizeLabel', {mb: bytesToMb(heroFile.size)})}
                   </div>
                   {heroFile.size >= softWarnSingleBytes ? (
-                    <div className="text-amber-700">
+                    <div className={newModelClientClasses.warn}>
                       {tMedia('warningLargeFile', {mb: bytesToMb(heroFile.size)})}
                     </div>
                   ) : null}
@@ -108,19 +134,21 @@ export function NewModelClient() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-black/80">{tMedia('gallery')}</div>
-            <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm hover:bg-black/5">
+          <div className={newModelClientClasses.field}>
+            <div className={newModelClientClasses.fieldLabel}>
+              {tMedia('gallery')}
+            </div>
+            <label className={newModelClientClasses.fileLabel}>
               <input
                 type="file"
                 accept={acceptImages}
                 multiple
-                className="hidden"
+                className={newModelClientClasses.fileInputHidden}
                 onChange={(e) => setGalleryFiles(Array.from(e.target.files ?? []))}
               />
               {tMedia('selectFiles')}
             </label>
-            <div className="text-xs text-black/60">
+            <div className={newModelClientClasses.fileInfo}>
               {galleryFiles.length ? (() => {
                 const totalBytes = galleryFiles.reduce((sum, file) => sum + file.size, 0);
                 const showWarn =
@@ -128,11 +156,11 @@ export function NewModelClient() {
                   galleryFiles.some((f) => f.size >= softWarnSingleBytes);
 
                 return (
-                  <div className="space-y-1">
+                  <div className={newModelClientClasses.fileInfoList}>
                     <div>{tMedia('filesSelected', {count: galleryFiles.length})}</div>
                     <div>{tMedia('sizeTotalLabel', {mb: bytesToMb(totalBytes)})}</div>
                     {showWarn ? (
-                      <div className="text-amber-700">
+                      <div className={newModelClientClasses.warn}>
                         {tMedia('warningLargeSelection', {
                           count: galleryFiles.length,
                           mb: bytesToMb(totalBytes)
@@ -148,7 +176,9 @@ export function NewModelClient() {
           </div>
         </div>
 
-        <div className="mt-4 text-xs text-black/50">{t('documentIdHelp')}</div>
+        <div className={newModelClientClasses.note}>
+          {t('documentIdHelp')}
+        </div>
       </div>
     </div>
   );

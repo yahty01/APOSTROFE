@@ -8,8 +8,14 @@ import {AssetForm} from '../AssetForm';
 import {DeleteAssetButton} from '../DeleteAssetButton';
 import {MediaManager, type AdminMediaItem} from '../MediaManager';
 
+import {adminEditModelPageClasses} from './page.styles';
+
 export const dynamic = 'force-dynamic';
 
+/**
+ * Конвертирует произвольный JSON в строку для textarea с красивыми отступами.
+ * Используется при заполнении `AssetForm` из значений, полученных из БД.
+ */
 function jsonToTextarea(value: unknown) {
   if (!value) return '';
   try {
@@ -19,6 +25,10 @@ function jsonToTextarea(value: unknown) {
   }
 }
 
+/**
+ * Страница редактирования ассета (`/admin/models/[id]`).
+ * Загружает ассет + медиа на сервере, подготавливает signed URLs и рендерит `AssetForm` + `MediaManager`.
+ */
 export default async function AdminEditModelPage({
   params
 }: {
@@ -75,16 +85,20 @@ export default async function AdminEditModelPage({
   ).filter((m) => Boolean(m));
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t('editTitle')}</h1>
-          <p className="text-sm text-black/60 font-mono">{asset.id}</p>
+    <div className={adminEditModelPageClasses.root}>
+      <div className={adminEditModelPageClasses.header}>
+        <div className={adminEditModelPageClasses.headerMeta}>
+          <h1 className={adminEditModelPageClasses.title}>
+            {t('editTitle')}
+          </h1>
+          <p className={adminEditModelPageClasses.subtitle}>
+            {asset.id}
+          </p>
         </div>
         <DeleteAssetButton assetId={asset.id} title={asset.title} />
       </div>
 
-      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+      <div className={adminEditModelPageClasses.panel}>
         <AssetForm
           assetId={asset.id}
           initialValues={{
@@ -101,7 +115,7 @@ export default async function AdminEditModelPage({
         />
       </div>
 
-      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+      <div className={adminEditModelPageClasses.panel}>
         <MediaManager
           assetId={asset.id}
           documentId={asset.document_id}

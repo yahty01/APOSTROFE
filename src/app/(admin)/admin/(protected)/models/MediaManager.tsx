@@ -6,13 +6,20 @@ import {useTransition} from 'react';
 import {useTranslations} from 'next-intl';
 import {toast} from 'sonner';
 
+import {useReportPending} from '@/lib/pending';
+
 import {
   deleteMediaAction,
   moveGalleryMediaAction,
   uploadGalleryAction,
   uploadHeroAction
 } from './media-actions';
+import {mediaManagerClasses} from './MediaManager.styles';
 
+/**
+ * UI-тип медиа-элемента для админки.
+ * Заполняется на сервере (страница редактирования) и используется для рендера hero/gallery в `MediaManager`.
+ */
 export type AdminMediaItem = {
   id: string;
   path: string;
@@ -21,6 +28,10 @@ export type AdminMediaItem = {
   order_index: number;
 };
 
+/**
+ * Управление медиа ассета: загрузка hero, загрузка/сортировка/удаление gallery.
+ * Используется на странице `/admin/models/[id]` и вызывает server actions из `media-actions.ts`.
+ */
 export function MediaManager({
   assetId,
   documentId,
@@ -37,6 +48,7 @@ export function MediaManager({
   const tCommon = useTranslations('common');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  useReportPending(isPending);
 
   const MB = 1024 * 1024;
   const maxBytes = 10 * 1024 * 1024;
@@ -45,16 +57,27 @@ export function MediaManager({
   const softWarnSingleBytes = 4 * MB;
   const softWarnTotalBytes = 15 * MB;
 
+  /**
+   * Переводит байты в мегабайты для отображения пользователю.
+   * Используется только в предупреждениях (toast).
+   */
   function bytesToMb(bytes: number) {
     return Math.round((bytes / MB) * 10) / 10;
   }
 
+  /**
+   * Быстрая проверка типа/размера файла перед отправкой на сервер.
+   * Нужна, чтобы сразу показать понятную ошибку в UI, не нагружая server actions.
+   */
   function validateFile(file: File): string | null {
     if (!file.type.startsWith('image/')) return t('errorOnlyImages');
     if (file.size > maxBytes) return t('errorTooLarge', {mb: 10});
     return null;
   }
 
+  /**
+   * Загрузка hero-файла: валидируем, при необходимости предупреждаем про размер, вызываем `uploadHeroAction`.
+   */
   function onUploadHero(file: File | null) {
     if (!file) return;
     const err = validateFile(file);
@@ -78,6 +101,9 @@ export function MediaManager({
     });
   }
 
+  /**
+   * Загрузка набора gallery-файлов: валидируем каждый файл и суммарный размер, затем вызываем `uploadGalleryAction`.
+   */
   function onUploadGallery(files: FileList | null) {
     if (!files || !files.length) return;
     const list = Array.from(files);
@@ -106,6 +132,9 @@ export function MediaManager({
     });
   }
 
+  /**
+   * Перемещает gallery-элемент вверх/вниз (swap) через server action.
+   */
   function move(mediaId: string, direction: 'up' | 'down') {
     startTransition(async () => {
       const res = await moveGalleryMediaAction({asset_id: assetId, media_id: mediaId, direction});
@@ -114,6 +143,9 @@ export function MediaManager({
     });
   }
 
+  /**
+   * Удаляет hero/gallery элемент через server action и обновляет страницу.
+   */
   function remove(mediaId: string) {
     startTransition(async () => {
       const res = await deleteMediaAction({asset_id: assetId, media_id: mediaId});
@@ -124,10 +156,12 @@ export function MediaManager({
   }
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-2xl border border-black/10 bg-white p-4 text-sm text-black/70">
-        <div className="font-medium text-black/80">{t('howItWorksTitle')}</div>
-        <div className="mt-1 space-y-1 text-xs">
+    <div className={mediaManagerClasses.root}>
+      <div className={mediaManagerClasses.howPanel}>
+        <div className={mediaManagerClasses.howTitle}>
+          {t('howItWorksTitle')}
+        </div>
+        <div className={mediaManagerClasses.howList}>
           <div>{t('howItWorksFormats', {mb: 10})}</div>
           <div>{t('howItWorksPaths', {documentId})}</div>
           <div>{t('howItWorksPublish')}</div>
@@ -135,14 +169,16 @@ export function MediaManager({
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold tracking-tight">{t('hero')}</h2>
-          <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm hover:bg-black/5">
+      <div className={mediaManagerClasses.section}>
+        <div className={mediaManagerClasses.sectionHeader}>
+          <h2 className={mediaManagerClasses.sectionTitle}>
+            {t('hero')}
+          </h2>
+          <label className={mediaManagerClasses.uploadLabel}>
             <input
               type="file"
               accept={acceptImages}
-              className="hidden"
+              className={mediaManagerClasses.hiddenInput}
               disabled={isPending}
               onChange={(e) => onUploadHero(e.target.files?.[0] ?? null)}
             />
@@ -150,17 +186,17 @@ export function MediaManager({
           </label>
         </div>
 
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-black/10 bg-zinc-100">
+        <div className={mediaManagerClasses.heroPreview}>
           {hero?.url ? (
             <Image
               src={hero.url}
               alt="Hero"
               fill
-              className="object-contain object-center"
+              className={mediaManagerClasses.previewImage}
               sizes="(max-width: 1024px) 100vw, 60vw"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-black/40">
+            <div className={mediaManagerClasses.previewFallback}>
               {t('emptyHero')}
             </div>
           )}
@@ -171,22 +207,24 @@ export function MediaManager({
             type="button"
             disabled={isPending}
             onClick={() => remove(hero.id)}
-            className="inline-flex h-9 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5 disabled:opacity-60"
+            className={mediaManagerClasses.removeHeroButton}
           >
             {t('remove')}
           </button>
         ) : null}
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold tracking-tight">{t('gallery')}</h2>
-          <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm hover:bg-black/5">
+      <div className={mediaManagerClasses.section}>
+        <div className={mediaManagerClasses.sectionHeader}>
+          <h2 className={mediaManagerClasses.sectionTitle}>
+            {t('gallery')}
+          </h2>
+          <label className={mediaManagerClasses.uploadLabel}>
             <input
               type="file"
               accept={acceptImages}
               multiple
-              className="hidden"
+              className={mediaManagerClasses.hiddenInput}
               disabled={isPending}
               onChange={(e) => onUploadGallery(e.target.files)}
             />
@@ -195,37 +233,37 @@ export function MediaManager({
         </div>
 
         {gallery.length ? (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={mediaManagerClasses.galleryGrid}>
             {gallery
               .slice()
               .sort((a, b) => a.order_index - b.order_index)
               .map((item, idx, arr) => (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-black/10 bg-white p-3 shadow-sm"
+                  className={mediaManagerClasses.galleryItem}
                 >
-                  <div className="relative aspect-square overflow-hidden rounded-xl bg-zinc-100">
+                  <div className={mediaManagerClasses.galleryThumb}>
                     {item.url ? (
                       <Image
                         src={item.url}
                         alt={`Gallery ${idx + 1}`}
                         fill
-                        className="object-contain object-center"
+                        className={mediaManagerClasses.previewImage}
                         sizes="200px"
                       />
                     ) : null}
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between gap-2">
-                    <div className="text-xs font-mono text-black/60 truncate">
+                  <div className={mediaManagerClasses.galleryMetaRow}>
+                    <div className={mediaManagerClasses.galleryIndex}>
                       {item.order_index}
                     </div>
-                    <div className="flex gap-2">
+                    <div className={mediaManagerClasses.galleryActions}>
                       <button
                         type="button"
                         disabled={isPending || idx === 0}
                         onClick={() => move(item.id, 'up')}
-                        className="inline-flex h-8 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5 disabled:opacity-50"
+                        className={mediaManagerClasses.galleryButton}
                       >
                         {t('reorderUp')}
                       </button>
@@ -233,7 +271,7 @@ export function MediaManager({
                         type="button"
                         disabled={isPending || idx === arr.length - 1}
                         onClick={() => move(item.id, 'down')}
-                        className="inline-flex h-8 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5 disabled:opacity-50"
+                        className={mediaManagerClasses.galleryButton}
                       >
                         {t('reorderDown')}
                       </button>
@@ -241,7 +279,7 @@ export function MediaManager({
                         type="button"
                         disabled={isPending}
                         onClick={() => remove(item.id)}
-                        className="inline-flex h-8 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5 disabled:opacity-50"
+                        className={mediaManagerClasses.galleryButton}
                       >
                         {t('remove')}
                       </button>
@@ -251,7 +289,7 @@ export function MediaManager({
               ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-black/10 bg-white p-8 text-center text-sm text-black/60">
+          <div className={mediaManagerClasses.galleryEmpty}>
             {t('emptyGallery')}
           </div>
         )}

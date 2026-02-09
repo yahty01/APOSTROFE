@@ -1,82 +1,146 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import {useTranslations} from 'next-intl';
 import {useVirtualizer} from '@tanstack/react-virtual';
-import {useRef} from 'react';
+import {useMemo, useRef, useState} from 'react';
 
 import type {AssetListItem} from './types';
+import {
+  assetsTableClasses,
+  getVirtualRowStyle,
+  getVirtualizerContainerStyle
+} from './AssetsTable.styles';
 
+/**
+ * Вытаскивает YYYY-MM-DD из ISO-строки, чтобы таблица выглядела компактно.
+ * Используется в `AssetsTable` для отображения `updated_at`.
+ */
+function formatIsoDate(value: string) {
+  if (!value) return '—';
+  const d = value.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
+}
+
+/**
+ * Табличный вид каталога моделей с виртуализацией строк.
+ * Используется на `/models` при `view=list`: рендерит только видимую часть списка через `@tanstack/react-virtual`.
+ */
 export function AssetsTable({items}: {items: AssetListItem[]}) {
+  const t = useTranslations('public');
   const parentRef = useRef<HTMLDivElement | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const gridCols = useMemo(
+    () => assetsTableClasses.gridCols,
+    []
+  );
+
+  // Виртуализация списка: считаем общую высоту и выдаём "виртуальные" индексы для текущего scroll.
   const rowVirtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 64,
+    estimateSize: () => 56,
     overscan: 10
   });
 
   return (
-    <div className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm">
-      <div className="grid grid-cols-[80px_1fr_180px_160px_140px] items-center gap-3 border-b border-black/10 px-4 py-3 text-xs font-medium text-black/60">
-        <div>Preview</div>
-        <div>Title</div>
-        <div>document_id</div>
-        <div>Category</div>
-        <div>Status</div>
+    <div className={assetsTableClasses.root}>
+      <div
+        className={`${assetsTableClasses.headerRow} ${gridCols}`}
+      >
+        <div className={assetsTableClasses.headerCell}>
+          {t('asset.documentId')}
+        </div>
+        <div className={assetsTableClasses.headerCell}>
+          {t('asset.timestamp')}
+        </div>
+        <div className={assetsTableClasses.headerCell}>
+          {t('asset.licenseType')}
+        </div>
+        <div className={assetsTableClasses.headerCell}>
+          {t('asset.status')}
+        </div>
+        <div className={assetsTableClasses.headerCellLast}>
+          {t('asset.description')}
+        </div>
       </div>
 
-      <div ref={parentRef} className="max-h-[70vh] overflow-auto">
+      <div ref={parentRef} className={assetsTableClasses.scrollArea}>
         <div
-          className="relative"
-          style={{height: `${rowVirtualizer.getTotalSize()}px`}}
+          className={assetsTableClasses.virtualContainer}
+          style={getVirtualizerContainerStyle(rowVirtualizer.getTotalSize())}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const item = items[virtualRow.index];
+            const isSelected = selectedId === item.id;
+
+            const timestamp = formatIsoDate(item.updated_at);
+            const license = (item.license_type || 'STANDARD').toUpperCase();
+            const status = (item.status || 'AVAILABLE').toUpperCase();
+            const description = (item.description || item.title || '').trim() || '—';
+
             return (
               <div
                 key={item.id}
-                className="absolute left-0 top-0 w-full border-b border-black/5 px-4 py-3"
-                style={{
-                  transform: `translateY(${virtualRow.start}px)`
+                className={`${assetsTableClasses.rowBase} ${
+                  isSelected ? assetsTableClasses.rowSelected : assetsTableClasses.rowDefault
+                }`}
+                style={getVirtualRowStyle(virtualRow.start)}
+                onClick={() => setSelectedId(isSelected ? null : item.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedId(isSelected ? null : item.id);
+                  }
                 }}
               >
-                <div className="grid grid-cols-[80px_1fr_180px_160px_140px] items-center gap-3">
-                  <div className="relative h-10 w-16 overflow-hidden rounded-md bg-zinc-100">
-                    {item.preview_url ? (
-                      <Image
-                        src={item.preview_url}
-                        alt={item.title}
-                        fill
-                        className="object-cover object-top"
-                        sizes="64px"
-                      />
-                    ) : null}
-                  </div>
-
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium text-black">
-                      {item.title}
-                    </div>
-                    <div className="truncate text-xs text-black/60">
-                      {item.license_type ?? '—'}
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/models/${encodeURIComponent(item.document_id)}`}
-                    className="truncate text-sm text-black/80 hover:text-black"
+                <div className={`${assetsTableClasses.rowGrid} ${gridCols}`}>
+                  <div
+                    className={`${assetsTableClasses.cellBase} ${
+                      isSelected
+                        ? assetsTableClasses.cellBorderSelected
+                        : assetsTableClasses.cellBorderDefault
+                    }`}
                   >
-                    {item.document_id}
-                  </Link>
-
-                  <div className="truncate text-sm text-black/70">
-                    {item.category ?? '—'}
+                    <Link
+                      href={`/models/${encodeURIComponent(item.document_id)}`}
+                      className={assetsTableClasses.cellLink}
+                    >
+                      {item.document_id}
+                    </Link>
                   </div>
-
-                  <div className="truncate text-sm text-black/70">
-                    {item.status ?? '—'}
+                  <div
+                    className={`${assetsTableClasses.cellBase} ${
+                      isSelected
+                        ? assetsTableClasses.cellBorderSelected
+                        : assetsTableClasses.cellBorderDefault
+                    }`}
+                  >
+                    {timestamp}
+                  </div>
+                  <div
+                    className={`${assetsTableClasses.cellBase} ${
+                      isSelected
+                        ? assetsTableClasses.cellBorderSelected
+                        : assetsTableClasses.cellBorderDefault
+                    }`}
+                  >
+                    {license}
+                  </div>
+                  <div
+                    className={`${assetsTableClasses.cellBase} ${
+                      isSelected
+                        ? assetsTableClasses.cellBorderSelected
+                        : assetsTableClasses.cellBorderDefault
+                    }`}
+                  >
+                    {status}
+                  </div>
+                  <div className={assetsTableClasses.descCell}>
+                    {description}
                   </div>
                 </div>
               </div>

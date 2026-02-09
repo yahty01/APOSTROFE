@@ -5,22 +5,42 @@ import {getTranslations} from 'next-intl/server';
 
 import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
+import {
+  buildLicenseRequestText,
+  buildRequestInfoText,
+  buildTelegramShareUrl
+} from '@/lib/telegram';
+
+import {modelDetailPageClasses} from './page.styles';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Вытаскивает YYYY-MM-DD из ISO timestamp.
+ * Используется на странице модели для компактного отображения времени обновления.
+ */
+function formatIsoDate(value: string | null | undefined) {
+  if (!value) return '—';
+  const d = value.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
+}
+
+/**
+ * Рендерит объект как список key/value (dl), если это "плоская" структура.
+ * Используется для `measurements`/`details`, чтобы красиво показать JSON без принудительного `pre`.
+ */
 function renderKeyValue(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   const entries = Object.entries(value as Record<string, unknown>);
   if (!entries.length) return null;
   return (
-    <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <dl className={modelDetailPageClasses.kvGrid}>
       {entries.map(([k, v]) => (
-        <div
-          key={k}
-          className="rounded-lg border border-black/10 bg-white px-3 py-2"
-        >
-          <dt className="text-xs font-medium text-black/60">{k}</dt>
-          <dd className="mt-1 text-sm text-black">
+        <div key={k} className={modelDetailPageClasses.kvItem}>
+          <dt className={modelDetailPageClasses.kvKey}>
+            {k}
+          </dt>
+          <dd className={modelDetailPageClasses.kvValue}>
             {typeof v === 'string' || typeof v === 'number' ? String(v) : '—'}
           </dd>
         </div>
@@ -29,6 +49,11 @@ function renderKeyValue(value: unknown) {
   );
 }
 
+/**
+ * Страница детального просмотра модели (`/models/[document_id]`).
+ * Делает server-side запросы в Supabase (ассет + медиа), строит signed URLs для изображений и CTA в Telegram.
+ * При любой ошибке (включая отсутствие записи) отдаёт 404 через `notFound()`.
+ */
 export default async function ModelDetailPage({
   params
 }: {
@@ -36,17 +61,19 @@ export default async function ModelDetailPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const {document_id} = await params;
-  const t = await getTranslations('public.detail');
+  const tPublic = await getTranslations('public');
+  const tCommon = await getTranslations('common');
 
   let heroUrl: string | null = null;
   let galleryUrls: string[] = [];
 
+  // Все обращения к Supabase оборачиваем в try/catch, чтобы в случае проблем показывать корректный 404, а не 500.
   try {
     const supabase = createSupabasePublicClient();
     const {data: asset, error: assetError} = await supabase
       .from('assets')
       .select(
-        'id,document_id,title,description,measurements,details,category,license_type,status'
+        'id,document_id,title,description,measurements,details,category,license_type,status,updated_at'
       )
       .eq('document_id', document_id)
       .maybeSingle();
@@ -78,127 +105,138 @@ export default async function ModelDetailPage({
       )
     ).filter((u): u is string => Boolean(u));
 
-    const message = encodeURIComponent(
-      `Здравствуйте! Интересует модель ${asset.document_id} — ${asset.title}`
-    );
-    const telegramHref = `https://t.me/share/url?text=${message}`;
+    const timestamp = formatIsoDate(asset.updated_at);
+    const license = (asset.license_type || 'STANDARD').toUpperCase();
+    const status = (asset.status || 'AVAILABLE').toUpperCase();
+    const description = (asset.description || asset.title || '').trim() || '—';
+
+    const acquireHref = buildTelegramShareUrl(buildLicenseRequestText(asset));
+    const requestInfoHref = buildTelegramShareUrl(buildRequestInfoText(asset));
+
+    const thumbs = galleryUrls.slice(0, 4);
 
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
+      <div className={modelDetailPageClasses.root}>
+        <div className={modelDetailPageClasses.topRow}>
           <Link
             href="/models"
-            className="text-sm text-black/70 hover:text-black"
+            className={modelDetailPageClasses.backLink}
           >
-            ← Back
+            ← {tCommon('back').toUpperCase()}
           </Link>
-          <a
-            href={telegramHref}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex h-10 items-center justify-center rounded-full bg-black px-4 text-sm font-medium text-white hover:bg-black/90"
-          >
-            {t('telegramCta')}
-          </a>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-4">
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-black/10 bg-zinc-100">
+        <div className={modelDetailPageClasses.mainGrid}>
+          <section className={modelDetailPageClasses.mediaSection}>
+            <div className={modelDetailPageClasses.hero}>
               {heroUrl ? (
                 <Image
                   src={heroUrl}
                   alt={asset.title}
                   fill
-                  className="object-contain object-center"
-                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  className={modelDetailPageClasses.heroImage}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm text-black/40">
-                  No hero image
+                <div className={modelDetailPageClasses.heroFallback}>
+                  {tPublic('detail.noHeroImage')}
                 </div>
               )}
             </div>
 
-            {galleryUrls.length ? (
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-                {galleryUrls.slice(0, 10).map((url, idx) => (
+            <div className={modelDetailPageClasses.thumbsGrid}>
+              {thumbs.length ? (
+                thumbs.map((url, idx) => (
                   <div
                     key={url}
-                    className="relative aspect-square overflow-hidden rounded-xl border border-black/10 bg-zinc-100"
+                    className={modelDetailPageClasses.thumb}
                   >
                     <Image
                       src={url}
                       alt={`${asset.title} ${idx + 1}`}
                       fill
-                      className="object-contain object-center"
-                      sizes="120px"
+                      className={modelDetailPageClasses.thumbImage}
+                      sizes="160px"
                     />
                   </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
+                ))
+              ) : (
+                <div className={modelDetailPageClasses.thumbsFallback}>
+                  {tPublic('detail.noThumbnails')}
+                </div>
+              )}
+            </div>
+          </section>
 
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                {asset.title}
-              </h1>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs text-black/60">
-                <span className="rounded-full bg-black/5 px-2 py-1">
-                  {asset.document_id}
-                </span>
-                {asset.category ? (
-                  <span className="rounded-full bg-black/5 px-2 py-1">
-                    {asset.category}
-                  </span>
-                ) : null}
-                {asset.license_type ? (
-                  <span className="rounded-full bg-black/5 px-2 py-1">
-                    {asset.license_type}
-                  </span>
-                ) : null}
-                {asset.status ? (
-                  <span className="rounded-full bg-black/5 px-2 py-1">
-                    {asset.status}
-                  </span>
-                ) : null}
+          <section className={modelDetailPageClasses.detailsSection}>
+            <h1 className={modelDetailPageClasses.title}>
+              {asset.document_id}
+            </h1>
+            <div className={modelDetailPageClasses.meta}>
+              {status} · {license} · {timestamp}
+            </div>
+
+            <div className={modelDetailPageClasses.blocks}>
+              <div className={modelDetailPageClasses.block}>
+                <div className={modelDetailPageClasses.blockTitle}>
+                  {tPublic('asset.description')}
+                </div>
+                <div className={modelDetailPageClasses.blockText}>
+                  {description}
+                </div>
               </div>
-              {asset.description ? (
-                <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-black/80">
-                  {asset.description}
-                </p>
+
+              {asset.measurements ? (
+                <div className={modelDetailPageClasses.block}>
+                  <div className={modelDetailPageClasses.blockTitle}>
+                    {tPublic('detail.measurements').toUpperCase()}
+                  </div>
+                  <div className={modelDetailPageClasses.blockBody}>
+                    {renderKeyValue(asset.measurements) ?? (
+                      <pre className={modelDetailPageClasses.blockPre}>
+                        {JSON.stringify(asset.measurements, null, 2)}
+                      </pre>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+
+              {asset.details ? (
+                <div className={modelDetailPageClasses.block}>
+                  <div className={modelDetailPageClasses.blockTitle}>
+                    {tPublic('detail.details').toUpperCase()}
+                  </div>
+                  <div className={modelDetailPageClasses.blockBody}>
+                    {renderKeyValue(asset.details) ?? (
+                      <pre className={modelDetailPageClasses.blockPre}>
+                        {JSON.stringify(asset.details, null, 2)}
+                      </pre>
+                    )}
+                  </div>
+                </div>
               ) : null}
             </div>
 
-            {asset.measurements ? (
-              <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
-                <h2 className="text-base font-semibold">{t('measurements')}</h2>
-                <div className="mt-3">
-                  {renderKeyValue(asset.measurements) ?? (
-                    <pre className="overflow-auto rounded-lg bg-zinc-50 p-3 text-xs text-black/70">
-                      {JSON.stringify(asset.measurements, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              </div>
-            ) : null}
-
-            {asset.details ? (
-              <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
-                <h2 className="text-base font-semibold">{t('details')}</h2>
-                <div className="mt-3">
-                  {renderKeyValue(asset.details) ?? (
-                    <pre className="overflow-auto rounded-lg bg-zinc-50 p-3 text-xs text-black/70">
-                      {JSON.stringify(asset.details, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              </div>
-            ) : null}
-          </div>
+            <div className={modelDetailPageClasses.actions}>
+              <a
+                href={acquireHref}
+                target="_blank"
+                rel="noreferrer"
+                className={modelDetailPageClasses.actionPrimary}
+              >
+                {tPublic('cta.requestLicense')}
+              </a>
+              <a
+                href={requestInfoHref}
+                target="_blank"
+                rel="noreferrer"
+                className={modelDetailPageClasses.actionSecondary}
+              >
+                {tPublic('cta.requestInfo')}
+              </a>
+            </div>
+          </section>
         </div>
       </div>
     );

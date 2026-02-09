@@ -3,9 +3,13 @@
     "name": "Апостроф"
   },
   "nav": {
-    "models": "Каталог",
+    "models": "models",
+    "creators": "creators",
+    "generators": "generators",
+    "influencers": "influencers",
     "admin": "Админка",
-    "marquee": "Бегущая строка"
+    "marquee": "Бегущая строка",
+    "public": "Обратно на сайт"
   },
   "common": {
     "loading": "Загрузка…",
@@ -19,13 +23,36 @@
     "yes": "Да",
     "no": "Нет",
     "enabled": "Включено",
-    "disabled": "Выключено"
+    "disabled": "Выключено",
+    "actions": "ДЕЙСТВИЯ",
+    "systemOnline": "СИСТЕМА: В СЕТИ",
+    "assetsCount": "АКТИВЫ: {count}"
   },
   "public": {
-    "catalogTitle": "Каталог моделей",
+    "catalogTitle": "КАТАЛОГ АКТИВОВ",
+    "catalogSubtitle": "РЕЕСТР ЛИЦЕНЗИРОВАННЫХ ЦИФРОВЫХ ИДЕНТИЧНОСТЕЙ.",
+    "registry": {
+      "section": "РАЗДЕЛ РЕЕСТРА — {status}."
+    },
+    "cta": {
+      "requestLicense": "[ ЗАПРОСИТЬ ЛИЦЕНЗИЮ ]",
+      "requestInfo": "[ ЗАПРОСИТЬ ИНФОРМАЦИЮ ]"
+    },
+    "comingSoon": "СКОРО",
     "view": {
       "cards": "Карточки",
-      "list": "Таблица"
+      "list": "Таблица",
+      "label": "ВИД",
+      "switch": "СМЕНИТЬ"
+    },
+    "asset": {
+      "noImage": "НЕТ ИЗОБРАЖЕНИЯ",
+      "documentId": "DOCUMENT_ID",
+      "timestamp": "ДАТА",
+      "licenseType": "ТИП ЛИЦЕНЗИИ",
+      "license": "ЛИЦЕНЗИЯ",
+      "status": "СТАТУС",
+      "description": "ОПИСАНИЕ"
     },
     "category": "Категория",
     "noResults": "Модели не найдены",
@@ -38,12 +65,33 @@
     "detail": {
       "measurements": "Размеры",
       "details": "Детали",
-      "telegramCta": "Спросить в Telegram"
+      "telegramCta": "Спросить в Telegram",
+      "noHeroImage": "НЕТ ОСНОВНОГО ИЗОБРАЖЕНИЯ",
+      "noThumbnails": "НЕТ МИНИАТЮР"
     }
+  },
+  "footer": {
+    "legalTitle": "ЮРИДИЧЕСКАЯ ИНФОРМАЦИЯ",
+    "legalCompany": "APOSTROPHE DIGITAL ASSETS LLC",
+    "legalRegNo": "РЕГ. №: 2024-DA-01420",
+    "legalJurisdiction": "ЮРИСДИКЦИЯ: МЕЖДУНАРОДНАЯ",
+    "contactsTitle": "КОНТАКТЫ",
+    "contactsEmail": "ПОЧТА: LICENSE@APOSTROPHE.DIGITAL",
+    "contactsPhone": "ТЕЛЕФОН: +1 (555) 000-1420",
+    "contactsSupport": "ПОДДЕРЖКА: ДОСТУПНО 24/7",
+    "docsTitle": "ДОКУМЕНТАЦИЯ",
+    "docsTerms": "УСЛОВИЯ ИСПОЛЬЗОВАНИЯ",
+    "docsPrivacy": "ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ",
+    "docsLicensing": "ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ",
+    "rights": "© 2024 APOSTROPHE. ВСЕ ПРАВА ЗАЩИЩЕНЫ.",
+    "systemVersion": "ВЕРСИЯ СИСТЕМЫ: {version} | СБОРКА: {build}",
+    "poweredBy": "СДЕЛАНО НА READDY |",
+    "createdBy": "САЙТ СОЗДАЛ ЕГОР САВЕЛЬЕВ"
   },
   "admin": {
     "login": {
       "title": "Вход в админку",
+      "subtitle": "ИСПОЛЬЗУЙТЕ EMAIL/ПАРОЛЬ ИЗ SUPABASE AUTH.",
       "email": "Email",
       "password": "Пароль",
       "submit": "Войти",
@@ -60,6 +108,7 @@
       "licenseType": "Лицензия",
       "status": "Статус",
       "published": "Публикация",
+      "publishedYes": "ОПУБЛИКОВАНО",
       "updatedAt": "Обновлено",
       "publish": "Опубликовать",
       "unpublish": "Снять с публикации",
@@ -80,7 +129,13 @@
       "measurements": "Размеры (JSON)",
       "measurementsHelp": "JSON‑объект (ключ → значение). Оставь пустым, если не нужно",
       "details": "Детали (JSON)",
-      "detailsHelp": "JSON‑объект характеристик (ключ → значение). Оставь пустым, если не нужно"
+      "detailsHelp": "JSON‑объект характеристик (ключ → значение). Оставь пустым, если не нужно",
+      "errors": {
+        "documentIdRequired": "Введите document_id",
+        "documentIdInvalid": "Допустимы только латинские буквы, цифры, _ и -",
+        "titleRequired": "Введите название",
+        "invalidJson": "Неверный JSON"
+      }
     },
     "media": {
       "title": "Медиа",
@@ -114,9 +169,11 @@
       "textRu": "Текст (RU)",
       "textEn": "Текст (EN)",
       "speed": "Скорость",
+      "secondsPerLoop": "СЕКУНД НА ЦИКЛ",
       "direction": "Направление",
       "directionLeft": "Влево",
-      "directionRight": "Вправо"
+      "directionRight": "Вправо",
+      "missingSettings": "Настройки не найдены"
     },
     "toast": {
       "saved": "Сохранено",

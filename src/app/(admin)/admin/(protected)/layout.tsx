@@ -1,20 +1,39 @@
-import Link from 'next/link';
 import {redirect} from 'next/navigation';
-import {getTranslations} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
-import {signOutAction} from '@/app/(admin)/admin/actions';
+import {Marquee, type MarqueeSettings} from '@/components/Marquee';
+import {AppShell} from '@/components/shell/AppShell';
+import {AdminHeader} from '@/components/shell/AdminHeader';
+import {Footer} from '@/components/shell/Footer';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
+
+import {adminProtectedLayoutClasses} from './layout.styles';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Fallback-настройки marquee для админских layout’ов на случай ошибок Supabase.
+ */
+const DEFAULT_MARQUEE: MarqueeSettings = {
+  enabled: true,
+  text_ru: '',
+  text_en: '',
+  speed: null,
+  direction: null
+};
+
+/**
+ * Layout для защищённой части админки (`/admin/...` кроме `/admin/login`).
+ * Проверяет авторизацию и роль пользователя, затем оборачивает контент в `AppShell`.
+ */
 export default async function AdminProtectedLayout({
   children
 }: {
   children: React.ReactNode;
   params: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const locale = await getLocale();
   const tAdmin = await getTranslations('admin');
-  const tNav = await getTranslations('nav');
 
   const supabase = await createSupabaseServerClientReadOnly();
   const {
@@ -23,6 +42,7 @@ export default async function AdminProtectedLayout({
 
   if (!user) redirect('/admin/login');
 
+  // Роль хранится в `profiles.role` и используется для разграничения доступа к админским функциям.
   const {data: profile} = await supabase
     .from('profiles')
     .select('role')
@@ -32,61 +52,47 @@ export default async function AdminProtectedLayout({
   const role = profile?.role;
   const isAllowed = role === 'admin' || role === 'editor';
 
+  let marquee: MarqueeSettings = DEFAULT_MARQUEE;
+  try {
+    const {data} = await supabase
+      .from('settings_marquee')
+      .select('enabled,text_ru,text_en,speed,direction')
+      .eq('id', 1)
+      .maybeSingle();
+    if (data) marquee = data;
+  } catch {
+    // ignore
+  }
+
   if (!isAllowed) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-20">
-        <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
-          <h1 className="text-xl font-semibold tracking-tight">
-            {tAdmin('accessDenied')}
-          </h1>
-          <p className="mt-2 text-sm text-black/70">
-            {user.email ?? user.id}
-          </p>
-          <form action={signOutAction} className="mt-6">
-            <button
-              type="submit"
-              className="inline-flex h-10 items-center justify-center rounded-full bg-black px-4 text-sm font-medium text-white hover:bg-black/90"
-            >
-              {tAdmin('signOut')}
-            </button>
-          </form>
+      <AppShell
+        header={<AdminHeader />}
+        ticker={<Marquee initial={marquee} locale={locale} />}
+        footer={<Footer />}
+      >
+        {/* Отдельный UI для "нет доступа", чтобы не показывать админские страницы без прав. */}
+        <div className={adminProtectedLayoutClasses.deniedWrap}>
+          <div className={adminProtectedLayoutClasses.deniedPanel}>
+            <h1 className={adminProtectedLayoutClasses.deniedTitle}>
+              {tAdmin('accessDenied')}
+            </h1>
+            <p className={adminProtectedLayoutClasses.deniedSubtitle}>
+              {user.email ?? user.id}
+            </p>
+          </div>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="min-h-dvh bg-zinc-50 text-zinc-950">
-      <header className="sticky top-0 z-20 border-b border-black/10 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <nav className="flex items-center gap-3 text-sm">
-            <Link href="/models" className="text-black/70 hover:text-black">
-              ← {tNav('models')}
-            </Link>
-            <span className="text-black/20">/</span>
-            <Link href="/admin/models" className="text-black/70 hover:text-black">
-              {tNav('admin')}
-            </Link>
-            <Link
-              href="/admin/settings/marquee"
-              className="text-black/70 hover:text-black"
-            >
-              {tNav('marquee')}
-            </Link>
-          </nav>
-          <form action={signOutAction}>
-            <button
-              type="submit"
-              className="inline-flex h-9 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-sm text-black/80 hover:bg-black/5"
-            >
-              {tAdmin('signOut')}
-            </button>
-          </form>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-    </div>
+    <AppShell
+      header={<AdminHeader />}
+      ticker={<Marquee initial={marquee} locale={locale} />}
+      footer={<Footer />}
+    >
+      {children}
+    </AppShell>
   );
 }
-

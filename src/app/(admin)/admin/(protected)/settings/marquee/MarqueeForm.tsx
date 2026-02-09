@@ -8,8 +8,15 @@ import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
 import {z} from 'zod';
 
-import {saveMarqueeSettingsAction} from './actions';
+import {useReportPending} from '@/lib/pending';
 
+import {saveMarqueeSettingsAction} from './actions';
+import {marqueeFormClasses} from './MarqueeForm.styles';
+
+/**
+ * Схема client-side валидации формы.
+ * Используется `react-hook-form` + `zodResolver`, чтобы ловить ошибки до отправки server action.
+ */
 const schema = z.object({
   enabled: z.boolean(),
   text_ru: z.string().optional(),
@@ -20,6 +27,10 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+/**
+ * Клиентская форма редактирования marquee.
+ * Используется на `/admin/settings/marquee` и сохраняет настройки через server action.
+ */
 export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
   const t = useTranslations('admin.marquee');
   const tCommon = useTranslations('common');
@@ -27,12 +38,16 @@ export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  useReportPending(isPending);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: initialValues
   });
 
+  /**
+   * Сохранение настроек: выполняем server action, показываем toast и обновляем данные на странице.
+   */
   function onSubmit(values: FormValues) {
     startTransition(async () => {
       const res = await saveMarqueeSettingsAction({
@@ -48,42 +63,42 @@ export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
   }
 
   return (
-    <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-      <label className="flex items-center gap-2 text-sm text-black/80">
+    <form className={marqueeFormClasses.form} onSubmit={form.handleSubmit(onSubmit)}>
+      <label className={marqueeFormClasses.checkboxLabel}>
         <input
           type="checkbox"
           {...form.register('enabled')}
-          className="h-4 w-4 rounded border-black/20"
+          className={marqueeFormClasses.checkboxInput}
         />
         {tCommon('enabled')}
       </label>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className={marqueeFormClasses.textGrid}>
         <div>
-          <label className="block text-sm font-medium text-black/80">
+          <label className={marqueeFormClasses.label}>
             {t('textRu')}
           </label>
           <textarea
             {...form.register('text_ru')}
             rows={6}
-            className="mt-1 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+            className={marqueeFormClasses.textarea}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-black/80">
+          <label className={marqueeFormClasses.label}>
             {t('textEn')}
           </label>
           <textarea
             {...form.register('text_en')}
             rows={6}
-            className="mt-1 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+            className={marqueeFormClasses.textarea}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className={marqueeFormClasses.controlsGrid}>
         <div>
-          <label className="block text-sm font-medium text-black/80">
+          <label className={marqueeFormClasses.label}>
             {t('speed')}
           </label>
           <input
@@ -97,19 +112,21 @@ export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
                 return Number.isFinite(n) ? n : null;
               }
             })}
-            className="mt-1 h-11 w-full rounded-lg border border-black/10 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+            className={marqueeFormClasses.speedInput}
             placeholder="20"
           />
-          <p className="mt-1 text-xs text-black/50">Seconds per loop</p>
+          <p className={marqueeFormClasses.help}>
+            {t('secondsPerLoop')}
+          </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-black/80">
+          <label className={marqueeFormClasses.label}>
             {t('direction')}
           </label>
           <select
             {...form.register('direction')}
-            className="mt-1 h-11 w-full rounded-lg border border-black/10 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+            className={marqueeFormClasses.select}
           >
             <option value="left">{t('directionLeft')}</option>
             <option value="right">{t('directionRight')}</option>
@@ -120,7 +137,7 @@ export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex h-11 items-center justify-center rounded-full bg-black px-5 text-sm font-medium text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className={marqueeFormClasses.submit}
       >
         {isPending ? tCommon('saving') : tCommon('save')}
       </button>

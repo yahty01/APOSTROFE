@@ -1,18 +1,25 @@
 import Link from 'next/link';
 import {getTranslations} from 'next-intl/server';
 
+import {PendingFormStatusReporter} from '@/components/pending/PendingFormStatusReporter';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
 
 import {setPublishAction} from './actions';
 import {DeleteAssetButton} from './DeleteAssetButton';
+import {adminModelsPageClasses} from './page.styles';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Список ассетов в админке (`/admin/models`).
+ * Загружает данные на сервере и рендерит таблицу с действиями publish/unpublish, edit и delete.
+ */
 export default async function AdminModelsPage({}: {
   params: Promise<Record<string, string | string[] | undefined>>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const t = await getTranslations('admin.models');
+  const tCommon = await getTranslations('common');
 
   const supabase = await createSupabaseServerClientReadOnly();
   const {data: assets, error} = await supabase
@@ -22,82 +29,105 @@ export default async function AdminModelsPage({}: {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+      <div className={adminModelsPageClasses.error}>
         {error.message}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+    <div className={adminModelsPageClasses.root}>
+      <div className={adminModelsPageClasses.header}>
+        <h1 className={adminModelsPageClasses.title}>
+          {t('title')}
+        </h1>
         <Link
           href="/admin/models/new"
-          className="inline-flex h-10 items-center justify-center rounded-full bg-black px-4 text-sm font-medium text-white hover:bg-black/90"
+          className={adminModelsPageClasses.createLink}
         >
           {t('create')}
         </Link>
       </div>
 
-      <div className="overflow-x-auto overflow-y-hidden rounded-xl border border-black/10 bg-white shadow-sm">
-        <div className="grid grid-cols-[160px_1fr_160px_120px_120px_320px] gap-3 border-b border-black/10 px-4 py-3 text-xs font-medium text-black/60">
-          <div>{t('documentId')}</div>
-          <div>{t('titleField')}</div>
-          <div>{t('category')}</div>
-          <div>{t('published')}</div>
-          <div>{t('status')}</div>
-          <div className="text-right">Actions</div>
-        </div>
-
-        {(assets ?? []).map((a) => (
-          <div
-            key={a.id}
-            className="grid grid-cols-[160px_1fr_160px_120px_120px_320px] items-center gap-3 border-b border-black/5 px-4 py-3 text-sm"
-          >
-            <div className="truncate font-mono text-xs text-black/70">
-              {a.document_id}
+      <div className={adminModelsPageClasses.tableWrap}>
+        <div className={adminModelsPageClasses.tableInner}>
+          <div className={adminModelsPageClasses.tableHeaderRow}>
+            <div className={adminModelsPageClasses.headerCell}>
+              {t('documentId')}
             </div>
+            <div className={adminModelsPageClasses.headerCell}>
+              {t('titleField')}
+            </div>
+            <div className={adminModelsPageClasses.headerCell}>
+              {t('category')}
+            </div>
+            <div className={adminModelsPageClasses.headerCell}>
+              {t('published')}
+            </div>
+            <div className={adminModelsPageClasses.headerCell}>
+              {t('status')}
+            </div>
+            <div className={adminModelsPageClasses.headerCellLast}>
+              {tCommon('actions')}
+            </div>
+          </div>
 
-            <Link
-              href={`/admin/models/${a.id}`}
-              className="min-w-0 truncate font-medium text-black hover:underline"
+          {(assets ?? []).map((a) => (
+            <div
+              key={a.id}
+              className={adminModelsPageClasses.row}
             >
-              {a.title}
-            </Link>
-
-            <div className="truncate text-black/70">{a.category ?? '—'}</div>
-            <div className="text-black/70">{a.is_published ? '✅' : '—'}</div>
-            <div className="truncate text-black/70">{a.status ?? '—'}</div>
-
-            <div className="flex justify-end gap-2">
-              <form action={setPublishAction}>
-                <input type="hidden" name="asset_id" value={a.id} />
-                <input type="hidden" name="document_id" value={a.document_id} />
-                <input
-                  type="hidden"
-                  name="next_published"
-                  value={a.is_published ? 'false' : 'true'}
-                />
-                <button
-                  type="submit"
-                  className="inline-flex h-9 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-xs hover:bg-black/5"
-                >
-                  {a.is_published ? t('unpublish') : t('publish')}
-                </button>
-              </form>
-
-              <DeleteAssetButton assetId={a.id} title={a.title} />
+              <div className={adminModelsPageClasses.cellMuted}>
+                {a.document_id}
+              </div>
 
               <Link
                 href={`/admin/models/${a.id}`}
-                className="inline-flex h-9 items-center justify-center rounded-full bg-black px-3 text-xs text-white hover:bg-black/90"
+                className={adminModelsPageClasses.cellTitleLink}
               >
-                Edit
+                {a.title}
               </Link>
+
+              <div className={adminModelsPageClasses.cellMuted}>
+                {a.category ?? '—'}
+              </div>
+              <div className={adminModelsPageClasses.cellMuted}>
+                {a.is_published ? t('publishedYes') : '—'}
+              </div>
+              <div className={adminModelsPageClasses.cellMuted}>
+                {a.status ?? '—'}
+              </div>
+
+              <div className={adminModelsPageClasses.actions}>
+                <form action={setPublishAction}>
+                  <PendingFormStatusReporter />
+                  <input type="hidden" name="asset_id" value={a.id} />
+                  <input type="hidden" name="document_id" value={a.document_id} />
+                  <input
+                    type="hidden"
+                    name="next_published"
+                    value={a.is_published ? 'false' : 'true'}
+                  />
+                  <button
+                    type="submit"
+                    className={adminModelsPageClasses.actionButton}
+                  >
+                    {a.is_published ? t('unpublish') : t('publish')}
+                  </button>
+                </form>
+
+                <DeleteAssetButton assetId={a.id} title={a.title} />
+
+                <Link
+                  href={`/admin/models/${a.id}`}
+                  className={adminModelsPageClasses.actionEditLink}
+                >
+                  {tCommon('edit').toUpperCase()}
+                </Link>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
