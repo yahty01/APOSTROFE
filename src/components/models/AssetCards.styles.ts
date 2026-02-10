@@ -3,6 +3,7 @@
  * Стили вынесены рядом с компонентом, чтобы в JSX оставалась только структура карточек.
  */
 export const assetCardsClasses = {
+  root: '',
   grid: "grid grid-cols-1 gap-px bg-[var(--color-paper)] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
   card: "group flex flex-col bg-[var(--color-surface)]",
   mediaLink: "relative aspect-[4/5] w-full bg-[var(--color-paper)]",
