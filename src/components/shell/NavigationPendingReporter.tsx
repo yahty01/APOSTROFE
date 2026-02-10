@@ -1,9 +1,10 @@
 'use client';
 
 import {useRouter} from 'next/navigation';
-import {useEffect, useTransition} from 'react';
+import {useEffect, useRef, useTransition} from 'react';
 
 import {useReportPending} from '@/lib/pending';
+import {clearRouteIntent, setRouteIntent} from '@/lib/routeIntent';
 
 function isPlainLeftClick(event: MouseEvent) {
   return (
@@ -30,6 +31,12 @@ export function NavigationPendingReporter() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   useReportPending(isPending);
+  const wasPendingRef = useRef(false);
+
+  useEffect(() => {
+    if (wasPendingRef.current && !isPending) clearRouteIntent();
+    wasPendingRef.current = isPending;
+  }, [isPending]);
 
   useEffect(() => {
     function onClick(event: MouseEvent) {
@@ -65,6 +72,7 @@ export function NavigationPendingReporter() {
       if (nextKey === currentKey) return;
 
       event.preventDefault();
+      setRouteIntent(nextKey);
       startTransition(() => {
         router.push(`${url.pathname}${url.search}${url.hash}`);
       });

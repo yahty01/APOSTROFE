@@ -1,5 +1,5 @@
-import {RouteLoadingBar} from '@/components/shell/RouteLoadingBar';
+import {RouteContentSkeleton} from '@/components/shell/RouteContentSkeleton';
 
 export default function Loading() {
-  return <RouteLoadingBar />;
+  return <RouteContentSkeleton />;
 }
