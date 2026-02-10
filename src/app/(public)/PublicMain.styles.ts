@@ -3,6 +3,5 @@
  * Держим здесь, чтобы `layout.tsx` оставался максимально декларативным.
  */
 export const publicMainClasses = {
-  root: 'space-y-12'
+  root: 'space-y-8 md:space-y-12'
 } as const;
-

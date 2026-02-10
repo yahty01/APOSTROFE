@@ -13,9 +13,9 @@ export const assetCardsClasses = {
   body: "mt-px flex flex-1 flex-col gap-px bg-[var(--color-line)]",
   table:
     "flex-1 divide-y divide-[color:var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] group-hover:divide-white/30 group-hover:bg-black group-hover:text-white",
-  row: "flex items-start justify-between gap-4 px-3 py-2 font-doc text-[10px] uppercase tracking-[0.18em]",
+  row: "flex min-w-0 items-start justify-between gap-4 px-3 py-2 font-doc text-[10px] uppercase tracking-[0.18em]",
   rowKey: "text-[var(--color-muted)] group-hover:text-white/70",
-  rowValue: "text-right",
+  rowValue: "min-w-0 text-right truncate",
   description: "px-3 py-2",
   descriptionLabel:
     "font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)] group-hover:text-white/70",

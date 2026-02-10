@@ -11,14 +11,16 @@
  */
 export const modelsPageClasses = {
   /** Вся страница: задаёт базовые отступы между секциями. */
-  root: "space-y-12",
+  root: "space-y-8 md:space-y-12",
 
   // Верхняя зона (stats + фильтр категории)
   toolbarGrid:
     "grid grid-cols-1 gap-px bg-[var(--color-line)] md:grid-cols-[1fr_auto]",
   /** Левая панель в верхней зоне: "Всего / Страница". */
   statsPanel:
-    "bg-[var(--color-surface)] p-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]",
+    "flex flex-col gap-4 bg-[var(--color-surface)] p-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)] md:flex-row md:items-center md:justify-between",
+  /** Контейнер с текстовой статистикой внутри `statsPanel`. */
+  statsInfo: "flex flex-col",
   /** Вторая строка внутри `statsPanel` (например "Page 1/3"). */
   statsPageRow: "mt-1",
   /** Правая панель в верхней зоне: содержит `ModelsToolbar` (select категории). */
@@ -28,7 +30,7 @@ export const modelsPageClasses = {
   errorPanel:
     "ui-panel p-4 font-doc text-[11px] uppercase tracking-[0.16em] text-red-800",
   emptyPanel:
-    "ui-panel p-10 text-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]",
+    "ui-panel p-6 text-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)] md:p-10",
 
   // Пагинация
   paginationWrap:
@@ -50,7 +52,8 @@ export const modelsPageClasses = {
     "hidden h-10 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] md:flex",
 
   // CTA
-  ctaWrap: "py-16",
+  ctaWrap: "py-10 md:py-16",
   ctaInner: "flex justify-center",
-  ctaButton: "ui-btn-primary h-14 px-10 text-[16px]",
+  ctaButton:
+    "ui-btn-primary h-14 w-full max-w-md px-6 text-[16px] md:w-auto md:px-10",
 } as const;

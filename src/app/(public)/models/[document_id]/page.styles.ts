@@ -13,7 +13,7 @@ export const modelDetailPageClasses = {
   topRow: 'flex items-center justify-between gap-4',
   backLink:
     'font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)] hover:text-[var(--color-ink)]',
-  contentWrap: '-mx-6 space-y-0',
+  contentWrap: '-mx-4 md:-mx-6 space-y-0',
   mainGrid: 'grid grid-cols-1 gap-px bg-[var(--color-line)] lg:grid-cols-2',
   mediaSection: 'bg-[var(--color-surface)] p-0',
   hero: 'relative aspect-[4/5] w-full bg-[var(--color-paper)]',
@@ -21,17 +21,18 @@ export const modelDetailPageClasses = {
   heroFallback:
     'flex h-full w-full items-center justify-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]',
   gallerySection:
-    'border-t border-[color:var(--color-line)] bg-[var(--color-paper)] px-6 py-8',
+    'border-t border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 py-6 md:px-6 md:py-8',
   galleryGrid:
     'mx-auto grid max-w-[1800px] grid-cols-1 items-start gap-4 sm:grid-cols-2',
   galleryItem: 'relative w-full overflow-hidden bg-[var(--color-paper)]',
   galleryItemVertical: 'aspect-[3/4]',
   galleryItemHorizontal: 'aspect-[4/3]',
-  galleryItemSolo: 'sm:col-span-2',
+  galleryItemSolo:
+    'sm:col-span-2 sm:w-full sm:max-w-[1400px] sm:justify-self-center',
   galleryImage: 'object-contain object-top',
   galleryFallback:
     'bg-[var(--color-paper)] p-6 text-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]',
-  detailsSection: 'bg-[var(--color-surface)] p-6',
+  detailsSection: 'bg-[var(--color-surface)] p-4 md:p-6',
   title:
     'font-condensed text-[clamp(32px,4vw,52px)] leading-[0.9] uppercase tracking-[0.14em]',
   meta:

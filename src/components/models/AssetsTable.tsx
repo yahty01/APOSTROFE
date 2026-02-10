@@ -46,106 +46,156 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
 
   return (
     <div className={assetsTableClasses.root}>
-      <div
-        className={`${assetsTableClasses.headerRow} ${gridCols}`}
-      >
-        <div className={assetsTableClasses.headerCell}>
-          {t('asset.documentId')}
-        </div>
-        <div className={assetsTableClasses.headerCell}>
-          {t('asset.timestamp')}
-        </div>
-        <div className={assetsTableClasses.headerCell}>
-          {t('asset.licenseType')}
-        </div>
-        <div className={assetsTableClasses.headerCell}>
-          {t('asset.status')}
-        </div>
-        <div className={assetsTableClasses.headerCellLast}>
-          {t('asset.description')}
-        </div>
-      </div>
+      <div className={assetsTableClasses.mobileList}>
+        {items.map((item) => {
+          const timestamp = formatIsoDate(item.updated_at);
+          const license = (item.license_type || 'STANDARD').toUpperCase();
+          const status = (item.status || 'AVAILABLE').toUpperCase();
+          const description = (item.description || item.title || '').trim() || '—';
 
-      <div ref={parentRef} className={assetsTableClasses.scrollArea}>
-        <div
-          className={assetsTableClasses.virtualContainer}
-          style={getVirtualizerContainerStyle(rowVirtualizer.getTotalSize())}
-        >
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const item = items[virtualRow.index];
-            const isSelected = selectedId === item.id;
+          return (
+            <div key={item.id} className={assetsTableClasses.mobileItem}>
+              <div className={assetsTableClasses.mobileTopRow}>
+                <Link
+                  href={`/models/${encodeURIComponent(item.document_id)}`}
+                  className={assetsTableClasses.mobileDocLink}
+                >
+                  {item.document_id}
+                </Link>
+                <div className={assetsTableClasses.mobileTimestamp}>
+                  {timestamp}
+                </div>
+              </div>
 
-            const timestamp = formatIsoDate(item.updated_at);
-            const license = (item.license_type || 'STANDARD').toUpperCase();
-            const status = (item.status || 'AVAILABLE').toUpperCase();
-            const description = (item.description || item.title || '').trim() || '—';
-
-            return (
-              <div
-                key={item.id}
-                className={`${assetsTableClasses.rowBase} ${
-                  isSelected ? assetsTableClasses.rowSelected : assetsTableClasses.rowDefault
-                }`}
-                style={getVirtualRowStyle(virtualRow.start)}
-                onClick={() => setSelectedId(isSelected ? null : item.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setSelectedId(isSelected ? null : item.id);
-                  }
-                }}
-              >
-                <div className={`${assetsTableClasses.rowGrid} ${gridCols}`}>
-                  <div
-                    className={`${assetsTableClasses.cellBase} ${
-                      isSelected
-                        ? assetsTableClasses.cellBorderSelected
-                        : assetsTableClasses.cellBorderDefault
-                    }`}
-                  >
-                    <Link
-                      href={`/models/${encodeURIComponent(item.document_id)}`}
-                      className={assetsTableClasses.cellLink}
-                    >
-                      {item.document_id}
-                    </Link>
+              <div className={assetsTableClasses.mobileMetaGrid}>
+                <div>
+                  <div className={assetsTableClasses.mobileMetaLabel}>
+                    {t('asset.licenseType')}
                   </div>
-                  <div
-                    className={`${assetsTableClasses.cellBase} ${
-                      isSelected
-                        ? assetsTableClasses.cellBorderSelected
-                        : assetsTableClasses.cellBorderDefault
-                    }`}
-                  >
-                    {timestamp}
-                  </div>
-                  <div
-                    className={`${assetsTableClasses.cellBase} ${
-                      isSelected
-                        ? assetsTableClasses.cellBorderSelected
-                        : assetsTableClasses.cellBorderDefault
-                    }`}
-                  >
+                  <div className={assetsTableClasses.mobileMetaValue}>
                     {license}
                   </div>
-                  <div
-                    className={`${assetsTableClasses.cellBase} ${
-                      isSelected
-                        ? assetsTableClasses.cellBorderSelected
-                        : assetsTableClasses.cellBorderDefault
-                    }`}
-                  >
-                    {status}
+                </div>
+                <div>
+                  <div className={assetsTableClasses.mobileMetaLabel}>
+                    {t('asset.status')}
                   </div>
-                  <div className={assetsTableClasses.descCell}>
-                    {description}
+                  <div className={assetsTableClasses.mobileMetaValue}>
+                    {status}
                   </div>
                 </div>
               </div>
-            );
-          })}
+
+              <div className={assetsTableClasses.mobileDesc}>
+                {description}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="hidden md:block">
+        <div
+          className={`${assetsTableClasses.headerRow} ${gridCols}`}
+        >
+          <div className={assetsTableClasses.headerCell}>
+            {t('asset.documentId')}
+          </div>
+          <div className={assetsTableClasses.headerCell}>
+            {t('asset.timestamp')}
+          </div>
+          <div className={assetsTableClasses.headerCell}>
+            {t('asset.licenseType')}
+          </div>
+          <div className={assetsTableClasses.headerCell}>
+            {t('asset.status')}
+          </div>
+          <div className={assetsTableClasses.headerCellLast}>
+            {t('asset.description')}
+          </div>
+        </div>
+
+        <div ref={parentRef} className={assetsTableClasses.scrollArea}>
+          <div
+            className={assetsTableClasses.virtualContainer}
+            style={getVirtualizerContainerStyle(rowVirtualizer.getTotalSize())}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const item = items[virtualRow.index];
+              const isSelected = selectedId === item.id;
+
+              const timestamp = formatIsoDate(item.updated_at);
+              const license = (item.license_type || 'STANDARD').toUpperCase();
+              const status = (item.status || 'AVAILABLE').toUpperCase();
+              const description = (item.description || item.title || '').trim() || '—';
+
+              return (
+                <div
+                  key={item.id}
+                  className={`${assetsTableClasses.rowBase} ${
+                    isSelected ? assetsTableClasses.rowSelected : assetsTableClasses.rowDefault
+                  }`}
+                  style={getVirtualRowStyle(virtualRow.start)}
+                  onClick={() => setSelectedId(isSelected ? null : item.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedId(isSelected ? null : item.id);
+                    }
+                  }}
+                >
+                  <div className={`${assetsTableClasses.rowGrid} ${gridCols}`}>
+                    <div
+                      className={`${assetsTableClasses.cellBase} ${
+                        isSelected
+                          ? assetsTableClasses.cellBorderSelected
+                          : assetsTableClasses.cellBorderDefault
+                      }`}
+                    >
+                      <Link
+                        href={`/models/${encodeURIComponent(item.document_id)}`}
+                        className={assetsTableClasses.cellLink}
+                      >
+                        {item.document_id}
+                      </Link>
+                    </div>
+                    <div
+                      className={`${assetsTableClasses.cellBase} ${
+                        isSelected
+                          ? assetsTableClasses.cellBorderSelected
+                          : assetsTableClasses.cellBorderDefault
+                      }`}
+                    >
+                      {timestamp}
+                    </div>
+                    <div
+                      className={`${assetsTableClasses.cellBase} ${
+                        isSelected
+                          ? assetsTableClasses.cellBorderSelected
+                          : assetsTableClasses.cellBorderDefault
+                      }`}
+                    >
+                      {license}
+                    </div>
+                    <div
+                      className={`${assetsTableClasses.cellBase} ${
+                        isSelected
+                          ? assetsTableClasses.cellBorderSelected
+                          : assetsTableClasses.cellBorderDefault
+                      }`}
+                    >
+                      {status}
+                    </div>
+                    <div className={assetsTableClasses.descCell}>
+                      {description}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
