@@ -8,7 +8,6 @@ import { signOutAction } from "@/app/(admin)/admin/actions";
 import { PendingFormStatusReporter } from "@/components/pending/PendingFormStatusReporter";
 
 import { LanguageDropdown } from "./LanguageDropdown";
-import { SystemStatus } from "./SystemStatus";
 import { adminHeaderClasses } from "./AdminHeader.styles";
 
 /**

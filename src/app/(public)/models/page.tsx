@@ -1,18 +1,21 @@
-import Link from 'next/link';
-import {cookies} from 'next/headers';
-import {getTranslations} from 'next-intl/server';
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { getTranslations } from "next-intl/server";
 
-import {AssetCards} from '@/components/models/AssetCards';
-import {AssetsTable} from '@/components/models/AssetsTable';
-import {ModelsToolbar} from '@/components/models/ModelsToolbar';
-import type {AssetListItem} from '@/components/models/types';
-import {createSignedImageUrl} from '@/lib/supabase/images';
-import {createSupabasePublicClient} from '@/lib/supabase/public';
-import {buildGenericLicenseRequestText, buildTelegramShareUrl} from '@/lib/telegram';
+import { AssetCards } from "@/components/models/AssetCards";
+import { AssetsTable } from "@/components/models/AssetsTable";
+import { ModelsToolbar } from "@/components/models/ModelsToolbar";
+import type { AssetListItem } from "@/components/models/types";
+import { createSignedImageUrl } from "@/lib/supabase/images";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
+import {
+  buildGenericLicenseRequestText,
+  buildTelegramShareUrl,
+} from "@/lib/telegram";
 
-import {modelsPageClasses} from './page.styles';
+import { modelsPageClasses } from "./page.styles";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * Размер страницы каталога моделей (публичная часть).
@@ -24,9 +27,7 @@ const PAGE_SIZE = 12;
  * Нормализует значение query-параметра Next.js (string | string[]) к одиночной строке.
  * Используется на сервере для `searchParams`.
  */
-function firstString(
-  value: string | string[] | undefined
-): string | undefined {
+function firstString(value: string | string[] | undefined): string | undefined {
   if (Array.isArray(value)) return value[0];
   return value;
 }
@@ -36,7 +37,7 @@ function firstString(
  * Используется для `page`, чтобы не падать на мусорных query-параметрах.
  */
 function asInt(value: string | undefined, fallback: number) {
-  const parsed = Number.parseInt(value ?? '', 10);
+  const parsed = Number.parseInt(value ?? "", 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
@@ -46,7 +47,7 @@ function asInt(value: string | undefined, fallback: number) {
  */
 function buildSearchParams(
   current: Record<string, string | string[] | undefined>,
-  patch: Record<string, string | null>
+  patch: Record<string, string | null>,
 ) {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(current)) {
@@ -69,31 +70,31 @@ function buildSearchParams(
  * Загружает данные из Supabase на сервере, строит превью-ссылки на изображения и рендерит list/cards view.
  */
 export default async function ModelsPage({
-  searchParams
+  searchParams,
 }: {
   params: Promise<Record<string, string | string[] | undefined>>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
 
-  const t = await getTranslations('public');
-  const tCommon = await getTranslations('common');
+  const t = await getTranslations("public");
+  const tCommon = await getTranslations("common");
 
   const viewRaw = firstString(sp.view);
   const cookieStore = await cookies();
-  const cookieView = cookieStore.get('models_view')?.value;
+  const cookieView = cookieStore.get("models_view")?.value;
   const viewMode =
-    viewRaw === 'list'
-      ? 'list'
-      : viewRaw === 'cards'
-        ? 'cards'
-        : cookieView === 'list'
-          ? 'list'
-          : 'cards';
+    viewRaw === "list"
+      ? "list"
+      : viewRaw === "cards"
+        ? "cards"
+        : cookieView === "list"
+          ? "list"
+          : "cards";
 
   const page = asInt(firstString(sp.page), 1);
   const categoryRaw = firstString(sp.category);
-  const category = categoryRaw && categoryRaw !== 'all' ? categoryRaw : null;
+  const category = categoryRaw && categoryRaw !== "all" ? categoryRaw : null;
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
@@ -106,30 +107,27 @@ export default async function ModelsPage({
   try {
     const supabase = createSupabasePublicClient();
 
-    const [{data: categoriesData}, assetsRes] = await Promise.all([
+    const [{ data: categoriesData }, assetsRes] = await Promise.all([
+      supabase.from("assets").select("category").not("category", "is", null),
       supabase
-        .from('assets')
-        .select('category')
-        .not('category', 'is', null),
-      supabase
-        .from('assets')
+        .from("assets")
         .select(
-          'id,document_id,title,description,category,license_type,status,updated_at',
-          {count: 'exact'}
+          "id,document_id,title,description,category,license_type,status,updated_at",
+          { count: "exact" },
         )
-        .order('updated_at', {ascending: false})
-        .match(category ? {category} : {})
-        .range(from, to)
+        .order("updated_at", { ascending: false })
+        .match(category ? { category } : {})
+        .range(from, to),
     ]);
 
     const rawCategories = (categoriesData ?? [])
       .map((row) => row.category)
-      .filter((v): v is string => typeof v === 'string')
+      .filter((v): v is string => typeof v === "string")
       .map((v) => v.trim())
       .filter(Boolean);
 
     categories = Array.from(new Set(rawCategories)).sort((a, b) =>
-      a.localeCompare(b, 'ru')
+      a.localeCompare(b, "ru"),
     );
 
     if (assetsRes.error) throw assetsRes.error;
@@ -140,23 +138,23 @@ export default async function ModelsPage({
       items = [];
     } else {
       const assetIds = assets.map((a) => a.id);
-      const {data: mediaData} = await supabase
-        .from('asset_media')
-        .select('asset_id,path,kind,order_index')
-        .in('asset_id', assetIds)
-        .order('kind', {ascending: true})
-        .order('order_index', {ascending: true});
+      const { data: mediaData } = await supabase
+        .from("asset_media")
+        .select("asset_id,path,kind,order_index")
+        .in("asset_id", assetIds)
+        .order("kind", { ascending: true })
+        .order("order_index", { ascending: true });
 
       const mediaByAsset = new Map<
         string,
-        {path: string; kind: 'hero' | 'gallery'; order_index: number}[]
+        { path: string; kind: "hero" | "gallery"; order_index: number }[]
       >();
       for (const m of mediaData ?? []) {
         const list = mediaByAsset.get(m.asset_id) ?? [];
         list.push({
           path: m.path,
           kind: m.kind,
-          order_index: m.order_index
+          order_index: m.order_index,
         });
         mediaByAsset.set(m.asset_id, list);
       }
@@ -164,16 +162,17 @@ export default async function ModelsPage({
       items = await Promise.all(
         assets.map(async (a) => {
           const media = mediaByAsset.get(a.id) ?? [];
-          const hero = media.find((m) => m.kind === 'hero')?.path ?? null;
-          const gallery = media
-            .filter((m) => m.kind === 'gallery')
-            .sort((x, y) => x.order_index - y.order_index)[0]?.path ?? null;
+          const hero = media.find((m) => m.kind === "hero")?.path ?? null;
+          const gallery =
+            media
+              .filter((m) => m.kind === "gallery")
+              .sort((x, y) => x.order_index - y.order_index)[0]?.path ?? null;
 
           const previewPath = hero ?? gallery;
           const previewUrl = previewPath
             ? await createSignedImageUrl(supabase, previewPath, {
                 width: 720,
-                quality: 80
+                quality: 80,
               })
             : null;
 
@@ -186,14 +185,14 @@ export default async function ModelsPage({
             license_type: a.license_type,
             status: a.status,
             updated_at: a.updated_at,
-            preview_url: previewUrl
+            preview_url: previewUrl,
           };
-        })
+        }),
       );
     }
   } catch (e) {
     errorMessage =
-      e instanceof Error ? e.message : 'Failed to load models (unknown error)';
+      e instanceof Error ? e.message : "Failed to load models (unknown error)";
   }
 
   const pages = Math.max(1, Math.ceil(count / PAGE_SIZE));
@@ -201,25 +200,16 @@ export default async function ModelsPage({
   const nextPage = page < pages ? page + 1 : null;
 
   const genericTelegramHref = buildTelegramShareUrl(
-    buildGenericLicenseRequestText()
+    buildGenericLicenseRequestText(),
   );
 
   return (
     <div className={modelsPageClasses.root}>
-      <header className={modelsPageClasses.header}>
-        <h1 className={modelsPageClasses.title}>
-          {t('catalogTitle')}
-        </h1>
-        <p className={modelsPageClasses.subtitle}>
-          {t('catalogSubtitle')}
-        </p>
-      </header>
-
       <div className={modelsPageClasses.toolbarGrid}>
         <div className={modelsPageClasses.statsPanel}>
-          <div>{t('pagination.items', {count})}</div>
+          <div>{t("pagination.items", { count })}</div>
           <div className={modelsPageClasses.statsPageRow}>
-            {t('pagination.page', {page, pages})}
+            {t("pagination.page", { page, pages })}
           </div>
         </div>
         <div className={modelsPageClasses.toolbarPanel}>
@@ -228,19 +218,15 @@ export default async function ModelsPage({
       </div>
 
       {errorMessage ? (
-        <div className={modelsPageClasses.errorPanel}>
-          {errorMessage}
-        </div>
+        <div className={modelsPageClasses.errorPanel}>{errorMessage}</div>
       ) : null}
 
       {!errorMessage && items.length === 0 ? (
-        <div className={modelsPageClasses.emptyPanel}>
-          {t('noResults')}
-        </div>
+        <div className={modelsPageClasses.emptyPanel}>{t("noResults")}</div>
       ) : null}
 
       {items.length > 0 ? (
-        viewMode === 'list' ? (
+        viewMode === "list" ? (
           <AssetsTable items={items} />
         ) : (
           <AssetCards items={items} />
@@ -249,7 +235,7 @@ export default async function ModelsPage({
 
       <div className={modelsPageClasses.paginationWrap}>
         <div className={modelsPageClasses.paginationLabel}>
-          {t('pagination.page', {page, pages})}
+          {t("pagination.page", { page, pages })}
         </div>
         <div className={modelsPageClasses.paginationButtons}>
           <Link
@@ -262,12 +248,12 @@ export default async function ModelsPage({
             href={
               prevPage
                 ? `/models?${buildSearchParams(sp, {
-                    page: String(prevPage)
+                    page: String(prevPage),
                   }).toString()}`
-                : '#'
+                : "#"
             }
           >
-            {t('pagination.previous')}
+            {t("pagination.previous")}
           </Link>
           <Link
             aria-disabled={!nextPage}
@@ -279,18 +265,18 @@ export default async function ModelsPage({
             href={
               nextPage
                 ? `/models?${buildSearchParams(sp, {
-                    page: String(nextPage)
+                    page: String(nextPage),
                   }).toString()}`
-                : '#'
+                : "#"
             }
           >
-            {t('pagination.next')}
+            {t("pagination.next")}
           </Link>
           <Link
             className={modelsPageClasses.allButton}
-            href={`/models?${buildSearchParams(sp, {page: null, category: null}).toString()}`}
+            href={`/models?${buildSearchParams(sp, { page: null, category: null }).toString()}`}
           >
-            {tCommon('all')}
+            {tCommon("all")}
           </Link>
         </div>
       </div>
@@ -303,7 +289,7 @@ export default async function ModelsPage({
             rel="noreferrer"
             className={modelsPageClasses.ctaButton}
           >
-            {t('cta.requestLicense')}
+            {t("cta.requestLicense")}
           </a>
         </div>
       </div>

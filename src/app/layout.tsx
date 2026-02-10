@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {Geist, Geist_Mono} from 'next/font/google';
+import {IBM_Plex_Mono} from 'next/font/google';
 import {NextIntlClientProvider} from 'next-intl';
 import {getLocale, getMessages} from 'next-intl/server';
 import {Toaster} from 'sonner';
@@ -10,16 +10,12 @@ import {rootLayoutClasses} from './layout.styles';
 
 /**
  * Подключаем шрифты через `next/font`, чтобы иметь CSS variables и корректную оптимизацию загрузки.
- * Используется в `body.className`.
+ * Используется в `html.className`.
  */
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: '--font-ibm-plex-mono',
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '500', '600', '700']
 });
 
 export const metadata: Metadata = {
@@ -40,9 +36,12 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html
+      lang={locale}
+      className={`${ibmPlexMono.variable} ${ibmPlexMono.className}`}
+    >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${rootLayoutClasses.body}`}
+        className={rootLayoutClasses.body}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}

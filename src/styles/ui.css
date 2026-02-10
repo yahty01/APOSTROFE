@@ -110,8 +110,6 @@
 @layer utilities {
   .font-condensed {
     font-family: var(--font-condensed);
-    font-stretch: condensed;
-    font-variation-settings: "wdth" 85;
   }
 
   .font-doc {

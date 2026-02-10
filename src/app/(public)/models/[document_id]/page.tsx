@@ -11,6 +11,7 @@ import {
   buildTelegramShareUrl
 } from '@/lib/telegram';
 
+import {GalleryItem} from './GalleryItem';
 import {modelDetailPageClasses} from './page.styles';
 
 export const dynamic = 'force-dynamic';
@@ -100,7 +101,7 @@ export default async function ModelDetailPage({
     galleryUrls = (
       await Promise.all(
         galleryPaths.map((p) =>
-          createSignedImageUrl(supabase, p, {width: 600, quality: 80})
+          createSignedImageUrl(supabase, p, {width: 1600, quality: 82})
         )
       )
     ).filter((u): u is string => Boolean(u));
@@ -113,8 +114,6 @@ export default async function ModelDetailPage({
     const acquireHref = buildTelegramShareUrl(buildLicenseRequestText(asset));
     const requestInfoHref = buildTelegramShareUrl(buildRequestInfoText(asset));
 
-    const thumbs = galleryUrls.slice(0, 4);
-
     return (
       <div className={modelDetailPageClasses.root}>
         <div className={modelDetailPageClasses.topRow}>
@@ -126,116 +125,118 @@ export default async function ModelDetailPage({
           </Link>
         </div>
 
-        <div className={modelDetailPageClasses.mainGrid}>
-          <section className={modelDetailPageClasses.mediaSection}>
-            <div className={modelDetailPageClasses.hero}>
-              {heroUrl ? (
-                <Image
-                  src={heroUrl}
-                  alt={asset.title}
-                  fill
-                  className={modelDetailPageClasses.heroImage}
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority
-                />
-              ) : (
-                <div className={modelDetailPageClasses.heroFallback}>
-                  {tPublic('detail.noHeroImage')}
-                </div>
-              )}
-            </div>
-
-            <div className={modelDetailPageClasses.thumbsGrid}>
-              {thumbs.length ? (
-                thumbs.map((url, idx) => (
-                  <div
-                    key={url}
-                    className={modelDetailPageClasses.thumb}
-                  >
-                    <Image
-                      src={url}
-                      alt={`${asset.title} ${idx + 1}`}
-                      fill
-                      className={modelDetailPageClasses.thumbImage}
-                      sizes="160px"
-                    />
+        <div className={modelDetailPageClasses.contentWrap}>
+          <div className={modelDetailPageClasses.mainGrid}>
+            <section className={modelDetailPageClasses.mediaSection}>
+              <div className={modelDetailPageClasses.hero}>
+                {heroUrl ? (
+                  <Image
+                    src={heroUrl}
+                    alt={asset.title}
+                    fill
+                    className={modelDetailPageClasses.heroImage}
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    priority
+                  />
+                ) : (
+                  <div className={modelDetailPageClasses.heroFallback}>
+                    {tPublic('detail.noHeroImage')}
                   </div>
-                ))
-              ) : (
-                <div className={modelDetailPageClasses.thumbsFallback}>
-                  {tPublic('detail.noThumbnails')}
-                </div>
-              )}
-            </div>
-          </section>
+                )}
+              </div>
+            </section>
 
-          <section className={modelDetailPageClasses.detailsSection}>
-            <h1 className={modelDetailPageClasses.title}>
-              {asset.document_id}
-            </h1>
-            <div className={modelDetailPageClasses.meta}>
-              {status} · {license} · {timestamp}
-            </div>
-
-            <div className={modelDetailPageClasses.blocks}>
-              <div className={modelDetailPageClasses.block}>
-                <div className={modelDetailPageClasses.blockTitle}>
-                  {tPublic('asset.description')}
-                </div>
-                <div className={modelDetailPageClasses.blockText}>
-                  {description}
-                </div>
+            <section className={modelDetailPageClasses.detailsSection}>
+              <h1 className={modelDetailPageClasses.title}>
+                {asset.document_id}
+              </h1>
+              <div className={modelDetailPageClasses.meta}>
+                {status} · {license} · {timestamp}
               </div>
 
-              {asset.measurements ? (
+              <div className={modelDetailPageClasses.blocks}>
                 <div className={modelDetailPageClasses.block}>
                   <div className={modelDetailPageClasses.blockTitle}>
-                    {tPublic('detail.measurements').toUpperCase()}
+                    {tPublic('asset.description')}
                   </div>
-                  <div className={modelDetailPageClasses.blockBody}>
-                    {renderKeyValue(asset.measurements) ?? (
-                      <pre className={modelDetailPageClasses.blockPre}>
-                        {JSON.stringify(asset.measurements, null, 2)}
-                      </pre>
-                    )}
+                  <div className={modelDetailPageClasses.blockText}>
+                    {description}
                   </div>
                 </div>
-              ) : null}
 
-              {asset.details ? (
-                <div className={modelDetailPageClasses.block}>
-                  <div className={modelDetailPageClasses.blockTitle}>
-                    {tPublic('detail.details').toUpperCase()}
+                {asset.measurements ? (
+                  <div className={modelDetailPageClasses.block}>
+                    <div className={modelDetailPageClasses.blockTitle}>
+                      {tPublic('detail.measurements').toUpperCase()}
+                    </div>
+                    <div className={modelDetailPageClasses.blockBody}>
+                      {renderKeyValue(asset.measurements) ?? (
+                        <pre className={modelDetailPageClasses.blockPre}>
+                          {JSON.stringify(asset.measurements, null, 2)}
+                        </pre>
+                      )}
+                    </div>
                   </div>
-                  <div className={modelDetailPageClasses.blockBody}>
-                    {renderKeyValue(asset.details) ?? (
-                      <pre className={modelDetailPageClasses.blockPre}>
-                        {JSON.stringify(asset.details, null, 2)}
-                      </pre>
-                    )}
-                  </div>
-                </div>
-              ) : null}
-            </div>
+                ) : null}
 
-            <div className={modelDetailPageClasses.actions}>
-              <a
-                href={acquireHref}
-                target="_blank"
-                rel="noreferrer"
-                className={modelDetailPageClasses.actionPrimary}
-              >
-                {tPublic('cta.requestLicense')}
-              </a>
-              <a
-                href={requestInfoHref}
-                target="_blank"
-                rel="noreferrer"
-                className={modelDetailPageClasses.actionSecondary}
-              >
-                {tPublic('cta.requestInfo')}
-              </a>
-            </div>
+                {asset.details ? (
+                  <div className={modelDetailPageClasses.block}>
+                    <div className={modelDetailPageClasses.blockTitle}>
+                      {tPublic('detail.details').toUpperCase()}
+                    </div>
+                    <div className={modelDetailPageClasses.blockBody}>
+                      {renderKeyValue(asset.details) ?? (
+                        <pre className={modelDetailPageClasses.blockPre}>
+                          {JSON.stringify(asset.details, null, 2)}
+                        </pre>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className={modelDetailPageClasses.actions}>
+                <a
+                  href={acquireHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={modelDetailPageClasses.actionPrimary}
+                >
+                  {tPublic('cta.requestLicense')}
+                </a>
+                <a
+                  href={requestInfoHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={modelDetailPageClasses.actionSecondary}
+                >
+                  {tPublic('cta.requestInfo')}
+                </a>
+              </div>
+            </section>
+          </div>
+
+          <section className={modelDetailPageClasses.gallerySection}>
+            {galleryUrls.length ? (
+              <div className={modelDetailPageClasses.galleryGrid}>
+                {galleryUrls.map((url, idx) => {
+                  const isSolo =
+                    galleryUrls.length % 2 === 1 && idx === galleryUrls.length - 1;
+                  return (
+                    <GalleryItem
+                      key={`${url}-${idx}`}
+                      src={url}
+                      alt={`${asset.document_id} ${idx + 1}`}
+                      isSolo={isSolo}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className={modelDetailPageClasses.galleryFallback}>
+                {tPublic('detail.noThumbnails')}
+              </div>
+            )}
           </section>
         </div>
       </div>

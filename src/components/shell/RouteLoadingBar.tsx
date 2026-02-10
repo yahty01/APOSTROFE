@@ -5,7 +5,7 @@ export type LoadingBarProps = {
 };
 
 /**
- * Тонкая полоска загрузки для route transitions (используется в `app/.../loading.tsx`).
+ * Тонкая полоска загрузки для route transitions.
  * Компонент без состояния/хуков, чтобы его можно было рендерить из server components.
  */
 export function LoadingBar({ariaLabel = 'Loading'}: LoadingBarProps) {

@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
 import { LanguageDropdown } from "./LanguageDropdown";
-import { SystemStatus } from "./SystemStatus";
 import { ViewSwitcher } from "./ViewSwitcher";
 import { topHeaderClasses } from "./TopHeader.styles";
 

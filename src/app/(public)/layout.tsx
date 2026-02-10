@@ -7,6 +7,8 @@ import {Footer} from '@/components/shell/Footer';
 import {TopHeader} from '@/components/shell/TopHeader';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 
+import {PublicMain} from './PublicMain';
+
 export const dynamic = 'force-dynamic';
 
 /**
@@ -63,7 +65,7 @@ export default async function PublicLayout({
       ticker={<Marquee initial={marquee} locale={locale} />}
       footer={<Footer />}
     >
-      {children}
+      <PublicMain>{children}</PublicMain>
     </AppShell>
   );
 }
