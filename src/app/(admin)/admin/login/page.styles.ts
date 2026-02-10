@@ -4,7 +4,7 @@
  */
 export const adminLoginPageClasses = {
   root: 'mx-auto flex min-h-[70vh] max-w-md items-center',
-  panel: 'ui-panel w-full p-6',
+  panel: 'ui-panel w-full p-4 md:p-6',
   title: 'font-condensed text-xl uppercase tracking-[0.12em]',
   subtitle:
     'mt-3 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]',

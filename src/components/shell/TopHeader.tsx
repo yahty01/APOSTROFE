@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
 import { LanguageDropdown } from "./LanguageDropdown";
-import { ViewSwitcher } from "./ViewSwitcher";
 import { topHeaderClasses } from "./TopHeader.styles";
 
 /**
@@ -34,16 +33,10 @@ function isActiveTab(pathname: string, href: string) {
 
 /**
  * Верхняя панель публичной части: бренд, табы, переключатель языка и системный статус.
- * `ViewSwitcher` показываем только в каталоге моделей, потому что он управляет query `?view=...`.
  */
-export function TopHeader({
-  initialModelsView,
-}: {
-  initialModelsView?: "cards" | "list";
-}) {
+export function TopHeader() {
   const pathname = usePathname();
   const tNav = useTranslations("nav");
-  const showViewSwitcher = pathname === "/models";
 
   return (
     <header className={topHeaderClasses.header}>
@@ -74,9 +67,6 @@ export function TopHeader({
 
         <div className={topHeaderClasses.actions}>
           <LanguageDropdown />
-          {showViewSwitcher ? (
-            <ViewSwitcher initialView={initialModelsView} />
-          ) : null}
         </div>
       </div>
     </header>

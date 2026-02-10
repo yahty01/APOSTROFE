@@ -5,5 +5,5 @@
 export const appShellClasses = {
   outer: "min-h-dvh bg-[var(--color-paper)] p-0 text-[var(--color-ink)]",
   frame: "ui-frame mx-auto w-full max-w-[2400px]",
-  main: "relative px-6 py-8",
+  main: "relative px-4 py-6 md:px-6 md:py-8",
 } as const;

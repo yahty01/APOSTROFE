@@ -6,6 +6,7 @@ import { AssetCards } from "@/components/models/AssetCards";
 import { AssetsTable } from "@/components/models/AssetsTable";
 import { ModelsToolbar } from "@/components/models/ModelsToolbar";
 import type { AssetListItem } from "@/components/models/types";
+import { ViewSwitcher } from "@/components/shell/ViewSwitcher";
 import { createSignedImageUrl } from "@/lib/supabase/images";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import {
@@ -207,10 +208,13 @@ export default async function ModelsPage({
     <div className={modelsPageClasses.root}>
       <div className={modelsPageClasses.toolbarGrid}>
         <div className={modelsPageClasses.statsPanel}>
-          <div>{t("pagination.items", { count })}</div>
-          <div className={modelsPageClasses.statsPageRow}>
-            {t("pagination.page", { page, pages })}
+          <div className={modelsPageClasses.statsInfo}>
+            <div>{t("pagination.items", { count })}</div>
+            <div className={modelsPageClasses.statsPageRow}>
+              {t("pagination.page", { page, pages })}
+            </div>
           </div>
+          <ViewSwitcher initialView={viewMode} />
         </div>
         <div className={modelsPageClasses.toolbarPanel}>
           <ModelsToolbar categories={categories} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useReportPending } from "@/lib/pending";
@@ -16,13 +16,6 @@ type ViewMode = "cards" | "list";
 function asViewMode(value: string | null): ViewMode | null {
   if (value === "cards" || value === "list") return value;
   return null;
-}
-
-/**
- * Утилита для кнопки "SWITCH": переключает режим таблица/карточки.
- */
-function nextView(current: ViewMode): ViewMode {
-  return current === "cards" ? "list" : "cards";
 }
 
 /**
@@ -48,51 +41,35 @@ export function ViewSwitcher({
 
   const view = asViewMode(searchParams.get("view")) ?? initialView;
 
-  const url = useMemo(() => {
+  function setView(nextMode: ViewMode) {
     const params = new URLSearchParams(searchParams.toString());
-    return (nextMode: ViewMode) => {
-      setModelsViewCookie(nextMode);
-      params.set("view", nextMode);
-      startTransition(() => {
-        router.push(`${pathname}?${params.toString()}`);
-      });
-    };
-  }, [pathname, router, searchParams, startTransition]);
+    setModelsViewCookie(nextMode);
+    params.set("view", nextMode);
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  }
 
   useEffect(() => {
     setModelsViewCookie(view);
   }, [view]);
 
   return (
-    <div className={viewSwitcherClasses.root}>
-      <button
-        type="button"
+    <label className={viewSwitcherClasses.root}>
+      <span className={viewSwitcherClasses.labelText}>{t("view.label")}</span>
+      <select
+        value={view}
         disabled={isPending}
-        onClick={() => url("cards")}
-        className={`${viewSwitcherClasses.segmentBase} ${
-          viewSwitcherClasses.segmentBg
-        } ${view === "cards" ? viewSwitcherClasses.segmentActive : ""}`}
+        onChange={(e) => {
+          const nextMode = asViewMode(e.target.value);
+          if (!nextMode) return;
+          setView(nextMode);
+        }}
+        className={viewSwitcherClasses.select}
       >
-        {t("view.label")}: {t("view.cards").toUpperCase()}
-      </button>
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={() => url("list")}
-        className={`${viewSwitcherClasses.segmentBase} ${
-          viewSwitcherClasses.segmentBg
-        } ${view === "list" ? viewSwitcherClasses.segmentActive : ""}`}
-      >
-        {t("view.label")}: {t("view.list").toUpperCase()}
-      </button>
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={() => url(nextView(view))}
-        className={`${viewSwitcherClasses.segmentBase} ${viewSwitcherClasses.segmentBg}`}
-      >
-        {t("view.switch")}
-      </button>
-    </div>
+        <option value="cards">{t("view.cards")}</option>
+        <option value="list">{t("view.list")}</option>
+      </select>
+    </label>
   );
 }

@@ -3,7 +3,7 @@
  * Это универсальный "скелет" под заголовком страницы на время навигации/подгрузки данных.
  */
 export const routeContentSkeletonClasses = {
-  root: 'space-y-12',
+  root: 'space-y-8 md:space-y-12',
   toolbarGrid:
     'grid grid-cols-1 gap-px bg-[var(--color-line)] md:grid-cols-[1fr_auto]',
   panel: 'bg-[var(--color-surface)] p-4',
@@ -18,4 +18,3 @@ export const routeContentSkeletonClasses = {
     'flex flex-col gap-3 border-t ui-line pt-6 md:flex-row md:items-center md:justify-between',
   paginationButtons: 'flex flex-wrap gap-2'
 } as const;
-

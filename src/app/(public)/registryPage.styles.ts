@@ -5,5 +5,5 @@
 export const registryPageClasses = {
   root: 'space-y-12',
   panel:
-    'ui-panel p-10 text-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]'
+    'ui-panel p-6 text-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)] md:p-10'
 } as const;

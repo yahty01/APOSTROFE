@@ -8,5 +8,5 @@ export const adminMarqueeSettingsPageClasses = {
   root: 'space-y-6',
   title:
     'font-condensed text-[clamp(32px,4vw,52px)] leading-[0.9] uppercase tracking-[0.14em]',
-  panel: 'ui-panel p-6'
+  panel: 'ui-panel p-4 md:p-6'
 } as const;

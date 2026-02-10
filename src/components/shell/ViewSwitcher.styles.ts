@@ -4,9 +4,7 @@
  */
 export const viewSwitcherClasses = {
   root:
-    'inline-flex h-10 items-stretch gap-px border border-[color:var(--color-line)] bg-[var(--color-line)]',
-  segmentBase:
-    'flex h-10 items-center justify-center px-3 font-condensed text-[12px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]',
-  segmentBg: 'bg-[var(--color-paper)]',
-  segmentActive: 'bg-black text-white hover:bg-black'
+    'flex flex-col items-start gap-2 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)] md:flex-row md:items-center md:gap-3',
+  labelText: 'md:whitespace-nowrap',
+  select: 'ui-select h-10 w-full font-doc text-[11px] uppercase tracking-[0.18em] md:w-44'
 } as const;

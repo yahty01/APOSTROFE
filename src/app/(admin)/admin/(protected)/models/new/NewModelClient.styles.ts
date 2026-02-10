@@ -4,7 +4,7 @@
  */
 export const newModelClientClasses = {
   root: 'space-y-6',
-  panel: 'ui-panel p-6',
+  panel: 'ui-panel p-4 md:p-6',
   panelHeaderRow: 'flex items-start justify-between gap-4',
   panelTitle: 'font-condensed text-xl uppercase tracking-[0.12em]',
   panelSubtitle:
