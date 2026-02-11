@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/(admin)/admin/actions";
 import { PendingFormStatusReporter } from "@/components/pending/PendingFormStatusReporter";
 
+import { Brand } from "./Brand";
 import { LanguageDropdown } from "./LanguageDropdown";
 import { adminHeaderClasses } from "./AdminHeader.styles";
 
@@ -42,12 +43,7 @@ export function AdminHeader() {
   return (
     <header className={adminHeaderClasses.header}>
       <div className={adminHeaderClasses.grid}>
-        <div className={adminHeaderClasses.brandWrap}>
-          <div aria-hidden className={adminHeaderClasses.mark} />
-          <Link href="/admin/models" className={adminHeaderClasses.brandLink}>
-            APOSTROPHE
-          </Link>
-        </div>
+        <Brand href="/admin/models" />
 
         <nav className={adminHeaderClasses.nav}>
           {TABS.map((tab) => {

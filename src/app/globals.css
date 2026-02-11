@@ -26,6 +26,7 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-weight: 700;
 }
 
 @keyframes route-loading-progress {

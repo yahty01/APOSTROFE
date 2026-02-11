@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
+import { Brand } from "./Brand";
 import { LanguageDropdown } from "./LanguageDropdown";
 import { topHeaderClasses } from "./TopHeader.styles";
 
@@ -41,12 +42,7 @@ export function TopHeader() {
   return (
     <header className={topHeaderClasses.header}>
       <div className={topHeaderClasses.grid}>
-        <div className={topHeaderClasses.brandWrap}>
-          <div aria-hidden className={topHeaderClasses.mark} />
-          <Link href="/models" className={topHeaderClasses.brandLink}>
-            APOSTROPHE
-          </Link>
-        </div>
+        <Brand href="/models" />
 
         <nav className={topHeaderClasses.nav}>
           {TABS.map((tab) => {

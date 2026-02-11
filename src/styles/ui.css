@@ -25,12 +25,22 @@
     background: var(--color-paper);
     padding: 0 14px;
     font-family: var(--font-condensed);
+    font-weight: 700;
     font-size: 14px;
     line-height: 1;
-    letter-spacing: 0.08em;
+    letter-spacing: -0.02em;
     text-transform: uppercase;
     color: var(--color-ink);
     user-select: none;
+  }
+
+  @media (min-width: 768px) {
+    .ui-tab {
+      height: 44px;
+      padding: 0 18px;
+      font-size: 20px;
+      line-height: 24px;
+    }
   }
 
   .ui-tab:hover {
