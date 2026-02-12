@@ -13,18 +13,20 @@ export const modelsPageClasses = {
   /** Вся страница: задаёт базовые отступы между секциями. */
   root: "space-y-8 md:space-y-12",
 
-  // Верхняя зона (stats + фильтр категории)
-  toolbarGrid:
-    "grid grid-cols-1 gap-px bg-[var(--color-line)] md:grid-cols-[1fr_auto]",
-  /** Левая панель в верхней зоне: "Всего / Страница". */
-  statsPanel:
-    "flex flex-col gap-4 bg-[var(--color-surface)] p-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)] md:flex-row md:items-center md:justify-between",
-  /** Контейнер с текстовой статистикой внутри `statsPanel`. */
-  statsInfo: "flex flex-col",
-  /** Вторая строка внутри `statsPanel` (например "Page 1/3"). */
-  statsPageRow: "mt-1",
-  /** Правая панель в верхней зоне: содержит `ModelsToolbar` (select категории). */
-  toolbarPanel: "bg-[var(--color-surface)] p-4",
+  // Верхняя зона (stats + фильтры)
+  toolbarPanel: "ui-panel ui-panel--strong p-5 md:p-6",
+  toolbarInner:
+    "flex flex-col gap-4 md:flex-row md:items-center md:justify-between",
+  /** Контейнер с текстовой статистикой внутри toolbar. */
+  statsInfo:
+    "flex flex-col font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]",
+  /** Вторая строка внутри `statsInfo` (например "PAGE 1/3"). */
+  statsPageRow: "mt-2",
+  /** Правая часть toolbar: View + Category. */
+  toolbarControls:
+    "flex flex-col gap-4 md:flex-row md:items-center md:justify-end md:gap-5",
+  toolbarDivider:
+    "hidden h-10 w-px bg-[var(--color-line-strong)] md:block",
 
   // Состояния контента
   errorPanel:

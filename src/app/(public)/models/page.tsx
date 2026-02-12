@@ -206,18 +206,20 @@ export default async function ModelsPage({
 
   return (
     <div className={modelsPageClasses.root}>
-      <div className={modelsPageClasses.toolbarGrid}>
-        <div className={modelsPageClasses.statsPanel}>
+      <div className={modelsPageClasses.toolbarPanel}>
+        <div className={modelsPageClasses.toolbarInner}>
           <div className={modelsPageClasses.statsInfo}>
             <div>{t("pagination.items", { count })}</div>
             <div className={modelsPageClasses.statsPageRow}>
               {t("pagination.page", { page, pages })}
             </div>
           </div>
-          <ViewSwitcher initialView={viewMode} />
-        </div>
-        <div className={modelsPageClasses.toolbarPanel}>
-          <ModelsToolbar categories={categories} />
+
+          <div className={modelsPageClasses.toolbarControls}>
+            <ViewSwitcher initialView={viewMode} />
+            <div aria-hidden className={modelsPageClasses.toolbarDivider} />
+            <ModelsToolbar categories={categories} />
+          </div>
         </div>
       </div>
 
