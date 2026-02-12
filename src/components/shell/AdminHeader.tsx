@@ -5,10 +5,12 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
 import { signOutAction } from "@/app/(admin)/admin/actions";
+import { BrandLogoMark } from "@/components/brand/BrandLogoMark";
 import { PendingFormStatusReporter } from "@/components/pending/PendingFormStatusReporter";
 
 import { LanguageDropdown } from "./LanguageDropdown";
 import { adminHeaderClasses } from "./AdminHeader.styles";
+import { NavTabLabel } from "./NavTabLabel";
 
 /**
  * Таб-навигация админского раздела.
@@ -43,7 +45,7 @@ export function AdminHeader() {
     <header className={adminHeaderClasses.header}>
       <div className={adminHeaderClasses.grid}>
         <div className={adminHeaderClasses.brandWrap}>
-          <div aria-hidden className={adminHeaderClasses.mark} />
+          <BrandLogoMark aria-hidden className={adminHeaderClasses.mark} />
           <Link href="/admin/models" className={adminHeaderClasses.brandLink}>
             APOSTROPHE
           </Link>
@@ -60,7 +62,7 @@ export function AdminHeader() {
                   active ? adminHeaderClasses.tabActive : ""
                 }`}
               >
-                {tNav(tab.key).toUpperCase()}’
+                <NavTabLabel text={tNav(tab.key).toUpperCase()} />
               </Link>
             );
           })}

@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {IBM_Plex_Mono} from 'next/font/google';
+import {IBM_Plex_Mono, Tiny5} from 'next/font/google';
 import {NextIntlClientProvider} from 'next-intl';
 import {getLocale, getMessages} from 'next-intl/server';
 import {Toaster} from 'sonner';
@@ -16,6 +16,12 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: '--font-ibm-plex-mono',
   subsets: ['latin', 'cyrillic'],
   weight: ['400', '500', '600', '700']
+});
+
+const tiny5 = Tiny5({
+  variable: '--font-tiny5',
+  subsets: ['latin', 'cyrillic'],
+  weight: '400'
 });
 
 export const metadata: Metadata = {
@@ -38,7 +44,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${ibmPlexMono.variable} ${ibmPlexMono.className}`}
+      className={`${ibmPlexMono.variable} ${tiny5.variable} ${ibmPlexMono.className}`}
     >
       <body
         className={rootLayoutClasses.body}

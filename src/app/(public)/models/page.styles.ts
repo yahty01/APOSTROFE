@@ -43,13 +43,13 @@ export const modelsPageClasses = {
     "flex h-10 items-center justify-center border px-4 font-doc text-[11px] uppercase tracking-[0.18em]",
   /** Активная (кликабельная) кнопка пагинации. */
   pageButtonEnabled:
-    "border-[color:var(--color-line)] bg-[var(--color-paper)] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]",
+    "border-[color:var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-surface),#000_6%)]",
   /** Неактивная (disabled) кнопка пагинации. */
   pageButtonDisabled:
-    "cursor-not-allowed border-[color:var(--color-line)] bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] text-[var(--color-muted)] opacity-60",
+    "cursor-not-allowed border-[color:var(--color-line)] bg-[color-mix(in_oklab,var(--color-surface),#000_6%)] text-[var(--color-muted)] opacity-60",
   /** Кнопка "ALL" в пагинации — показываем только на md+, чтобы не перегружать мобилку. */
   allButton:
-    "hidden h-10 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)] md:flex",
+    "hidden h-10 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-surface)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-surface),#000_6%)] md:flex",
 
   // CTA
   ctaWrap: "py-10 md:py-16",

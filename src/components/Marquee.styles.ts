@@ -5,10 +5,10 @@ import type {CSSProperties} from 'react';
  * Вынесено отдельно, чтобы компонент не захламлялся Tailwind-строками и было проще править стили.
  */
 export const marqueeClasses = {
-  wrapper: 'border-b ui-line bg-black text-white',
+  wrapper: 'border-y ui-line bg-black text-white',
   marquee: 'marquee',
   inner: 'marquee__inner',
-  content: 'marquee__content font-condensed uppercase tracking-[0.24em]'
+  content: 'marquee__content font-tiny5 uppercase tracking-[0.24em]'
 } as const;
 
 type MarqueeVars = CSSProperties & {

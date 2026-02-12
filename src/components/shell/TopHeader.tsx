@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
+import { BrandLogoMark } from "@/components/brand/BrandLogoMark";
+
 import { LanguageDropdown } from "./LanguageDropdown";
+import { NavTabLabel } from "./NavTabLabel";
 import { topHeaderClasses } from "./TopHeader.styles";
 
 /**
@@ -42,7 +45,7 @@ export function TopHeader() {
     <header className={topHeaderClasses.header}>
       <div className={topHeaderClasses.grid}>
         <div className={topHeaderClasses.brandWrap}>
-          <div aria-hidden className={topHeaderClasses.mark} />
+          <BrandLogoMark aria-hidden className={topHeaderClasses.mark} />
           <Link href="/models" className={topHeaderClasses.brandLink}>
             APOSTROPHE
           </Link>
@@ -59,7 +62,7 @@ export function TopHeader() {
                   active ? topHeaderClasses.tabActive : ""
                 }`}
               >
-                {tNav(tab.key).toUpperCase()}’
+                <NavTabLabel text={tNav(tab.key).toUpperCase()} />
               </Link>
             );
           })}

@@ -22,19 +22,21 @@
     justify-content: center;
     gap: 8px;
     border: 1px solid var(--color-line);
-    background: var(--color-paper);
+    background: var(--color-surface);
     padding: 0 14px;
     font-family: var(--font-condensed);
     font-size: 14px;
     line-height: 1;
-    letter-spacing: 0.08em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    min-width: 160px;
     text-transform: uppercase;
     color: var(--color-ink);
     user-select: none;
   }
 
   .ui-tab:hover {
-    background: color-mix(in oklab, var(--color-paper), #000 6%);
+    background: color-mix(in oklab, var(--color-surface), #000 6%);
   }
 
   .ui-tab--active {
@@ -72,7 +74,7 @@
     justify-content: center;
     gap: 8px;
     border: 1px solid var(--color-line-strong);
-    background: var(--color-paper);
+    background: var(--color-surface);
     padding: 0 16px;
     font-family: var(--font-condensed);
     font-size: 14px;
@@ -84,7 +86,7 @@
   }
 
   .ui-btn-outline:hover {
-    background: color-mix(in oklab, var(--color-paper), #000 6%);
+    background: color-mix(in oklab, var(--color-surface), #000 6%);
   }
 
   .ui-input,
@@ -110,6 +112,10 @@
 @layer utilities {
   .font-condensed {
     font-family: var(--font-condensed);
+  }
+
+  .font-tiny5 {
+    font-family: var(--font-tiny5);
   }
 
   .font-doc {
