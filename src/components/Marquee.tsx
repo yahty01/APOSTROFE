@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import {useEffect, useMemo, useState} from 'react';
+import { useEffect, useMemo, useState } from "react";
 
-import {getMarqueeVars, marqueeClasses} from './Marquee.styles';
+import { getMarqueeVars, marqueeClasses } from "./Marquee.styles";
 
 /**
  * Контракт настроек marquee, совпадающий со схемой таблицы `settings_marquee`.
@@ -20,9 +20,7 @@ export type MarqueeSettings = {
  * Текст по умолчанию, если админ ещё не заполнил строку или она пустая для текущей локали.
  */
 function getFallbackText(locale: string) {
-  return locale === 'ru'
-    ? 'ЛИЦЕНЗИРУЕМ ИДЕНТИЧНОСТЬ'
-    : 'WE LICENSE IDENTITY';
+  return locale === "ru" ? "ЛИЦЕНЗИРУЕМ ИДЕНТИЧНОСТЬ" : "WE LICENSE IDENTITY";
 }
 
 /**
@@ -30,7 +28,7 @@ function getFallbackText(locale: string) {
  * Используется в компоненте `Marquee` перед нормализацией и fallback.
  */
 function pickText(settings: MarqueeSettings, locale: string) {
-  return locale === 'ru' ? settings.text_ru : settings.text_en;
+  return locale === "ru" ? settings.text_ru : settings.text_en;
 }
 
 /**
@@ -38,7 +36,7 @@ function pickText(settings: MarqueeSettings, locale: string) {
  * Это защищает анимацию от слишком быстрых/медленных значений из базы.
  */
 function normalizeDurationSeconds(speed: number | null | undefined) {
-  const value = typeof speed === 'number' ? speed : null;
+  const value = typeof speed === "number" ? speed : null;
   if (!value || !Number.isFinite(value)) return 20;
   return Math.min(120, Math.max(6, value));
 }
@@ -49,7 +47,7 @@ function normalizeDurationSeconds(speed: number | null | undefined) {
  */
 export function Marquee({
   initial,
-  locale
+  locale,
 }: {
   initial: MarqueeSettings;
   locale: string;
@@ -58,10 +56,10 @@ export function Marquee({
 
   const durationSeconds = useMemo(
     () => normalizeDurationSeconds(settings.speed),
-    [settings.speed]
+    [settings.speed],
   );
 
-  const direction = settings.direction === 'right' ? 'right' : 'left';
+  const direction = settings.direction === "right" ? "right" : "left";
   const rawText = pickText(settings, locale).trim();
   const text = rawText || getFallbackText(locale);
   const style = getMarqueeVars(durationSeconds, direction);
@@ -73,7 +71,7 @@ export function Marquee({
     // Best-effort загрузка актуальных настроек; ошибки/плохие ответы просто игнорируем.
     async function refetch() {
       try {
-        const res = await fetch('/api/marquee', {cache: 'no-store'});
+        const res = await fetch("/api/marquee", { cache: "no-store" });
         if (!res.ok) return;
         const json = (await res.json()) as MarqueeSettings;
         if (!isMounted) return;
@@ -91,30 +89,27 @@ export function Marquee({
       void refetch();
     }
 
-    window.addEventListener('focus', onFocus);
+    window.addEventListener("focus", onFocus);
 
     return () => {
       isMounted = false;
       window.clearInterval(interval);
-      window.removeEventListener('focus', onFocus);
+      window.removeEventListener("focus", onFocus);
     };
   }, []);
 
   if (!settings.enabled) return null;
 
   return (
-    <div className={marqueeClasses.wrapper}>
-      <div className={marqueeClasses.marquee}>
-        <div className={marqueeClasses.inner} style={style}>
-          <span className={marqueeClasses.content}>
-            {text}
-          </span>
-          <span
-            className={marqueeClasses.content}
-            aria-hidden
-          >
-            {text}
-          </span>
+    <div className={marqueeClasses.line}>
+      <div className={marqueeClasses.wrapper}>
+        <div className={marqueeClasses.marquee}>
+          <div className={marqueeClasses.inner} style={style}>
+            <span className={marqueeClasses.content}>{text}</span>
+            <span className={marqueeClasses.content} aria-hidden>
+              {text}
+            </span>
+          </div>
         </div>
       </div>
     </div>

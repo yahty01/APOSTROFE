@@ -1,15 +1,15 @@
-import {getLocale, getTranslations} from 'next-intl/server';
+import { getLocale, getTranslations } from "next-intl/server";
 
-import {Marquee, type MarqueeSettings} from '@/components/Marquee';
-import {AppShell} from '@/components/shell/AppShell';
-import {AdminHeader} from '@/components/shell/AdminHeader';
-import {Footer} from '@/components/shell/Footer';
-import {createSupabasePublicClient} from '@/lib/supabase/public';
+import { Marquee, type MarqueeSettings } from "@/components/Marquee";
+import { AppShell } from "@/components/shell/AppShell";
+import { AdminHeader } from "@/components/shell/AdminHeader";
+import { Footer } from "@/components/shell/Footer";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 
-import {LoginForm} from './LoginForm';
-import {adminLoginPageClasses} from './page.styles';
+import { LoginForm } from "./LoginForm";
+import { adminLoginPageClasses } from "./page.styles";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * Fallback-настройки marquee на случай ошибок Supabase.
@@ -17,14 +17,14 @@ export const dynamic = 'force-dynamic';
  */
 const DEFAULT_MARQUEE: MarqueeSettings = {
   enabled: true,
-  text_ru: '',
-  text_en: '',
+  text_ru: "",
+  text_en: "",
   speed: null,
-  direction: null
+  direction: null,
 };
 
 /**
- * Страница логина админки (`/admin/login`).
+ * Страница логина админки  `/admin/login`).
  * Подгружает locale и initial-настройки marquee на сервере и рендерит `LoginForm`.
  */
 export default async function AdminLoginPage({}: {
@@ -32,15 +32,15 @@ export default async function AdminLoginPage({}: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const locale = await getLocale();
-  const t = await getTranslations('admin.login');
+  const t = await getTranslations("admin.login");
 
   let marquee: MarqueeSettings = DEFAULT_MARQUEE;
   try {
     const supabase = createSupabasePublicClient();
-    const {data} = await supabase
-      .from('settings_marquee')
-      .select('enabled,text_ru,text_en,speed,direction')
-      .eq('id', 1)
+    const { data } = await supabase
+      .from("settings_marquee")
+      .select("enabled,text_ru,text_en,speed,direction")
+      .eq("id", 1)
       .maybeSingle();
     if (data) marquee = data;
   } catch {
@@ -55,12 +55,8 @@ export default async function AdminLoginPage({}: {
     >
       <div className={adminLoginPageClasses.root}>
         <div className={adminLoginPageClasses.panel}>
-          <h1 className={adminLoginPageClasses.title}>
-            {t('title')}
-          </h1>
-          <p className={adminLoginPageClasses.subtitle}>
-            {t('subtitle')}
-          </p>
+          <h1 className={adminLoginPageClasses.title}>{t("title")}</h1>
+          <p className={adminLoginPageClasses.subtitle}>{t("subtitle")}</p>
           <div className={adminLoginPageClasses.form}>
             <LoginForm />
           </div>

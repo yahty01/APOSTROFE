@@ -1,19 +1,20 @@
-import type {CSSProperties} from 'react';
+import type { CSSProperties } from "react";
 
 /**
  * Все классы, используемые в `Marquee.tsx`.
  * Вынесено отдельно, чтобы компонент не захламлялся Tailwind-строками и было проще править стили.
  */
 export const marqueeClasses = {
-  wrapper: 'border-y ui-line bg-black text-white',
-  marquee: 'marquee',
-  inner: 'marquee__inner',
-  content: 'marquee__content font-tiny5 uppercase tracking-[0.24em]'
+  line: "border-y py-3 border-width-1 border-solid border-black",
+  wrapper: "ui-line bg-black text-white",
+  marquee: "marquee",
+  inner: "marquee__inner",
+  content: "marquee__content font-tiny5 uppercase tracking-[0.24em]",
 } as const;
 
 type MarqueeVars = CSSProperties & {
-  '--marquee-duration': string;
-  '--marquee-direction': string;
+  "--marquee-duration": string;
+  "--marquee-direction": string;
 };
 
 /**
@@ -22,10 +23,10 @@ type MarqueeVars = CSSProperties & {
  */
 export function getMarqueeVars(
   durationSeconds: number,
-  direction: 'left' | 'right'
+  direction: "left" | "right",
 ): MarqueeVars {
   return {
-    '--marquee-duration': `${durationSeconds}s`,
-    '--marquee-direction': direction === 'right' ? 'reverse' : 'normal'
+    "--marquee-duration": `${durationSeconds}s`,
+    "--marquee-direction": direction === "right" ? "reverse" : "normal",
   };
 }
