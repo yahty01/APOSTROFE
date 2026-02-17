@@ -18,7 +18,6 @@ export default async function AdminNewCreatorPage({}: {
         entityType="creator"
         redirectBasePath="/admin/creators"
         withMedia
-        allowHero={false}
         allowGallery
       />
     </div>

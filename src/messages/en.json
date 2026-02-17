@@ -60,6 +60,13 @@
       "status": "STATUS",
       "topic": "TOPIC",
       "platforms": "PLATFORMS",
+      "instagram": "INSTAGRAM",
+      "youtube": "YOUTUBE",
+      "tiktok": "TIKTOK",
+      "telegram": "TELEGRAM",
+      "vk": "VK",
+      "yandexMusic": "YANDEX MUSIC",
+      "spotify": "SPOTIFY",
       "description": "DESCRIPTION"
     },
     "category": "Category",
@@ -82,6 +89,7 @@
     "detail": {
       "measurements": "Measurements",
       "details": "Details",
+      "socialLinks": "Social links",
       "telegramCta": "Ask in Telegram",
       "noHeroImage": "NO HERO IMAGE",
       "noThumbnails": "NO THUMBNAILS"
@@ -157,6 +165,13 @@
       "topic": "Topic",
       "licenseType": "License",
       "platforms": "Platforms",
+      "instagramUrl": "Instagram URL",
+      "youtubeUrl": "YouTube URL",
+      "tiktokUrl": "TikTok URL",
+      "telegramUrl": "Telegram URL",
+      "vkUrl": "VK URL",
+      "yandexMusicUrl": "Yandex Music URL",
+      "spotifyUrl": "Spotify URL",
       "published": "Published",
       "publishedYes": "PUBLISHED",
       "updatedAt": "Updated",
@@ -177,6 +192,7 @@
       "directionHelp": "Creator direction (e.g. MUSIC / FASHION / DESIGN)",
       "topicHelp": "Influencer topic (e.g. MUSIC / SPORT / LIFESTYLE)",
       "platformsHelp": "Influencer platforms (e.g. INSTAGRAM, YOUTUBE, TIKTOK)",
+      "socialUrlHelp": "Full URL https://... (leave empty if not needed)",
       "categoryHelp": "Used for the /models category filter (optional)",
       "licenseHelp": "Free text (e.g. CC-BY / Royalty Free)",
       "statusHelp": "Free text status (e.g. DRAFT / READY)",
@@ -191,7 +207,8 @@
         "documentIdRequired": "Enter document_id",
         "documentIdInvalid": "Only letters, numbers, _ and -",
         "titleRequired": "Enter a title",
-        "invalidJson": "Invalid JSON"
+        "invalidJson": "Invalid JSON",
+        "invalidUrl": "Invalid URL (http/https expected)"
       }
     },
     "media": {

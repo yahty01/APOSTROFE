@@ -196,7 +196,10 @@ export async function PublicRegistryPage({
               .filter((m) => m.kind === 'gallery')
               .sort((x, y) => x.order_index - y.order_index)[0]?.path ?? null;
 
-          const previewPath = hero ?? gallery;
+          // Для каталога creators используем только явное hero-изображение/лого.
+          // Галерея не должна становиться fallback-обложкой карточки.
+          const previewPath =
+            config.entityType === 'creator' ? hero : hero ?? gallery;
           const previewUrl = previewPath
             ? await createSignedImageUrl(supabase, previewPath, {
                 width: 720,

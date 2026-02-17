@@ -25,7 +25,7 @@ export default async function AdminEditInfluencerPage({
   const {data: asset, error: assetError} = await supabase
     .from('assets')
     .select(
-      'id,document_id,title,description,influencer_topic,influencer_platforms,license_type,is_published'
+      'id,document_id,title,description,influencer_topic,influencer_platforms,influencer_instagram_url,influencer_youtube_url,influencer_tiktok_url,influencer_telegram_url,influencer_vk_url,influencer_yandex_music_url,influencer_spotify_url,license_type,is_published'
     )
     .eq('id', id)
     .eq('entity_type', 'influencer')
@@ -95,6 +95,13 @@ export default async function AdminEditInfluencerPage({
             description: asset.description ?? '',
             influencer_topic: asset.influencer_topic ?? '',
             influencer_platforms: asset.influencer_platforms ?? '',
+            influencer_instagram_url: asset.influencer_instagram_url ?? '',
+            influencer_youtube_url: asset.influencer_youtube_url ?? '',
+            influencer_tiktok_url: asset.influencer_tiktok_url ?? '',
+            influencer_telegram_url: asset.influencer_telegram_url ?? '',
+            influencer_vk_url: asset.influencer_vk_url ?? '',
+            influencer_yandex_music_url: asset.influencer_yandex_music_url ?? '',
+            influencer_spotify_url: asset.influencer_spotify_url ?? '',
             license_type: asset.license_type ?? '',
             is_published: asset.is_published
           }}

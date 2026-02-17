@@ -22,6 +22,19 @@ function formatIsoDate(value: string | null | undefined) {
   return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
 }
 
+function asNullableUrl(value: string | null | undefined) {
+  const text = (value ?? '').trim();
+  return text || null;
+}
+
+type SocialLink = {
+  key: string;
+  label: string;
+  url: string;
+  iconPath: string;
+  iconMode?: 'mask' | 'image';
+};
+
 export default async function InfluencerDetailPage({
   params
 }: {
@@ -42,6 +55,13 @@ export default async function InfluencerDetailPage({
     license_type: string | null;
     influencer_topic: string | null;
     influencer_platforms: string | null;
+    influencer_instagram_url: string | null;
+    influencer_youtube_url: string | null;
+    influencer_tiktok_url: string | null;
+    influencer_telegram_url: string | null;
+    influencer_vk_url: string | null;
+    influencer_yandex_music_url: string | null;
+    influencer_spotify_url: string | null;
     updated_at: string;
   } | null = null;
 
@@ -50,7 +70,7 @@ export default async function InfluencerDetailPage({
     const {data, error: assetError} = await supabase
       .from('assets')
       .select(
-        'id,document_id,title,description,license_type,influencer_topic,influencer_platforms,updated_at'
+        'id,document_id,title,description,license_type,influencer_topic,influencer_platforms,influencer_instagram_url,influencer_youtube_url,influencer_tiktok_url,influencer_telegram_url,influencer_vk_url,influencer_yandex_music_url,influencer_spotify_url,updated_at'
       )
       .eq('document_id', document_id)
       .eq('entity_type', 'influencer')
@@ -94,6 +114,51 @@ export default async function InfluencerDetailPage({
   const description = (asset.description || asset.title || '').trim() || '—';
   const topic = (asset.influencer_topic || '—').trim() || '—';
   const platforms = (asset.influencer_platforms || '—').trim() || '—';
+  const socialLinks = [
+    {
+      key: 'instagram',
+      label: tPublic('asset.instagram'),
+      url: asNullableUrl(asset.influencer_instagram_url),
+      iconPath: '/social/instagram.svg'
+    },
+    {
+      key: 'youtube',
+      label: tPublic('asset.youtube'),
+      url: asNullableUrl(asset.influencer_youtube_url),
+      iconPath: '/social/youtube.svg'
+    },
+    {
+      key: 'tiktok',
+      label: tPublic('asset.tiktok'),
+      url: asNullableUrl(asset.influencer_tiktok_url),
+      iconPath: '/social/tiktok.svg'
+    },
+    {
+      key: 'telegram',
+      label: tPublic('asset.telegram'),
+      url: asNullableUrl(asset.influencer_telegram_url),
+      iconPath: '/social/telegram.svg'
+    },
+    {
+      key: 'vk',
+      label: tPublic('asset.vk'),
+      url: asNullableUrl(asset.influencer_vk_url),
+      iconPath: '/social/vk.svg'
+    },
+    {
+      key: 'yandexMusic',
+      label: tPublic('asset.yandexMusic'),
+      url: asNullableUrl(asset.influencer_yandex_music_url),
+      iconPath: '/social/yandex-music.svg',
+      iconMode: 'image'
+    },
+    {
+      key: 'spotify',
+      label: tPublic('asset.spotify'),
+      url: asNullableUrl(asset.influencer_spotify_url),
+      iconPath: '/social/spotify.svg'
+    }
+  ].filter((entry): entry is SocialLink => Boolean(entry.url));
 
   const acquireHref = buildTelegramShareUrl(
     buildEntityLicenseRequestText(asset, 'influencer')
@@ -167,6 +232,57 @@ export default async function InfluencerDetailPage({
                   {platforms}
                 </div>
               </div>
+
+              {socialLinks.length ? (
+                <div className={modelDetailPageClasses.block}>
+                  <div className={modelDetailPageClasses.blockTitle}>
+                    {tPublic('detail.socialLinks')}
+                  </div>
+                  <div className={modelDetailPageClasses.socialLinksList}>
+                    {socialLinks.map((entry) => (
+                      <a
+                        key={entry.key}
+                        href={entry.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={
+                          entry.iconMode === 'image'
+                            ? `${modelDetailPageClasses.socialIconAnchor} ${modelDetailPageClasses.socialIconAnchorStatic}`
+                            : modelDetailPageClasses.socialIconAnchor
+                        }
+                        aria-label={entry.label}
+                        title={entry.label}
+                      >
+                        {entry.iconMode === 'image' ? (
+                          <Image
+                            src={entry.iconPath}
+                            alt=""
+                            width={24}
+                            height={24}
+                            aria-hidden
+                            className={modelDetailPageClasses.socialIconImage}
+                          />
+                        ) : (
+                          <span
+                            aria-hidden
+                            className={modelDetailPageClasses.socialIconGlyph}
+                            style={{
+                              WebkitMaskImage: `url(${entry.iconPath})`,
+                              maskImage: `url(${entry.iconPath})`,
+                              WebkitMaskPosition: 'center',
+                              maskPosition: 'center',
+                              WebkitMaskRepeat: 'no-repeat',
+                              maskRepeat: 'no-repeat',
+                              WebkitMaskSize: 'contain',
+                              maskSize: 'contain'
+                            }}
+                          />
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className={modelDetailPageClasses.actions}>

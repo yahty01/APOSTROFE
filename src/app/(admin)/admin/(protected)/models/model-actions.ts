@@ -26,6 +26,13 @@ const schema = z.object({
   creator_direction: z.string().optional(),
   influencer_topic: z.string().optional(),
   influencer_platforms: z.string().optional(),
+  influencer_instagram_url: z.string().optional(),
+  influencer_youtube_url: z.string().optional(),
+  influencer_tiktok_url: z.string().optional(),
+  influencer_telegram_url: z.string().optional(),
+  influencer_vk_url: z.string().optional(),
+  influencer_yandex_music_url: z.string().optional(),
+  influencer_spotify_url: z.string().optional(),
   license_type: z.string().optional(),
   status: z.string().optional(),
   measurements: z.string().optional(),
@@ -76,6 +83,24 @@ function asNullableText(value: string | undefined) {
   return text || null;
 }
 
+/**
+ * Нормализует URL-поле: пустое значение -> `null`, непустое должно быть `http/https`.
+ * Возвращает флаг валидности, чтобы прервать сохранение до записи в БД.
+ */
+function asNullableHttpUrl(value: string | undefined) {
+  const text = (value ?? '').trim();
+  if (!text) return {value: null as string | null, isValid: true};
+
+  try {
+    const url = new URL(text);
+    const isHttp = url.protocol === 'http:' || url.protocol === 'https:';
+    if (!isHttp) return {value: null as string | null, isValid: false};
+    return {value: text, isValid: true};
+  } catch {
+    return {value: null as string | null, isValid: false};
+  }
+}
+
 const documentIdMaxBaseLength = 56;
 
 function slugifyDocumentIdPart(value: string) {
@@ -114,7 +139,7 @@ function isDocumentIdUniqueViolation(error: SupabaseWriteError | null | undefine
 /**
  * Server Action: создаёт/обновляет ассет.
  * Вызывается из `AssetForm`: валидирует входные данные, нормализует строки, парсит JSON-поля,
- * и делает `revalidatePath` для публичных и админских маршрутов.
+ * проверяет URL полей соцсетей инфлюенсера и делает `revalidatePath` для публичных/админских маршрутов.
  */
 export async function saveAssetAction(input: unknown): Promise<SaveResult> {
   const parsed = schema.safeParse(input);
@@ -142,6 +167,27 @@ export async function saveAssetAction(input: unknown): Promise<SaveResult> {
   const creatorDirection = asNullableText(parsed.data.creator_direction);
   const influencerTopic = asNullableText(parsed.data.influencer_topic);
   const influencerPlatforms = asNullableText(parsed.data.influencer_platforms);
+  const influencerInstagramUrl = asNullableHttpUrl(parsed.data.influencer_instagram_url);
+  const influencerYoutubeUrl = asNullableHttpUrl(parsed.data.influencer_youtube_url);
+  const influencerTiktokUrl = asNullableHttpUrl(parsed.data.influencer_tiktok_url);
+  const influencerTelegramUrl = asNullableHttpUrl(parsed.data.influencer_telegram_url);
+  const influencerVkUrl = asNullableHttpUrl(parsed.data.influencer_vk_url);
+  const influencerYandexMusicUrl = asNullableHttpUrl(parsed.data.influencer_yandex_music_url);
+  const influencerSpotifyUrl = asNullableHttpUrl(parsed.data.influencer_spotify_url);
+
+  const invalidSocialUrl = [
+    influencerInstagramUrl,
+    influencerYoutubeUrl,
+    influencerTiktokUrl,
+    influencerTelegramUrl,
+    influencerVkUrl,
+    influencerYandexMusicUrl,
+    influencerSpotifyUrl
+  ].some((entry) => !entry.isValid);
+
+  if (invalidSocialUrl) {
+    return {ok: false, error: 'Invalid social URL'};
+  }
 
   const payload = {
     entity_type: entityType,
@@ -152,6 +198,21 @@ export async function saveAssetAction(input: unknown): Promise<SaveResult> {
     creator_direction: entityType === 'creator' ? creatorDirection : null,
     influencer_topic: entityType === 'influencer' ? influencerTopic : null,
     influencer_platforms: entityType === 'influencer' ? influencerPlatforms : null,
+    influencer_instagram_url:
+      entityType === 'influencer' ? influencerInstagramUrl.value : null,
+    influencer_youtube_url:
+      entityType === 'influencer' ? influencerYoutubeUrl.value : null,
+    influencer_tiktok_url:
+      entityType === 'influencer' ? influencerTiktokUrl.value : null,
+    influencer_telegram_url:
+      entityType === 'influencer' ? influencerTelegramUrl.value : null,
+    influencer_website_url: null,
+    influencer_vk_url: entityType === 'influencer' ? influencerVkUrl.value : null,
+    influencer_other_url: null,
+    influencer_yandex_music_url:
+      entityType === 'influencer' ? influencerYandexMusicUrl.value : null,
+    influencer_spotify_url:
+      entityType === 'influencer' ? influencerSpotifyUrl.value : null,
     license_type: asNullableText(parsed.data.license_type),
     status: entityType === 'influencer' ? null : asNullableText(parsed.data.status),
     measurements: entityType === 'model' ? measurements : null,

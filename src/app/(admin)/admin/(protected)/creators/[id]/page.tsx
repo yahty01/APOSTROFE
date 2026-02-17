@@ -38,7 +38,21 @@ export default async function AdminEditCreatorPage({
     .order('kind', {ascending: true})
     .order('order_index', {ascending: true});
 
+  const heroRow = media?.find((m) => m.kind === 'hero') ?? null;
   const galleryRows = (media ?? []).filter((m) => m.kind === 'gallery');
+  const hero: AdminMediaItem | null = heroRow
+    ? {
+        id: heroRow.id,
+        path: heroRow.path,
+        kind: 'hero',
+        order_index: heroRow.order_index,
+        url: (await createSignedImageUrl(supabase, heroRow.path, {
+          width: 1200,
+          quality: 82
+        })) as string | null
+      }
+    : null;
+
   const gallery: AdminMediaItem[] = (
     await Promise.all(
       galleryRows.map(async (m) => ({
@@ -85,9 +99,8 @@ export default async function AdminEditCreatorPage({
           assetId={asset.id}
           documentId={asset.document_id}
           entityType="creator"
-          allowHero={false}
           allowGallery
-          hero={null}
+          hero={hero}
           gallery={gallery}
         />
       </div>

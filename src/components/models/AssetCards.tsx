@@ -57,6 +57,10 @@ export async function AssetCards({
                 className={assetCardsClasses.mediaImage}
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
               />
+            ) : entityType === 'creator' ? (
+              <div className={assetCardsClasses.mediaTitle}>
+                {getAssetFieldValue(item, 'name')}
+              </div>
             ) : (
               <div className={assetCardsClasses.mediaFallback}>
                 {t('asset.noImage')}

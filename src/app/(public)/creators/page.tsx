@@ -19,7 +19,7 @@ export default async function CreatorsPage({
         filterColumn: 'creator_direction',
         filterLabelKey: 'filters.creatorDirection',
         noResultsKey: 'noResults.creators',
-        mediaMode: 'title',
+        mediaMode: 'image',
         detailBasePath: '/creators'
       }}
     />

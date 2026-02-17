@@ -1,5 +1,6 @@
 /**
  * Tailwind-классы для страницы `/models/[document_id]`.
+ * Также переиспользуются в публичных detail-страницах `creators` и `influencers`.
  * Вынесены рядом со страницей, чтобы разметка оставалась читаемой, а стили редактировались отдельно.
  */
 export const modelDetailPageClasses = {
@@ -44,6 +45,12 @@ export const modelDetailPageClasses = {
     'font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)]',
   blockText:
     'mt-2 max-w-[72ch] font-doc text-[11px] uppercase tracking-[0.14em] leading-[1.45]',
+  socialLinksList: 'mt-3 flex flex-wrap items-center gap-2',
+  socialIconAnchor:
+    'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[color:var(--color-line)] text-[var(--color-muted)] transition-colors hover:cursor-pointer hover:border-[color:var(--color-ink)] hover:text-[var(--color-ink)] active:border-[color:var(--color-ink)] active:bg-[var(--color-ink)] active:text-[var(--color-paper)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]',
+  socialIconAnchorStatic: 'hover:text-[var(--color-muted)] active:bg-transparent',
+  socialIconGlyph: 'h-5 w-5 cursor-pointer bg-current',
+  socialIconImage: 'h-5 w-5 select-none object-contain',
   blockBody: 'mt-3',
   blockPre:
     'overflow-auto bg-[var(--color-paper)] p-3 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-muted)]',

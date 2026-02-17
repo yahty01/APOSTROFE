@@ -19,11 +19,13 @@ import {saveAssetAction} from './model-actions';
 import {assetFormClasses} from './AssetForm.styles';
 
 /**
- * Валидатор поля textarea, которое может быть пустым или содержать JSON.
- * Используется для `measurements` и `details`.
+ * Схема валидации полей формы ассета.
+ * JSON-поля (`measurements`, `details`) допускают пустое значение или валидный JSON,
+ * URL-поля инфлюенсера — пустое значение или валидный `http/https` URL.
  */
 function buildSchema(messages: {
   invalidJson: string;
+  invalidUrl: string;
   titleRequired: string;
 }) {
   const jsonOrEmpty = z
@@ -40,6 +42,20 @@ function buildSchema(messages: {
       }
     }, messages.invalidJson);
 
+  const urlOrEmpty = z
+    .string()
+    .optional()
+    .refine((value) => {
+      const trimmed = (value ?? '').trim();
+      if (!trimmed) return true;
+      try {
+        const url = new URL(trimmed);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    }, messages.invalidUrl);
+
   return z.object({
     title: z.string().min(1, messages.titleRequired),
     description: z.string().optional(),
@@ -47,6 +63,13 @@ function buildSchema(messages: {
     creator_direction: z.string().optional(),
     influencer_topic: z.string().optional(),
     influencer_platforms: z.string().optional(),
+    influencer_instagram_url: urlOrEmpty,
+    influencer_youtube_url: urlOrEmpty,
+    influencer_tiktok_url: urlOrEmpty,
+    influencer_telegram_url: urlOrEmpty,
+    influencer_vk_url: urlOrEmpty,
+    influencer_yandex_music_url: urlOrEmpty,
+    influencer_spotify_url: urlOrEmpty,
     license_type: z.string().optional(),
     status: z.string().optional(),
     measurements: jsonOrEmpty,
@@ -95,6 +118,7 @@ export function AssetForm({
     () =>
       buildSchema({
         invalidJson: t('errors.invalidJson'),
+        invalidUrl: t('errors.invalidUrl'),
         titleRequired: t('errors.titleRequired')
       }),
     [t]
@@ -111,6 +135,13 @@ export function AssetForm({
       creator_direction: initialValues.creator_direction ?? '',
       influencer_topic: initialValues.influencer_topic ?? '',
       influencer_platforms: initialValues.influencer_platforms ?? '',
+      influencer_instagram_url: initialValues.influencer_instagram_url ?? '',
+      influencer_youtube_url: initialValues.influencer_youtube_url ?? '',
+      influencer_tiktok_url: initialValues.influencer_tiktok_url ?? '',
+      influencer_telegram_url: initialValues.influencer_telegram_url ?? '',
+      influencer_vk_url: initialValues.influencer_vk_url ?? '',
+      influencer_yandex_music_url: initialValues.influencer_yandex_music_url ?? '',
+      influencer_spotify_url: initialValues.influencer_spotify_url ?? '',
       license_type: initialValues.license_type ?? '',
       status: initialValues.status ?? '',
       measurements: initialValues.measurements ?? '',
@@ -287,6 +318,143 @@ export function AssetForm({
           {t('descriptionHelp')}
         </p>
       </div>
+
+      {entityType === 'influencer' ? (
+        <div className={assetFormClasses.grid2}>
+          <div>
+            <label className={assetFormClasses.label}>
+              {tEntity('instagramUrl')}
+            </label>
+            <input
+              {...form.register('influencer_instagram_url')}
+              className={assetFormClasses.input}
+              placeholder="https://instagram.com/username"
+            />
+            <p className={assetFormClasses.help}>
+              {t('socialUrlHelp')}
+            </p>
+            {form.formState.errors.influencer_instagram_url?.message ? (
+              <p className={assetFormClasses.error}>
+                {form.formState.errors.influencer_instagram_url.message}
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <label className={assetFormClasses.label}>
+              {tEntity('youtubeUrl')}
+            </label>
+            <input
+              {...form.register('influencer_youtube_url')}
+              className={assetFormClasses.input}
+              placeholder="https://youtube.com/@channel"
+            />
+            <p className={assetFormClasses.help}>
+              {t('socialUrlHelp')}
+            </p>
+            {form.formState.errors.influencer_youtube_url?.message ? (
+              <p className={assetFormClasses.error}>
+                {form.formState.errors.influencer_youtube_url.message}
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <label className={assetFormClasses.label}>
+              {tEntity('tiktokUrl')}
+            </label>
+            <input
+              {...form.register('influencer_tiktok_url')}
+              className={assetFormClasses.input}
+              placeholder="https://tiktok.com/@username"
+            />
+            <p className={assetFormClasses.help}>
+              {t('socialUrlHelp')}
+            </p>
+            {form.formState.errors.influencer_tiktok_url?.message ? (
+              <p className={assetFormClasses.error}>
+                {form.formState.errors.influencer_tiktok_url.message}
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <label className={assetFormClasses.label}>
+              {tEntity('telegramUrl')}
+            </label>
+            <input
+              {...form.register('influencer_telegram_url')}
+              className={assetFormClasses.input}
+              placeholder="https://t.me/username"
+            />
+            <p className={assetFormClasses.help}>
+              {t('socialUrlHelp')}
+            </p>
+            {form.formState.errors.influencer_telegram_url?.message ? (
+              <p className={assetFormClasses.error}>
+                {form.formState.errors.influencer_telegram_url.message}
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <label className={assetFormClasses.label}>
+              {tEntity('vkUrl')}
+            </label>
+            <input
+              {...form.register('influencer_vk_url')}
+              className={assetFormClasses.input}
+              placeholder="https://vk.com/username"
+            />
+            <p className={assetFormClasses.help}>
+              {t('socialUrlHelp')}
+            </p>
+            {form.formState.errors.influencer_vk_url?.message ? (
+              <p className={assetFormClasses.error}>
+                {form.formState.errors.influencer_vk_url.message}
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <label className={assetFormClasses.label}>
+              {tEntity('yandexMusicUrl')}
+            </label>
+            <input
+              {...form.register('influencer_yandex_music_url')}
+              className={assetFormClasses.input}
+              placeholder="https://music.yandex.ru/..."
+            />
+            <p className={assetFormClasses.help}>
+              {t('socialUrlHelp')}
+            </p>
+            {form.formState.errors.influencer_yandex_music_url?.message ? (
+              <p className={assetFormClasses.error}>
+                {form.formState.errors.influencer_yandex_music_url.message}
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <label className={assetFormClasses.label}>
+              {tEntity('spotifyUrl')}
+            </label>
+            <input
+              {...form.register('influencer_spotify_url')}
+              className={assetFormClasses.input}
+              placeholder="https://open.spotify.com/..."
+            />
+            <p className={assetFormClasses.help}>
+              {t('socialUrlHelp')}
+            </p>
+            {form.formState.errors.influencer_spotify_url?.message ? (
+              <p className={assetFormClasses.error}>
+                {form.formState.errors.influencer_spotify_url.message}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       {entityType === 'model' ? (
         <div className={assetFormClasses.jsonGrid}>

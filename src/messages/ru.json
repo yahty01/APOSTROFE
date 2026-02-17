@@ -60,6 +60,13 @@
       "status": "СТАТУС",
       "topic": "ТЕМАТИКА",
       "platforms": "ПЛОЩАДКИ",
+      "instagram": "INSTAGRAM",
+      "youtube": "YOUTUBE",
+      "tiktok": "TIKTOK",
+      "telegram": "TELEGRAM",
+      "vk": "VK",
+      "yandexMusic": "YANDEX MUSIC",
+      "spotify": "SPOTIFY",
       "description": "ОПИСАНИЕ"
     },
     "category": "Категория",
@@ -82,6 +89,7 @@
     "detail": {
       "measurements": "Размеры",
       "details": "Детали",
+      "socialLinks": "Соцсети",
       "telegramCta": "Спросить в Telegram",
       "noHeroImage": "НЕТ ОСНОВНОГО ИЗОБРАЖЕНИЯ",
       "noThumbnails": "НЕТ МИНИАТЮР"
@@ -157,6 +165,13 @@
       "topic": "Тематика",
       "licenseType": "Лицензия",
       "platforms": "Площадки",
+      "instagramUrl": "Instagram URL",
+      "youtubeUrl": "YouTube URL",
+      "tiktokUrl": "TikTok URL",
+      "telegramUrl": "Telegram URL",
+      "vkUrl": "VK URL",
+      "yandexMusicUrl": "Yandex Music URL",
+      "spotifyUrl": "Spotify URL",
       "published": "Публикация",
       "publishedYes": "ОПУБЛИКОВАНО",
       "updatedAt": "Обновлено",
@@ -177,6 +192,7 @@
       "directionHelp": "Направление креатора (например MUSIC / FASHION / DESIGN)",
       "topicHelp": "Тематика инфлюенсера (например MUSIC / SPORT / LIFESTYLE)",
       "platformsHelp": "Площадки инфлюенсера (например INSTAGRAM, YOUTUBE, TIKTOK)",
+      "socialUrlHelp": "Полная ссылка https://... (можно оставить пустым)",
       "categoryHelp": "Используется для фильтра в /models (можно оставить пустым)",
       "licenseHelp": "Текстовое поле (например CC‑BY / Royalty Free)",
       "statusHelp": "Произвольный статус (например DRAFT / READY)",
@@ -191,7 +207,8 @@
         "documentIdRequired": "Введите document_id",
         "documentIdInvalid": "Допустимы только латинские буквы, цифры, _ и -",
         "titleRequired": "Введите название",
-        "invalidJson": "Неверный JSON"
+        "invalidJson": "Неверный JSON",
+        "invalidUrl": "Неверный URL (ожидается http/https)"
       }
     },
     "media": {

@@ -81,7 +81,7 @@ export default async function CreatorDetailPage({
   const timestamp = formatIsoDate(asset.updated_at);
   const license = (asset.license_type || 'STANDARD').toUpperCase();
   const status = (asset.status || 'AVAILABLE').toUpperCase();
-  const description = (asset.description || asset.title || '').trim() || '—';
+  const description = (asset.description || '').trim() || '—';
   const direction = (asset.creator_direction || '—').trim() || '—';
   const creatorName = (asset.title || asset.document_id).trim() || asset.document_id;
 
