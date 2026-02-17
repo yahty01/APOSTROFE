@@ -1,14 +1,21 @@
+import type {AssetEntityType} from '@/lib/assets/entity';
+
 /**
  * Минимальный набор полей ассета, нужный для генерации Telegram-текстов.
  * Тип сделан "мягким", чтобы его могли передавать и публичные страницы, и админские формы.
  */
 type AssetLike = {
   document_id: string;
+  created_at?: string | null;
   updated_at?: string | null;
   license_type?: string | null;
   status?: string | null;
   description?: string | null;
   category?: string | null;
+  model_type?: string | null;
+  creator_direction?: string | null;
+  influencer_topic?: string | null;
+  influencer_platforms?: string | null;
   title?: string | null;
 };
 
@@ -20,6 +27,12 @@ function formatIsoDate(value: string | null | undefined) {
   if (!value) return '—';
   const d = value.slice(0, 10);
   return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
+}
+
+function asUpper(value: string | null | undefined, fallback = '—') {
+  const v = (value ?? '').trim();
+  if (!v) return fallback;
+  return v.toUpperCase();
 }
 
 /**
@@ -71,9 +84,62 @@ export function buildRequestInfoText(asset: AssetLike): string {
 }
 
 /**
+ * Формирует текст запроса лицензии для карточек public registry (`models/creators/influencers`).
+ * Поля подбираются по типу сущности, чтобы пользователю и оператору было проще сверить запрос.
+ */
+export function buildEntityLicenseRequestText(
+  asset: AssetLike,
+  entityType: AssetEntityType
+): string {
+  const description = (asset.description || asset.title || '').trim() || '—';
+  const date = formatIsoDate(asset.created_at ?? asset.updated_at);
+  const license = asUpper(asset.license_type, 'STANDARD');
+  const name = (asset.title || asset.document_id || '').trim() || asset.document_id;
+
+  if (entityType === 'creator') {
+    return [
+      'LICENSE REQUEST',
+      'ENTITY: CREATOR',
+      `NAME: ${name}`,
+      `DATE: ${date}`,
+      `DIRECTION: ${asUpper(asset.creator_direction)}`,
+      `LICENSE: ${license}`,
+      `STATUS: ${asUpper(asset.status)}`,
+      `DESCRIPTION: ${description}`,
+      `DOCUMENT_ID: ${asset.document_id}`
+    ].join('\n');
+  }
+
+  if (entityType === 'influencer') {
+    return [
+      'LICENSE REQUEST',
+      'ENTITY: INFLUENCER',
+      `NAME: ${name}`,
+      `DATE: ${date}`,
+      `TOPIC: ${asUpper(asset.influencer_topic)}`,
+      `LICENSE: ${license}`,
+      `PLATFORMS: ${asUpper(asset.influencer_platforms)}`,
+      `DESCRIPTION: ${description}`,
+      `DOCUMENT_ID: ${asset.document_id}`
+    ].join('\n');
+  }
+
+  return [
+    'LICENSE REQUEST',
+    'ENTITY: MODEL',
+    `NAME: ${name}`,
+    `DATE: ${date}`,
+    `TYPE: ${asUpper(asset.model_type ?? asset.category)}`,
+    `LICENSE: ${license}`,
+    `DESCRIPTION: ${description}`,
+    `DOCUMENT_ID: ${asset.document_id}`
+  ].join('\n');
+}
+
+/**
  * Текст для универсальной CTA-кнопки на странице каталога, когда пользователь ещё не выбрал модель.
  * Используется в `/models` внизу страницы.
  */
-export function buildGenericLicenseRequestText(): string {
-  return ['LICENSE REQUEST', 'TYPE: GENERAL', 'SOURCE: /models'].join('\n');
+export function buildGenericLicenseRequestText(source = '/models'): string {
+  return ['LICENSE REQUEST', 'TYPE: GENERAL', `SOURCE: ${source}`].join('\n');
 }

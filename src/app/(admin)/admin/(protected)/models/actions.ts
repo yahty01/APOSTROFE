@@ -4,6 +4,10 @@ import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 import {z} from 'zod';
 
+import {
+  getAdminBasePathForEntity,
+  getPublicBasePathForEntity
+} from '@/lib/assets/entity';
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 
 /**
@@ -33,44 +37,50 @@ async function requireAdminOrEditor() {
 }
 
 /**
- * Схема формы publish/unpublish в списке ассетов (`/admin/models`).
+ * Схема формы publish/unpublish в списках сущностей реестра.
  */
 const publishSchema = z.object({
   asset_id: z.string().uuid(),
   document_id: z.string().min(1),
+  entity_type: z.enum(['model', 'creator', 'influencer']),
   next_published: z.enum(['true', 'false'])
 });
 
 /**
  * Server Action: переключает флаг публикации ассета.
- * Вызывается формой в таблице `/admin/models`; валидирует FormData через Zod и делает `revalidatePath`.
+ * Вызывается формой в таблицах админки; валидирует FormData через Zod и делает `revalidatePath`.
  */
 export async function setPublishAction(formData: FormData) {
   const parsed = publishSchema.safeParse({
     asset_id: formData.get('asset_id'),
     document_id: formData.get('document_id'),
+    entity_type: formData.get('entity_type'),
     next_published: formData.get('next_published')
   });
   if (!parsed.success) throw new Error('Invalid form data');
 
   const supabase = await requireAdminOrEditor();
-  const {asset_id, document_id, next_published} = parsed.data;
+  const {asset_id, document_id, entity_type, next_published} = parsed.data;
+  const publicBase = getPublicBasePathForEntity(entity_type);
+  const adminBase = getAdminBasePathForEntity(entity_type);
 
   const {error} = await supabase
     .from('assets')
     .update({is_published: next_published === 'true'})
-    .eq('id', asset_id);
+    .eq('id', asset_id)
+    .eq('entity_type', entity_type);
 
   if (error) throw error;
 
-  revalidatePath('/models');
-  revalidatePath(`/models/${document_id}`);
-  revalidatePath('/admin/models');
-  revalidatePath(`/admin/models/${asset_id}`);
+  revalidatePath(publicBase);
+  if (entity_type === 'model') revalidatePath(`/models/${document_id}`);
+  revalidatePath(adminBase);
+  revalidatePath(`${adminBase}/${asset_id}`);
 }
 
 const deleteSchema = z.object({
-  asset_id: z.string().uuid()
+  asset_id: z.string().uuid(),
+  entity_type: z.enum(['model', 'creator', 'influencer'])
 });
 
 type DeleteResult = {ok: true; warning?: string} | {ok: false; error: string};
@@ -94,16 +104,21 @@ function chunkArray<T>(items: T[], size: number) {
  */
 export async function deleteAssetAction(formData: FormData): Promise<DeleteResult> {
   const parsed = deleteSchema.safeParse({
-    asset_id: formData.get('asset_id')
+    asset_id: formData.get('asset_id'),
+    entity_type: formData.get('entity_type')
   });
   if (!parsed.success) return {ok: false, error: 'Invalid form data'};
 
   const supabase = await requireAdminOrEditor();
+  const entityType = parsed.data.entity_type;
+  const publicBase = getPublicBasePathForEntity(entityType);
+  const adminBase = getAdminBasePathForEntity(entityType);
 
   const {data: asset, error: assetError} = await supabase
     .from('assets')
     .select('id,document_id')
     .eq('id', parsed.data.asset_id)
+    .eq('entity_type', entityType)
     .maybeSingle();
 
   if (assetError || !asset) {
@@ -130,14 +145,15 @@ export async function deleteAssetAction(formData: FormData): Promise<DeleteResul
   const {error: deleteError} = await supabase
     .from('assets')
     .delete()
-    .eq('id', parsed.data.asset_id);
+    .eq('id', parsed.data.asset_id)
+    .eq('entity_type', entityType);
 
   if (deleteError) return {ok: false, error: deleteError.message};
 
-  revalidatePath('/models');
-  revalidatePath(`/models/${asset.document_id}`);
-  revalidatePath('/admin/models');
-  revalidatePath(`/admin/models/${asset.id}`);
+  revalidatePath(publicBase);
+  if (entityType === 'model') revalidatePath(`/models/${asset.document_id}`);
+  revalidatePath(adminBase);
+  revalidatePath(`${adminBase}/${asset.id}`);
 
   return warning ? {ok: true, warning} : {ok: true};
 }

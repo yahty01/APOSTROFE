@@ -20,7 +20,7 @@ export default async function AdminNewModelPage({}: {
       <h1 className={adminNewModelPageClasses.title}>
         {t('createTitle')}
       </h1>
-      <NewModelClient />
+      <NewModelClient entityType="model" redirectBasePath="/admin/models" />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {footerClasses} from './Footer.styles';
  */
 export async function Footer() {
   const t = await getTranslations('footer');
+  const contactsSupport = t('contactsSupport');
 
   const version = '1.0.0';
   const build = '20240815';
@@ -34,7 +35,7 @@ export async function Footer() {
           <div className={footerClasses.topList}>
             <div>{t('contactsEmail')}</div>
             <div>{t('contactsPhone')}</div>
-            <div>{t('contactsSupport')}</div>
+            {contactsSupport ? <div>{contactsSupport}</div> : null}
           </div>
         </div>
 
@@ -46,7 +47,7 @@ export async function Footer() {
             <Link className={footerClasses.topLink} href="#">
               {t('docsTerms')}
             </Link>
-            <Link className={footerClasses.topLink} href="#">
+            <Link className={footerClasses.topLink} href="/policy">
               {t('docsPrivacy')}
             </Link>
             <Link className={footerClasses.topLink} href="#">
@@ -54,25 +55,27 @@ export async function Footer() {
             </Link>
           </div>
         </div>
-      </div>
 
-      <div className={footerClasses.bottomGrid}>
-        <div className={footerClasses.bottomText}>
-          {t('rights')}
-        </div>
-        <div className={footerClasses.bottomTextCenter}>
-          {t('systemVersion', {version, build})}
-        </div>
-        <div className={footerClasses.bottomTextRight}>
-          {t('poweredBy')}{' '}
-          <Link
-            className={footerClasses.bottomLink}
-            href="https://t.me/Sonolbol"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            {t('createdBy')}
-          </Link>
+        <div className={footerClasses.metaPanel}>
+          <div className={footerClasses.metaStack}>
+            <div className={footerClasses.bottomText}>
+              {t('rights')}
+            </div>
+            <div className={footerClasses.bottomTextCenter}>
+              {t('systemVersion', {version, build})}
+            </div>
+            <div className={footerClasses.bottomTextRight}>
+              {t('poweredBy')}{' '}
+              <Link
+                className={footerClasses.bottomLink}
+                href="https://t.me/Sonolbol"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {t('createdBy')}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

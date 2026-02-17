@@ -5,9 +5,9 @@
 export const headerBaseClasses = {
   header: "ui-line",
   grid: "grid grid-flow-row-dense grid-cols-[1fr_auto] items-center gap-3 px-4 py-4 md:grid-cols-[1fr_auto_1fr]",
-  brandWrap: "flex items-center gap-3",
+  brandWrap: "flex items-center gap-2",
   mark: "h-6 w-auto shrink-0",
-  brandLink: "font-condensed text-sm uppercase tracking-[0.22em]",
+  brandLink: "font-condensed text-m font-bold uppercase tracking-[0.02em]",
   navBase:
     "col-span-2 -mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-1 md:col-span-1 md:mx-0 md:grid md:gap-2 md:overflow-visible md:px-0 md:pb-0",
   tab: "ui-tab md:w-full",

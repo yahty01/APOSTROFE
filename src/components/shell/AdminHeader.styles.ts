@@ -10,7 +10,7 @@ export const adminHeaderClasses = {
   brandWrap: headerBaseClasses.brandWrap,
   mark: headerBaseClasses.mark,
   brandLink: headerBaseClasses.brandLink,
-  nav: `${headerBaseClasses.navBase} md:grid-cols-3`,
+  nav: `${headerBaseClasses.navBase} md:grid-cols-5`,
   tab: headerBaseClasses.tab,
   tabActive: headerBaseClasses.tabActive,
   actions: headerBaseClasses.actions,

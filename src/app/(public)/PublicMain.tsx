@@ -53,7 +53,7 @@ function useRegistryHeading(pathname: string): Heading | null {
   if (pathname === '/creators') {
     return {
       title: navTitle('creators'),
-      subtitle: comingSoonSubtitle
+      subtitle: tPublic('registry.creatorsSubtitle')
     };
   }
 
@@ -67,7 +67,7 @@ function useRegistryHeading(pathname: string): Heading | null {
   if (pathname === '/influencers') {
     return {
       title: navTitle('influencers'),
-      subtitle: comingSoonSubtitle
+      subtitle: tPublic('registry.influencersSubtitle')
     };
   }
 

@@ -9,11 +9,18 @@ import {useReportPending} from '@/lib/pending';
 import {modelsToolbarClasses} from './ModelsToolbar.styles';
 
 /**
- * Панель фильтрации каталога моделей по категории.
- * Используется на странице `/models` и управляет query-параметрами (`category`, сбрасывая `page`).
+ * Панель фильтрации реестра по одному текстовому параметру.
+ * Используется на публичных страницах `/models`, `/creators`, `/influencers`.
  */
-export function ModelsToolbar({categories}: {categories: string[]}) {
-  const t = useTranslations('public');
+export function ModelsToolbar({
+  categories,
+  label,
+  paramName = 'category'
+}: {
+  categories: string[];
+  label: string;
+  paramName?: string;
+}) {
   const tCommon = useTranslations('common');
 
   const router = useRouter();
@@ -22,7 +29,7 @@ export function ModelsToolbar({categories}: {categories: string[]}) {
   const [isPending, startTransition] = useTransition();
   useReportPending(isPending);
 
-  const category = searchParams.get('category') ?? 'all';
+  const category = searchParams.get(paramName) ?? 'all';
 
   /**
    * Обновляет query string так, чтобы выбор категории был ссылочным состоянием (делится URL).
@@ -31,8 +38,8 @@ export function ModelsToolbar({categories}: {categories: string[]}) {
   function setCategory(nextCategory: string) {
     const next = new URLSearchParams(searchParams.toString());
     next.delete('page');
-    if (!nextCategory || nextCategory === 'all') next.delete('category');
-    else next.set('category', nextCategory);
+    if (!nextCategory || nextCategory === 'all') next.delete(paramName);
+    else next.set(paramName, nextCategory);
     startTransition(() => {
       router.push(`${pathname}?${next.toString()}`);
     });
@@ -41,7 +48,7 @@ export function ModelsToolbar({categories}: {categories: string[]}) {
   return (
     <div className={modelsToolbarClasses.root}>
       <label className={modelsToolbarClasses.label}>
-        <span className={modelsToolbarClasses.labelText}>{t('category')}</span>
+        <span className={modelsToolbarClasses.labelText}>{label}</span>
         <select
           value={category}
           disabled={isPending}

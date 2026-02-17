@@ -1,24 +1,27 @@
-import {getTranslations} from 'next-intl/server';
-
-import {registryPageClasses} from '../registryPage.styles';
+import {PublicRegistryPage} from '@/components/models/PublicRegistryPage';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Раздел "Creators" (публичная часть).
- * Пока это заглушка "coming soon", но маршрут и структура уже готовы под будущий реестр.
- */
-export default async function CreatorsPage({}: {
+export default async function CreatorsPage({
+  searchParams
+}: {
   params: Promise<Record<string, string | string[] | undefined>>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const t = await getTranslations('public');
-
   return (
-    <div className={registryPageClasses.root}>
-      <div className={registryPageClasses.panel}>
-        {t('comingSoon')}
-      </div>
-    </div>
+    <PublicRegistryPage
+      searchParams={searchParams}
+      config={{
+        route: '/creators',
+        section: 'creators',
+        entityType: 'creator',
+        fields: ['name', 'direction', 'license', 'status'],
+        filterColumn: 'creator_direction',
+        filterLabelKey: 'filters.creatorDirection',
+        noResultsKey: 'noResults.creators',
+        mediaMode: 'title',
+        detailBasePath: '/creators'
+      }}
+    />
   );
 }

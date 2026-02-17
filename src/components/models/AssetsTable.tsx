@@ -5,35 +5,36 @@ import {useTranslations} from 'next-intl';
 import {useVirtualizer} from '@tanstack/react-virtual';
 import {useMemo, useRef, useState} from 'react';
 
-import type {AssetListItem} from './types';
+import {getAssetDescription, getAssetFieldValue} from './asset-fields';
 import {
   assetsTableClasses,
   getVirtualRowStyle,
   getVirtualizerContainerStyle
 } from './AssetsTable.styles';
+import type {AssetFieldKey, AssetListItem} from './types';
 
-/**
- * Вытаскивает YYYY-MM-DD из ISO-строки, чтобы таблица выглядела компактно.
- * Используется в `AssetsTable` для отображения `updated_at`.
- */
-function formatIsoDate(value: string) {
-  if (!value) return '—';
-  const d = value.slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
+function normalizeFields(fields: AssetFieldKey[]) {
+  const fallback: AssetFieldKey[] = ['name', 'createdAt', 'license', 'status'];
+  return [...fields, ...fallback].slice(0, 4);
 }
 
-/**
- * Табличный вид каталога моделей с виртуализацией строк.
- * Используется на `/models` при `view=list`: рендерит только видимую часть списка через `@tanstack/react-virtual`.
- */
-export function AssetsTable({items}: {items: AssetListItem[]}) {
+export function AssetsTable({
+  items,
+  fields,
+  detailBasePath
+}: {
+  items: AssetListItem[];
+  fields: AssetFieldKey[];
+  detailBasePath?: string;
+}) {
   const t = useTranslations('public');
   const parentRef = useRef<HTMLDivElement | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const gridCols = useMemo(
-    () => assetsTableClasses.gridCols,
-    []
+  const gridCols = useMemo(() => assetsTableClasses.gridCols, []);
+  const [fieldA, fieldB, fieldC, fieldD] = useMemo(
+    () => normalizeFields(fields),
+    [fields]
   );
 
   // Виртуализация списка: считаем общую высоту и выдаём "виртуальные" индексы для текущего scroll.
@@ -48,40 +49,45 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
     <div className={assetsTableClasses.root}>
       <div className={assetsTableClasses.mobileList}>
         {items.map((item) => {
-          const timestamp = formatIsoDate(item.updated_at);
-          const license = (item.license_type || 'STANDARD').toUpperCase();
-          const status = (item.status || 'AVAILABLE').toUpperCase();
-          const description = (item.description || item.title || '').trim() || '—';
+          const firstValue = getAssetFieldValue(item, fieldA);
+          const secondValue = getAssetFieldValue(item, fieldB);
+          const thirdValue = getAssetFieldValue(item, fieldC);
+          const fourthValue = getAssetFieldValue(item, fieldD);
+          const description = getAssetDescription(item);
+          const detailHref = detailBasePath
+            ? `${detailBasePath}/${encodeURIComponent(item.document_id)}`
+            : null;
 
           return (
             <div key={item.id} className={assetsTableClasses.mobileItem}>
               <div className={assetsTableClasses.mobileTopRow}>
-                <Link
-                  href={`/models/${encodeURIComponent(item.document_id)}`}
-                  className={assetsTableClasses.mobileDocLink}
-                >
-                  {item.document_id}
-                </Link>
+                {detailHref ? (
+                  <Link href={detailHref} className={assetsTableClasses.mobileDocLink}>
+                    {firstValue}
+                  </Link>
+                ) : (
+                  <div className={assetsTableClasses.mobileDocLink}>{firstValue}</div>
+                )}
                 <div className={assetsTableClasses.mobileTimestamp}>
-                  {timestamp}
+                  {secondValue}
                 </div>
               </div>
 
               <div className={assetsTableClasses.mobileMetaGrid}>
                 <div>
                   <div className={assetsTableClasses.mobileMetaLabel}>
-                    {t('asset.licenseType')}
+                    {t(`asset.${fieldC}`)}
                   </div>
                   <div className={assetsTableClasses.mobileMetaValue}>
-                    {license}
+                    {thirdValue}
                   </div>
                 </div>
                 <div>
                   <div className={assetsTableClasses.mobileMetaLabel}>
-                    {t('asset.status')}
+                    {t(`asset.${fieldD}`)}
                   </div>
                   <div className={assetsTableClasses.mobileMetaValue}>
-                    {status}
+                    {fourthValue}
                   </div>
                 </div>
               </div>
@@ -99,16 +105,16 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
           className={`${assetsTableClasses.headerRow} ${gridCols}`}
         >
           <div className={assetsTableClasses.headerCell}>
-            {t('asset.documentId')}
+            {t(`asset.${fieldA}`)}
           </div>
           <div className={assetsTableClasses.headerCell}>
-            {t('asset.timestamp')}
+            {t(`asset.${fieldB}`)}
           </div>
           <div className={assetsTableClasses.headerCell}>
-            {t('asset.licenseType')}
+            {t(`asset.${fieldC}`)}
           </div>
           <div className={assetsTableClasses.headerCell}>
-            {t('asset.status')}
+            {t(`asset.${fieldD}`)}
           </div>
           <div className={assetsTableClasses.headerCellLast}>
             {t('asset.description')}
@@ -124,10 +130,14 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
               const item = items[virtualRow.index];
               const isSelected = selectedId === item.id;
 
-              const timestamp = formatIsoDate(item.updated_at);
-              const license = (item.license_type || 'STANDARD').toUpperCase();
-              const status = (item.status || 'AVAILABLE').toUpperCase();
-              const description = (item.description || item.title || '').trim() || '—';
+              const firstValue = getAssetFieldValue(item, fieldA);
+              const secondValue = getAssetFieldValue(item, fieldB);
+              const thirdValue = getAssetFieldValue(item, fieldC);
+              const fourthValue = getAssetFieldValue(item, fieldD);
+              const description = getAssetDescription(item);
+              const detailHref = detailBasePath
+                ? `${detailBasePath}/${encodeURIComponent(item.document_id)}`
+                : null;
 
               return (
                 <div
@@ -154,12 +164,13 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
                           : assetsTableClasses.cellBorderDefault
                       }`}
                     >
-                      <Link
-                        href={`/models/${encodeURIComponent(item.document_id)}`}
-                        className={assetsTableClasses.cellLink}
-                      >
-                        {item.document_id}
-                      </Link>
+                      {detailHref ? (
+                        <Link href={detailHref} className={assetsTableClasses.cellLink}>
+                          {firstValue}
+                        </Link>
+                      ) : (
+                        firstValue
+                      )}
                     </div>
                     <div
                       className={`${assetsTableClasses.cellBase} ${
@@ -168,7 +179,7 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
                           : assetsTableClasses.cellBorderDefault
                       }`}
                     >
-                      {timestamp}
+                      {secondValue}
                     </div>
                     <div
                       className={`${assetsTableClasses.cellBase} ${
@@ -177,7 +188,7 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
                           : assetsTableClasses.cellBorderDefault
                       }`}
                     >
-                      {license}
+                      {thirdValue}
                     </div>
                     <div
                       className={`${assetsTableClasses.cellBase} ${
@@ -186,7 +197,7 @@ export function AssetsTable({items}: {items: AssetListItem[]}) {
                           : assetsTableClasses.cellBorderDefault
                       }`}
                     >
-                      {status}
+                      {fourthValue}
                     </div>
                     <div className={assetsTableClasses.descCell}>
                       {description}

@@ -4,48 +4,29 @@ import {getTranslations} from 'next-intl/server';
 import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
 
-import {AssetForm} from '../AssetForm';
-import {DeleteAssetButton} from '../DeleteAssetButton';
-import {MediaManager, type AdminMediaItem} from '../MediaManager';
-
-import {adminEditModelPageClasses} from './page.styles';
+import {AssetForm} from '../../models/AssetForm';
+import {DeleteAssetButton} from '../../models/DeleteAssetButton';
+import {MediaManager, type AdminMediaItem} from '../../models/MediaManager';
+import {adminEditModelPageClasses} from '../../models/[id]/page.styles';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Конвертирует произвольный JSON в строку для textarea с красивыми отступами.
- * Используется при заполнении `AssetForm` из значений, полученных из БД.
- */
-function jsonToTextarea(value: unknown) {
-  if (!value) return '';
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return '';
-  }
-}
-
-/**
- * Страница редактирования ассета (`/admin/models/[id]`).
- * Загружает ассет + медиа на сервере, подготавливает signed URLs и рендерит `AssetForm` + `MediaManager`.
- */
-export default async function AdminEditModelPage({
+export default async function AdminEditCreatorPage({
   params
 }: {
   params: Promise<{id: string}>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const {id} = await params;
-  const t = await getTranslations('admin.modelForm');
+  const tCommon = await getTranslations('common');
+  const tCreators = await getTranslations('admin.creators');
   const supabase = await createSupabaseServerClientReadOnly();
 
   const {data: asset, error: assetError} = await supabase
     .from('assets')
-    .select(
-      'id,document_id,title,description,model_type,license_type,status,measurements,details,is_published'
-    )
+    .select('id,document_id,title,description,creator_direction,license_type,status,is_published')
     .eq('id', id)
-    .eq('entity_type', 'model')
+    .eq('entity_type', 'creator')
     .maybeSingle();
 
   if (assetError || !asset) notFound();
@@ -57,22 +38,7 @@ export default async function AdminEditModelPage({
     .order('kind', {ascending: true})
     .order('order_index', {ascending: true});
 
-  const heroRow = media?.find((m) => m.kind === 'hero') ?? null;
   const galleryRows = (media ?? []).filter((m) => m.kind === 'gallery');
-
-  const hero: AdminMediaItem | null = heroRow
-    ? {
-        id: heroRow.id,
-        path: heroRow.path,
-        kind: 'hero',
-        order_index: heroRow.order_index,
-        url: (await createSignedImageUrl(supabase, heroRow.path, {
-          width: 1200,
-          quality: 82
-        })) as string | null
-      }
-    : null;
-
   const gallery: AdminMediaItem[] = (
     await Promise.all(
       galleryRows.map(async (m) => ({
@@ -90,29 +56,25 @@ export default async function AdminEditModelPage({
       <div className={adminEditModelPageClasses.header}>
         <div className={adminEditModelPageClasses.headerMeta}>
           <h1 className={adminEditModelPageClasses.title}>
-            {t('editTitle')}
+            {tCommon('edit')} {tCreators('title')}
           </h1>
-          <p className={adminEditModelPageClasses.subtitle}>
-            {asset.id}
-          </p>
+          <p className={adminEditModelPageClasses.subtitle}>{asset.id}</p>
         </div>
-        <DeleteAssetButton assetId={asset.id} title={asset.title} entityType="model" />
+        <DeleteAssetButton assetId={asset.id} title={asset.title} entityType="creator" />
       </div>
 
       <div className={adminEditModelPageClasses.panel}>
         <AssetForm
           assetId={asset.id}
-          entityType="model"
-          redirectBasePath="/admin/models"
+          entityType="creator"
+          redirectBasePath="/admin/creators"
           initialValues={{
             document_id: asset.document_id,
             title: asset.title,
             description: asset.description ?? '',
-            model_type: asset.model_type ?? '',
+            creator_direction: asset.creator_direction ?? '',
             license_type: asset.license_type ?? '',
             status: asset.status ?? '',
-            measurements: jsonToTextarea(asset.measurements),
-            details: jsonToTextarea(asset.details),
             is_published: asset.is_published
           }}
         />
@@ -122,8 +84,10 @@ export default async function AdminEditModelPage({
         <MediaManager
           assetId={asset.id}
           documentId={asset.document_id}
-          entityType="model"
-          hero={hero}
+          entityType="creator"
+          allowHero={false}
+          allowGallery
+          hero={null}
           gallery={gallery}
         />
       </div>

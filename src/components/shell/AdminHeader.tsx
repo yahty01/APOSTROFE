@@ -16,8 +16,13 @@ import { NavTabLabel } from "./NavTabLabel";
  * Таб-навигация админского раздела.
  * Используется для генерации ссылок и подсветки активного таба.
  */
-const TABS: { href: string; key: "models" | "marquee" | "public" }[] = [
+const TABS: {
+  href: string;
+  key: 'models' | 'creators' | 'influencers' | 'marquee' | 'public';
+}[] = [
   { href: "/admin/models", key: "models" },
+  { href: "/admin/creators", key: "creators" },
+  { href: "/admin/influencers", key: "influencers" },
   { href: "/admin/settings/marquee", key: "marquee" },
   { href: "/models", key: "public" },
 ];

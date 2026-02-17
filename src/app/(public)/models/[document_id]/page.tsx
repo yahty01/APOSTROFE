@@ -77,6 +77,7 @@ export default async function ModelDetailPage({
         'id,document_id,title,description,measurements,details,category,license_type,status,updated_at'
       )
       .eq('document_id', document_id)
+      .eq('entity_type', 'model')
       .maybeSingle();
 
     if (assetError || !asset) notFound();

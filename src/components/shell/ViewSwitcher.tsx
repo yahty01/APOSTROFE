@@ -20,19 +20,21 @@ function asViewMode(value: string | null): ViewMode | null {
 
 /**
  * Переключатель режима отображения каталога моделей.
- * Используется на странице `/models`: пишет `view` в query и запоминает выбор в cookie `models_view`.
+ * Используется на публичных страницах реестра: пишет `view` в query и запоминает выбор в cookie.
  */
-function setModelsViewCookie(mode: ViewMode) {
+function setModelsViewCookie(mode: ViewMode, cookieKey: string) {
   const maxAge = 60 * 60 * 24 * 365; // 1 год
-  document.cookie = `models_view=${mode}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+  document.cookie = `${cookieKey}=${mode}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
 }
 
 export function ViewSwitcher({
-  initialView = "cards",
+  initialView = 'cards',
+  cookieKey = 'models_view'
 }: {
   initialView?: ViewMode;
+  cookieKey?: string;
 }) {
-  const t = useTranslations("public");
+  const t = useTranslations('public');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -43,16 +45,16 @@ export function ViewSwitcher({
 
   function setView(nextMode: ViewMode) {
     const params = new URLSearchParams(searchParams.toString());
-    setModelsViewCookie(nextMode);
-    params.set("view", nextMode);
+    setModelsViewCookie(nextMode, cookieKey);
+    params.set('view', nextMode);
     startTransition(() => {
       router.push(`${pathname}?${params.toString()}`);
     });
   }
 
   useEffect(() => {
-    setModelsViewCookie(view);
-  }, [view]);
+    setModelsViewCookie(view, cookieKey);
+  }, [cookieKey, view]);
 
   return (
     <label className={viewSwitcherClasses.root}>
@@ -67,8 +69,8 @@ export function ViewSwitcher({
         }}
         className={viewSwitcherClasses.select}
       >
-        <option value="cards">{t("view.cards")}</option>
-        <option value="list">{t("view.list")}</option>
+        <option value='cards'>{t('view.cards')}</option>
+        <option value='list'>{t('view.list')}</option>
       </select>
     </label>
   );

@@ -7,6 +7,7 @@ import {useTranslations} from 'next-intl';
 import {toast} from 'sonner';
 
 import {useReportPending} from '@/lib/pending';
+import type {AssetEntityType} from '@/lib/assets/entity';
 
 import {
   deleteMediaAction,
@@ -30,16 +31,22 @@ export type AdminMediaItem = {
 
 /**
  * Управление медиа ассета: загрузка hero, загрузка/сортировка/удаление gallery.
- * Используется на странице `/admin/models/[id]` и вызывает server actions из `media-actions.ts`.
+ * Используется на страницах редактирования сущностей с медиа (`models`, `creators`, `influencers`).
  */
 export function MediaManager({
   assetId,
   documentId,
+  entityType = 'model',
+  allowHero = true,
+  allowGallery = true,
   hero,
   gallery
 }: {
   assetId: string;
   documentId: string;
+  entityType?: AssetEntityType;
+  allowHero?: boolean;
+  allowGallery?: boolean;
   hero: AdminMediaItem | null;
   gallery: AdminMediaItem[];
 }) {
@@ -93,6 +100,7 @@ export function MediaManager({
     startTransition(async () => {
       const fd = new FormData();
       fd.set('asset_id', assetId);
+      fd.set('entity_type', entityType);
       fd.set('file', file);
       const res = await uploadHeroAction(fd);
       if (!res.ok) toast.error(res.error || tToast('error'));
@@ -124,6 +132,7 @@ export function MediaManager({
     startTransition(async () => {
       const fd = new FormData();
       fd.set('asset_id', assetId);
+      fd.set('entity_type', entityType);
       list.forEach((f) => fd.append('files', f));
       const res = await uploadGalleryAction(fd);
       if (!res.ok) toast.error(res.error || tToast('error'));
@@ -137,7 +146,12 @@ export function MediaManager({
    */
   function move(mediaId: string, direction: 'up' | 'down') {
     startTransition(async () => {
-      const res = await moveGalleryMediaAction({asset_id: assetId, media_id: mediaId, direction});
+      const res = await moveGalleryMediaAction({
+        asset_id: assetId,
+        entity_type: entityType,
+        media_id: mediaId,
+        direction
+      });
       if (!res.ok) toast.error(res.error || tToast('error'));
       router.refresh();
     });
@@ -148,7 +162,11 @@ export function MediaManager({
    */
   function remove(mediaId: string) {
     startTransition(async () => {
-      const res = await deleteMediaAction({asset_id: assetId, media_id: mediaId});
+      const res = await deleteMediaAction({
+        asset_id: assetId,
+        entity_type: entityType,
+        media_id: mediaId
+      });
       if (!res.ok) toast.error(res.error || tToast('error'));
       else toast.success(tToast('saved'));
       router.refresh();
@@ -169,131 +187,135 @@ export function MediaManager({
         </div>
       </div>
 
-      <div className={mediaManagerClasses.section}>
-        <div className={mediaManagerClasses.sectionHeader}>
-          <h2 className={mediaManagerClasses.sectionTitle}>
-            {t('hero')}
-          </h2>
-          <label className={mediaManagerClasses.uploadLabel}>
-            <input
-              type="file"
-              accept={acceptImages}
-              className={mediaManagerClasses.hiddenInput}
-              disabled={isPending}
-              onChange={(e) => onUploadHero(e.target.files?.[0] ?? null)}
-            />
-            {isPending ? tCommon('loading') : t('upload')}
-          </label>
-        </div>
+      {allowHero ? (
+        <div className={mediaManagerClasses.section}>
+          <div className={mediaManagerClasses.sectionHeader}>
+            <h2 className={mediaManagerClasses.sectionTitle}>
+              {t('hero')}
+            </h2>
+            <label className={mediaManagerClasses.uploadLabel}>
+              <input
+                type="file"
+                accept={acceptImages}
+                className={mediaManagerClasses.hiddenInput}
+                disabled={isPending}
+                onChange={(e) => onUploadHero(e.target.files?.[0] ?? null)}
+              />
+              {isPending ? tCommon('loading') : t('upload')}
+            </label>
+          </div>
 
-        <div className={mediaManagerClasses.heroPreview}>
-          {hero?.url ? (
-            <Image
-              src={hero.url}
-              alt="Hero"
-              fill
-              className={mediaManagerClasses.previewImage}
-              sizes="(max-width: 1024px) 100vw, 60vw"
-            />
+          <div className={mediaManagerClasses.heroPreview}>
+            {hero?.url ? (
+              <Image
+                src={hero.url}
+                alt="Hero"
+                fill
+                className={mediaManagerClasses.previewImage}
+                sizes="(max-width: 1024px) 100vw, 60vw"
+              />
+            ) : (
+              <div className={mediaManagerClasses.previewFallback}>
+                {t('emptyHero')}
+              </div>
+            )}
+          </div>
+
+          {hero ? (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => remove(hero.id)}
+              className={mediaManagerClasses.removeHeroButton}
+            >
+              {t('remove')}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {allowGallery ? (
+        <div className={mediaManagerClasses.section}>
+          <div className={mediaManagerClasses.sectionHeader}>
+            <h2 className={mediaManagerClasses.sectionTitle}>
+              {t('gallery')}
+            </h2>
+            <label className={mediaManagerClasses.uploadLabel}>
+              <input
+                type="file"
+                accept={acceptImages}
+                multiple
+                className={mediaManagerClasses.hiddenInput}
+                disabled={isPending}
+                onChange={(e) => onUploadGallery(e.target.files)}
+              />
+              {isPending ? tCommon('loading') : t('upload')}
+            </label>
+          </div>
+
+          {gallery.length ? (
+            <div className={mediaManagerClasses.galleryGrid}>
+              {gallery
+                .slice()
+                .sort((a, b) => a.order_index - b.order_index)
+                .map((item, idx, arr) => (
+                  <div
+                    key={item.id}
+                    className={mediaManagerClasses.galleryItem}
+                  >
+                    <div className={mediaManagerClasses.galleryThumb}>
+                      {item.url ? (
+                        <Image
+                          src={item.url}
+                          alt={`Gallery ${idx + 1}`}
+                          fill
+                          className={mediaManagerClasses.previewImage}
+                          sizes="200px"
+                        />
+                      ) : null}
+                    </div>
+
+                    <div className={mediaManagerClasses.galleryMetaRow}>
+                      <div className={mediaManagerClasses.galleryIndex}>
+                        {item.order_index}
+                      </div>
+                      <div className={mediaManagerClasses.galleryActions}>
+                        <button
+                          type="button"
+                          disabled={isPending || idx === 0}
+                          onClick={() => move(item.id, 'up')}
+                          className={mediaManagerClasses.galleryButton}
+                        >
+                          {t('reorderUp')}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isPending || idx === arr.length - 1}
+                          onClick={() => move(item.id, 'down')}
+                          className={mediaManagerClasses.galleryButton}
+                        >
+                          {t('reorderDown')}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() => remove(item.id)}
+                          className={mediaManagerClasses.galleryButton}
+                        >
+                          {t('remove')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
           ) : (
-            <div className={mediaManagerClasses.previewFallback}>
-              {t('emptyHero')}
+            <div className={mediaManagerClasses.galleryEmpty}>
+              {t('emptyGallery')}
             </div>
           )}
         </div>
-
-        {hero ? (
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => remove(hero.id)}
-            className={mediaManagerClasses.removeHeroButton}
-          >
-            {t('remove')}
-          </button>
-        ) : null}
-      </div>
-
-      <div className={mediaManagerClasses.section}>
-        <div className={mediaManagerClasses.sectionHeader}>
-          <h2 className={mediaManagerClasses.sectionTitle}>
-            {t('gallery')}
-          </h2>
-          <label className={mediaManagerClasses.uploadLabel}>
-            <input
-              type="file"
-              accept={acceptImages}
-              multiple
-              className={mediaManagerClasses.hiddenInput}
-              disabled={isPending}
-              onChange={(e) => onUploadGallery(e.target.files)}
-            />
-            {isPending ? tCommon('loading') : t('upload')}
-          </label>
-        </div>
-
-        {gallery.length ? (
-          <div className={mediaManagerClasses.galleryGrid}>
-            {gallery
-              .slice()
-              .sort((a, b) => a.order_index - b.order_index)
-              .map((item, idx, arr) => (
-                <div
-                  key={item.id}
-                  className={mediaManagerClasses.galleryItem}
-                >
-                  <div className={mediaManagerClasses.galleryThumb}>
-                    {item.url ? (
-                      <Image
-                        src={item.url}
-                        alt={`Gallery ${idx + 1}`}
-                        fill
-                        className={mediaManagerClasses.previewImage}
-                        sizes="200px"
-                      />
-                    ) : null}
-                  </div>
-
-                  <div className={mediaManagerClasses.galleryMetaRow}>
-                    <div className={mediaManagerClasses.galleryIndex}>
-                      {item.order_index}
-                    </div>
-                    <div className={mediaManagerClasses.galleryActions}>
-                      <button
-                        type="button"
-                        disabled={isPending || idx === 0}
-                        onClick={() => move(item.id, 'up')}
-                        className={mediaManagerClasses.galleryButton}
-                      >
-                        {t('reorderUp')}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={isPending || idx === arr.length - 1}
-                        onClick={() => move(item.id, 'down')}
-                        className={mediaManagerClasses.galleryButton}
-                      >
-                        {t('reorderDown')}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={isPending}
-                        onClick={() => remove(item.id)}
-                        className={mediaManagerClasses.galleryButton}
-                      >
-                        {t('remove')}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        ) : (
-          <div className={mediaManagerClasses.galleryEmpty}>
-            {t('emptyGallery')}
-          </div>
-        )}
-      </div>
+      ) : null}
     </div>
   );
 }

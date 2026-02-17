@@ -8,6 +8,8 @@ export const assetCardsClasses = {
   card: "group flex flex-col bg-[var(--color-surface)] border border-[var(--color-line)]",
   mediaLink: "relative aspect-[4/5] w-full bg-[var(--color-paper)]",
   mediaImage: "object-cover object-top",
+  mediaTitle:
+    "flex h-full w-full items-center justify-center px-4 text-center font-doc text-[16px] uppercase tracking-[0.16em] text-[var(--color-ink)]",
   mediaFallback:
     "flex h-full w-full items-center justify-center font-doc text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]",
   body: "mt-px flex flex-1 flex-col gap-px bg-[var(--color-line)]",

@@ -4,6 +4,11 @@ import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 import {z} from 'zod';
 
+import {
+  getAdminBasePathForEntity,
+  getPublicBasePathForEntity,
+  type AssetEntityType
+} from '@/lib/assets/entity';
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 
 /**
@@ -47,7 +52,8 @@ function getSafeImageExt(fileName: string, mimeType: string) {
 }
 
 const uploadSchema = z.object({
-  asset_id: z.string().uuid()
+  asset_id: z.string().uuid(),
+  entity_type: z.enum(['model', 'creator', 'influencer']).default('model')
 });
 
 type ActionResult = {ok: true} | {ok: false; error: string};
@@ -56,15 +62,29 @@ type ActionResult = {ok: true} | {ok: false; error: string};
  * Достаёт `document_id` ассета — он используется как "папка" для хранения файлов в Supabase Storage.
  * Вынесено отдельно, чтобы upload/delete/reorder могли переиспользовать и единообразно падать.
  */
-async function getAssetDocumentId(supabase: Awaited<ReturnType<typeof requireAdminOrEditor>>, assetId: string) {
+async function getAssetDocumentId(
+  supabase: Awaited<ReturnType<typeof requireAdminOrEditor>>,
+  assetId: string,
+  entityType: AssetEntityType
+) {
   const {data, error} = await supabase
     .from('assets')
     .select('id,document_id')
     .eq('id', assetId)
+    .eq('entity_type', entityType)
     .maybeSingle();
 
   if (error || !data) throw new Error(error?.message ?? 'Asset not found');
   return data.document_id;
+}
+
+function revalidateEntityMediaPaths(entityType: AssetEntityType, assetId: string, documentId: string) {
+  const publicBase = getPublicBasePathForEntity(entityType);
+  const adminBase = getAdminBasePathForEntity(entityType);
+
+  revalidatePath(publicBase);
+  if (entityType === 'model') revalidatePath(`/models/${documentId}`);
+  revalidatePath(`${adminBase}/${assetId}`);
 }
 
 /**
@@ -78,7 +98,10 @@ const maxUploadBytes = 10 * 1024 * 1024;
  * Используется в `MediaManager` и `NewModelClient`; обновляет Storage + таблицу `asset_media` и делает revalidate.
  */
 export async function uploadHeroAction(formData: FormData): Promise<ActionResult> {
-  const parsed = uploadSchema.safeParse({asset_id: formData.get('asset_id')});
+  const parsed = uploadSchema.safeParse({
+    asset_id: formData.get('asset_id'),
+    entity_type: formData.get('entity_type') ?? 'model'
+  });
   if (!parsed.success) return {ok: false, error: 'Invalid asset id'};
 
   const file = formData.get('file');
@@ -90,7 +113,11 @@ export async function uploadHeroAction(formData: FormData): Promise<ActionResult
   if (!ext) return {ok: false, error: 'Unsupported image type'};
 
   const supabase = await requireAdminOrEditor();
-  const documentId = await getAssetDocumentId(supabase, parsed.data.asset_id);
+  const documentId = await getAssetDocumentId(
+    supabase,
+    parsed.data.asset_id,
+    parsed.data.entity_type
+  );
 
   try {
     // Remove old hero media (best effort)
@@ -125,9 +152,7 @@ export async function uploadHeroAction(formData: FormData): Promise<ActionResult
     });
     if (insertError) return {ok: false, error: insertError.message};
 
-    revalidatePath('/models');
-    revalidatePath(`/models/${documentId}`);
-    revalidatePath(`/admin/models/${parsed.data.asset_id}`);
+    revalidateEntityMediaPaths(parsed.data.entity_type, parsed.data.asset_id, documentId);
 
     return {ok: true};
   } catch (e) {
@@ -140,7 +165,10 @@ export async function uploadHeroAction(formData: FormData): Promise<ActionResult
  * Используется в `MediaManager` и `NewModelClient`.
  */
 export async function uploadGalleryAction(formData: FormData): Promise<ActionResult> {
-  const parsed = uploadSchema.safeParse({asset_id: formData.get('asset_id')});
+  const parsed = uploadSchema.safeParse({
+    asset_id: formData.get('asset_id'),
+    entity_type: formData.get('entity_type') ?? 'model'
+  });
   if (!parsed.success) return {ok: false, error: 'Invalid asset id'};
 
   const files = formData
@@ -156,7 +184,11 @@ export async function uploadGalleryAction(formData: FormData): Promise<ActionRes
   if (unsupported) return {ok: false, error: 'Unsupported image type'};
 
   const supabase = await requireAdminOrEditor();
-  const documentId = await getAssetDocumentId(supabase, parsed.data.asset_id);
+  const documentId = await getAssetDocumentId(
+    supabase,
+    parsed.data.asset_id,
+    parsed.data.entity_type
+  );
 
   const {data: last} = await supabase
     .from('asset_media')
@@ -192,15 +224,14 @@ export async function uploadGalleryAction(formData: FormData): Promise<ActionRes
     nextIndex += 1;
   }
 
-  revalidatePath('/models');
-  revalidatePath(`/models/${documentId}`);
-  revalidatePath(`/admin/models/${parsed.data.asset_id}`);
+  revalidateEntityMediaPaths(parsed.data.entity_type, parsed.data.asset_id, documentId);
 
   return {ok: true};
 }
 
 const moveSchema = z.object({
   asset_id: z.string().uuid(),
+  entity_type: z.enum(['model', 'creator', 'influencer']).default('model'),
   media_id: z.string().uuid(),
   direction: z.enum(['up', 'down'])
 });
@@ -246,12 +277,13 @@ export async function moveGalleryMediaAction(input: unknown): Promise<ActionResu
     .eq('id', b.id);
   if (err2) return {ok: false, error: err2.message};
 
-  revalidatePath(`/admin/models/${parsed.data.asset_id}`);
+  revalidatePath(`${getAdminBasePathForEntity(parsed.data.entity_type)}/${parsed.data.asset_id}`);
   return {ok: true};
 }
 
 const deleteSchema = z.object({
   asset_id: z.string().uuid(),
+  entity_type: z.enum(['model', 'creator', 'influencer']).default('model'),
   media_id: z.string().uuid()
 });
 
@@ -264,7 +296,11 @@ export async function deleteMediaAction(input: unknown): Promise<ActionResult> {
   if (!parsed.success) return {ok: false, error: 'Invalid request'};
 
   const supabase = await requireAdminOrEditor();
-  const documentId = await getAssetDocumentId(supabase, parsed.data.asset_id);
+  const documentId = await getAssetDocumentId(
+    supabase,
+    parsed.data.asset_id,
+    parsed.data.entity_type
+  );
 
   const {data: media, error: mediaError} = await supabase
     .from('asset_media')
@@ -283,9 +319,7 @@ export async function deleteMediaAction(input: unknown): Promise<ActionResult> {
 
   if (deleteError) return {ok: false, error: deleteError.message};
 
-  revalidatePath('/models');
-  revalidatePath(`/models/${documentId}`);
-  revalidatePath(`/admin/models/${parsed.data.asset_id}`);
+  revalidateEntityMediaPaths(parsed.data.entity_type, parsed.data.asset_id, documentId);
 
   return {ok: true};
 }

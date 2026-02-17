@@ -1,28 +1,99 @@
 /**
  * Brand mark used across the app (header + app icon).
- * Source: `/Users/sonolbol/Downloads/brand-logo.svg`
+ * Source: `/Users/sonolbol/Downloads/brend-logo.svg`
  *
- * Important: keep the SVG paths identical so the mark stays consistent everywhere.
+ * Important: keep the SVG/filter blocks identical so the mark stays consistent everywhere.
  */
 export function BrandLogoMark(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
-      viewBox="0 0 288 339"
+      viewBox="0 0 287 339"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M47.1141 336.555L2.28125 56.1873L284.965 2.55469L197.38 336.555H47.1141Z"
-        fill="black"
-        stroke="black"
-        strokeWidth="4"
-      />
-      <path
-        d="M128.324 248.595C119.084 248.595 110.431 246.908 102.364 243.535C94.4442 240.161 87.4776 235.321 81.4642 229.015C75.5976 222.708 70.9042 215.081 67.3842 206.135C64.0109 197.188 62.3242 187.068 62.3242 175.775C62.3242 164.628 64.0109 154.581 67.3842 145.635C70.9042 136.541 75.5976 128.841 81.4642 122.535C87.4776 116.228 94.4442 111.388 102.364 108.015C110.431 104.641 119.084 102.955 128.324 102.955C137.564 102.955 146.144 104.641 154.064 108.015C162.131 111.388 169.098 116.228 174.964 122.535C180.978 128.841 185.671 136.541 189.044 145.635C192.564 154.581 194.324 164.628 194.324 175.775C194.324 187.068 192.564 197.188 189.044 206.135C185.671 215.081 180.978 222.708 174.964 229.015C169.098 235.321 162.131 240.161 154.064 243.535C146.144 246.908 137.564 248.595 128.324 248.595ZM128.324 236.495C135.804 236.495 142.698 235.101 149.004 232.315C155.458 229.528 160.958 225.715 165.504 220.875C170.198 215.888 173.864 210.095 176.504 203.495C179.144 196.895 180.464 189.855 180.464 182.375V169.175C180.464 161.695 179.144 154.655 176.504 148.055C173.864 141.455 170.198 135.735 165.504 130.895C160.958 125.908 155.458 122.021 149.004 119.235C142.698 116.448 135.804 115.055 128.324 115.055C120.844 115.055 113.878 116.448 107.424 119.235C101.118 122.021 95.6176 125.908 90.9242 130.895C86.3776 135.735 82.7842 141.455 80.1442 148.055C77.5042 154.655 76.1842 161.695 76.1842 169.175V182.375C76.1842 189.855 77.5042 196.895 80.1442 203.495C82.7842 210.095 86.3776 215.888 90.9242 220.875C95.6176 225.715 101.118 229.528 107.424 232.315C113.878 235.101 120.844 236.495 128.324 236.495ZM130.304 218.895C124.144 218.895 118.571 217.868 113.584 215.815C108.598 213.761 104.344 210.901 100.824 207.235C97.3042 203.421 94.5909 198.875 92.6842 193.595C90.7776 188.315 89.8242 182.448 89.8242 175.995C89.8242 169.395 90.7776 163.455 92.6842 158.175C94.7376 152.748 97.5242 148.201 101.044 144.535C104.711 140.721 108.964 137.788 113.804 135.735C118.791 133.681 124.291 132.655 130.304 132.655C139.398 132.655 146.658 134.781 152.084 139.035C157.511 143.141 161.544 148.495 164.184 155.095L145.484 164.555C144.018 161.181 142.111 158.468 139.764 156.415C137.564 154.215 134.558 153.115 130.744 153.115C126.344 153.115 122.898 154.508 120.404 157.295C117.911 159.935 116.664 163.381 116.664 167.635V183.695C116.664 187.948 117.911 191.468 120.404 194.255C122.898 197.041 126.418 198.435 130.964 198.435C135.071 198.435 138.298 197.335 140.644 195.135C143.138 192.935 145.191 190.221 146.804 186.995L165.504 196.455C164.184 199.388 162.571 202.248 160.664 205.035C158.758 207.675 156.338 210.021 153.404 212.075C150.618 214.128 147.318 215.815 143.504 217.135C139.691 218.308 135.291 218.895 130.304 218.895Z"
-        fill="#F5F5F5"
-      />
+      <g filter="url(#filter0_n_396_449)">
+        <path
+          d="M46.9421 336.557L2.28027 56.1892L283.886 2.55664L196.635 336.557H46.9421Z"
+          fill="black"
+        />
+        <path
+          d="M46.9421 336.557L2.28027 56.1892L283.886 2.55664L196.635 336.557H46.9421Z"
+          stroke="black"
+          strokeWidth="4"
+        />
+      </g>
+      <defs>
+        <filter
+          id="filter0_n_396_449"
+          x="0"
+          y="0"
+          width="286.621"
+          height="338.557"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="2 2"
+            stitchTiles="stitch"
+            numOctaves="3"
+            result="noise"
+            seed="3522"
+          />
+          <feColorMatrix in="noise" type="luminanceToAlpha" result="alphaNoise" />
+          <feComponentTransfer in="alphaNoise" result="coloredNoise1">
+            <feFuncA
+              type="discrete"
+              tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "
+            />
+          </feComponentTransfer>
+          <feComposite
+            operator="in"
+            in2="shape"
+            in="coloredNoise1"
+            result="noise1Clipped"
+          />
+          <feComponentTransfer in="alphaNoise" result="coloredNoise2">
+            <feFuncA
+              type="discrete"
+              tableValues="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 "
+            />
+          </feComponentTransfer>
+          <feComposite
+            operator="in"
+            in2="shape"
+            in="coloredNoise2"
+            result="noise2Clipped"
+          />
+          <feFlood floodColor="rgba(0, 0, 0, 0.5)" result="color1Flood" />
+          <feComposite
+            operator="in"
+            in2="noise1Clipped"
+            in="color1Flood"
+            result="color1"
+          />
+          <feFlood floodColor="rgba(78, 78, 78, 0.25)" result="color2Flood" />
+          <feComposite
+            operator="in"
+            in2="noise2Clipped"
+            in="color2Flood"
+            result="color2"
+          />
+          <feMerge result="effect1_noise_396_449">
+            <feMergeNode in="shape" />
+            <feMergeNode in="color1" />
+            <feMergeNode in="color2" />
+          </feMerge>
+        </filter>
+      </defs>
     </svg>
   );
 }
-

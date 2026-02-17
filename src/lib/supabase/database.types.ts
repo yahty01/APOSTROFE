@@ -29,10 +29,15 @@ export type Database = {
       assets: {
         Row: {
           id: string;
+          entity_type: 'model' | 'creator' | 'influencer';
           document_id: string;
           title: string;
           description: string | null;
           category: string | null;
+          model_type: string | null;
+          creator_direction: string | null;
+          influencer_topic: string | null;
+          influencer_platforms: string | null;
           license_type: string | null;
           status: string | null;
           measurements: Json | null;
@@ -43,10 +48,15 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          entity_type?: 'model' | 'creator' | 'influencer';
           document_id: string;
           title: string;
           description?: string | null;
           category?: string | null;
+          model_type?: string | null;
+          creator_direction?: string | null;
+          influencer_topic?: string | null;
+          influencer_platforms?: string | null;
           license_type?: string | null;
           status?: string | null;
           measurements?: Json | null;
@@ -56,10 +66,15 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          entity_type?: 'model' | 'creator' | 'influencer';
           document_id?: string;
           title?: string;
           description?: string | null;
           category?: string | null;
+          model_type?: string | null;
+          creator_direction?: string | null;
+          influencer_topic?: string | null;
+          influencer_platforms?: string | null;
           license_type?: string | null;
           status?: string | null;
           measurements?: Json | null;
@@ -126,4 +141,3 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
-

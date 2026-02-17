@@ -68,3 +68,7 @@ cp .env.example .env.local
 ## Deploy (Timeweb)
 
 См. пошаговый гайд: `docs/deploy/README.md`.
+
+## MCP (Cursor)
+
+Подключение Supabase MCP для агента в Cursor: `docs/tools/mcp-supabase-cursor.md`.
