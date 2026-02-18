@@ -12,7 +12,11 @@ import {
 } from '@/lib/assets/entity';
 
 import {AssetForm} from '../AssetForm';
-import {uploadGalleryAction, uploadHeroAction} from '../media-actions';
+import {
+  uploadCatalogAction,
+  uploadGalleryAction,
+  uploadHeroAction
+} from '../media-actions';
 
 import {newModelClientClasses} from './NewModelClient.styles';
 
@@ -24,17 +28,19 @@ const acceptImages = 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp';
 
 /**
  * Клиентская часть страницы создания сущности реестра.
- * Может дополнительно подгружать hero/gallery сразу после сохранения.
+ * Может дополнительно подгружать catalog/hero/gallery сразу после сохранения.
  */
 export function NewModelClient({
   entityType = 'model',
   withMedia = true,
+  allowCatalog = true,
   allowHero = true,
   allowGallery = true,
   redirectBasePath
 }: {
   entityType?: AssetEntityType;
   withMedia?: boolean;
+  allowCatalog?: boolean;
   allowHero?: boolean;
   allowGallery?: boolean;
   redirectBasePath?: string;
@@ -45,11 +51,14 @@ export function NewModelClient({
   const tToast = useTranslations('admin.toast');
   const router = useRouter();
   const adminBasePath = redirectBasePath ?? getAdminBasePathForEntity(entityType);
+  const canUploadCatalog = withMedia && allowCatalog;
   const canUploadHero = withMedia && allowHero;
   const canUploadGallery = withMedia && allowGallery;
-  const hasMediaInputs = canUploadHero || canUploadGallery;
-  const mediaSectionsCount = Number(canUploadHero) + Number(canUploadGallery);
+  const hasMediaInputs = canUploadCatalog || canUploadHero || canUploadGallery;
+  const mediaSectionsCount =
+    Number(canUploadCatalog) + Number(canUploadHero) + Number(canUploadGallery);
 
+  const [catalogFile, setCatalogFile] = useState<File | null>(null);
   const [heroFile, setHeroFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
 
@@ -71,6 +80,15 @@ export function NewModelClient({
    */
   async function uploadSelected(assetId: string) {
     if (!hasMediaInputs) return;
+
+    if (canUploadCatalog && catalogFile) {
+      const fd = new FormData();
+      fd.set('asset_id', assetId);
+      fd.set('entity_type', entityType);
+      fd.set('file', catalogFile);
+      const res = await uploadCatalogAction(fd);
+      if (!res.ok) toast.error(res.error || tToast('error'));
+    }
 
     if (canUploadHero && heroFile) {
       const fd = new FormData();
@@ -125,6 +143,7 @@ export function NewModelClient({
             <button
               type="button"
               onClick={() => {
+                setCatalogFile(null);
                 setHeroFile(null);
                 setGalleryFiles([]);
               }}
@@ -141,6 +160,45 @@ export function NewModelClient({
                 : newModelClientClasses.inputsGridSingle
             }
           >
+            {canUploadCatalog ? (
+              <div className={newModelClientClasses.field}>
+                <div className={newModelClientClasses.fieldLabel}>
+                  {tMedia('catalog')}
+                </div>
+                <label className={newModelClientClasses.fileLabel}>
+                  <input
+                    type="file"
+                    accept={acceptImages}
+                    className={newModelClientClasses.fileInputHidden}
+                    onChange={(e) => setCatalogFile(e.target.files?.[0] ?? null)}
+                  />
+                  {tMedia('selectFiles')}
+                </label>
+                <div className={newModelClientClasses.fileInfo}>
+                  {catalogFile ? (
+                    <div className={newModelClientClasses.fileInfoList}>
+                      <div className={newModelClientClasses.fileName}>
+                        {catalogFile.name}
+                      </div>
+                      <div>
+                        {tMedia('sizeLabel', {mb: bytesToMb(catalogFile.size)})}
+                      </div>
+                      {catalogFile.size >= softWarnSingleBytes ? (
+                        <div className={newModelClientClasses.warn}>
+                          {tMedia('warningLargeFile', {mb: bytesToMb(catalogFile.size)})}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    tMedia('noFilesSelected')
+                  )}
+                </div>
+                <div className={newModelClientClasses.fieldHint}>
+                  {tMedia('catalogFormatHelp')}
+                </div>
+              </div>
+            ) : null}
+
             {canUploadHero ? (
               <div className={newModelClientClasses.field}>
                 <div className={newModelClientClasses.fieldLabel}>
@@ -173,6 +231,9 @@ export function NewModelClient({
                   ) : (
                     tMedia('noFilesSelected')
                   )}
+                </div>
+                <div className={newModelClientClasses.fieldHint}>
+                  {tMedia('heroFormatHelp')}
                 </div>
               </div>
             ) : null}
@@ -216,6 +277,9 @@ export function NewModelClient({
                   })() : (
                     <span>{tMedia('noFilesSelected')}</span>
                   )}
+                </div>
+                <div className={newModelClientClasses.fieldHint}>
+                  {tMedia('galleryFormatHelp')}
                 </div>
               </div>
             ) : null}

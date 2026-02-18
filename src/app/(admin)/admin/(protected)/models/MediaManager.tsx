@@ -12,6 +12,7 @@ import type {AssetEntityType} from '@/lib/assets/entity';
 import {
   deleteMediaAction,
   moveGalleryMediaAction,
+  uploadCatalogAction,
   uploadGalleryAction,
   uploadHeroAction
 } from './media-actions';
@@ -19,34 +20,38 @@ import {mediaManagerClasses} from './MediaManager.styles';
 
 /**
  * UI-тип медиа-элемента для админки.
- * Заполняется на сервере (страница редактирования) и используется для рендера hero/gallery в `MediaManager`.
+ * Заполняется на сервере (страница редактирования) и используется для рендера catalog/hero/gallery в `MediaManager`.
  */
 export type AdminMediaItem = {
   id: string;
   path: string;
   url: string | null;
-  kind: 'hero' | 'gallery';
+  kind: 'catalog' | 'hero' | 'gallery';
   order_index: number;
 };
 
 /**
- * Управление медиа ассета: загрузка hero, загрузка/сортировка/удаление gallery.
+ * Управление медиа ассета: загрузка catalog/hero, загрузка/сортировка/удаление gallery.
  * Используется на страницах редактирования сущностей с медиа (`models`, `creators`, `influencers`).
  */
 export function MediaManager({
   assetId,
   documentId,
   entityType = 'model',
+  allowCatalog = true,
   allowHero = true,
   allowGallery = true,
+  catalog,
   hero,
   gallery
 }: {
   assetId: string;
   documentId: string;
   entityType?: AssetEntityType;
+  allowCatalog?: boolean;
   allowHero?: boolean;
   allowGallery?: boolean;
+  catalog: AdminMediaItem | null;
   hero: AdminMediaItem | null;
   gallery: AdminMediaItem[];
 }) {
@@ -82,10 +87,7 @@ export function MediaManager({
     return null;
   }
 
-  /**
-   * Загрузка hero-файла: валидируем, при необходимости предупреждаем про размер, вызываем `uploadHeroAction`.
-   */
-  function onUploadHero(file: File | null) {
+  function onUploadSingle(file: File | null, kind: 'catalog' | 'hero') {
     if (!file) return;
     const err = validateFile(file);
     if (err) {
@@ -102,11 +104,25 @@ export function MediaManager({
       fd.set('asset_id', assetId);
       fd.set('entity_type', entityType);
       fd.set('file', file);
-      const res = await uploadHeroAction(fd);
+      const res =
+        kind === 'catalog'
+          ? await uploadCatalogAction(fd)
+          : await uploadHeroAction(fd);
       if (!res.ok) toast.error(res.error || tToast('error'));
       else toast.success(tToast('saved'));
       router.refresh();
     });
+  }
+
+  function onUploadCatalog(file: File | null) {
+    onUploadSingle(file, 'catalog');
+  }
+
+  /**
+   * Загрузка hero-файла: валидируем, при необходимости предупреждаем про размер, вызываем `uploadHeroAction`.
+   */
+  function onUploadHero(file: File | null) {
+    onUploadSingle(file, 'hero');
   }
 
   /**
@@ -158,7 +174,7 @@ export function MediaManager({
   }
 
   /**
-   * Удаляет hero/gallery элемент через server action и обновляет страницу.
+   * Удаляет catalog/hero/gallery элемент через server action и обновляет страницу.
    */
   function remove(mediaId: string) {
     startTransition(async () => {
@@ -182,17 +198,77 @@ export function MediaManager({
         <div className={mediaManagerClasses.howList}>
           <div>{t('howItWorksFormats', {mb: 10})}</div>
           <div>{t('howItWorksPaths', {documentId})}</div>
+          <div>{t('catalogFormatHelp')}</div>
+          <div>{t('heroFormatHelp')}</div>
+          <div>{t('galleryFormatHelp')}</div>
           <div>{t('howItWorksPublish')}</div>
           <div>{t('storageNote')}</div>
         </div>
       </div>
 
+      {allowCatalog ? (
+        <div className={mediaManagerClasses.section}>
+          <div className={mediaManagerClasses.sectionHeader}>
+            <div>
+              <h2 className={mediaManagerClasses.sectionTitle}>
+                {t('catalog')}
+              </h2>
+              <div className={mediaManagerClasses.sectionHint}>
+                {t('catalogFormatHelp')}
+              </div>
+            </div>
+            <label className={mediaManagerClasses.uploadLabel}>
+              <input
+                type="file"
+                accept={acceptImages}
+                className={mediaManagerClasses.hiddenInput}
+                disabled={isPending}
+                onChange={(e) => onUploadCatalog(e.target.files?.[0] ?? null)}
+              />
+              {isPending ? tCommon('loading') : t('upload')}
+            </label>
+          </div>
+
+          <div className={mediaManagerClasses.catalogPreview}>
+            {catalog?.url ? (
+              <Image
+                src={catalog.url}
+                alt="Catalog"
+                fill
+                className={mediaManagerClasses.previewImage}
+                sizes="(max-width: 1024px) 100vw, 40vw"
+              />
+            ) : (
+              <div className={mediaManagerClasses.previewFallback}>
+                {t('emptyCatalog')}
+              </div>
+            )}
+          </div>
+
+          {catalog ? (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => remove(catalog.id)}
+              className={mediaManagerClasses.removeSingleButton}
+            >
+              {t('remove')}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
       {allowHero ? (
         <div className={mediaManagerClasses.section}>
           <div className={mediaManagerClasses.sectionHeader}>
-            <h2 className={mediaManagerClasses.sectionTitle}>
-              {t('hero')}
-            </h2>
+            <div>
+              <h2 className={mediaManagerClasses.sectionTitle}>
+                {t('hero')}
+              </h2>
+              <div className={mediaManagerClasses.sectionHint}>
+                {t('heroFormatHelp')}
+              </div>
+            </div>
             <label className={mediaManagerClasses.uploadLabel}>
               <input
                 type="file"
@@ -226,7 +302,7 @@ export function MediaManager({
               type="button"
               disabled={isPending}
               onClick={() => remove(hero.id)}
-              className={mediaManagerClasses.removeHeroButton}
+              className={mediaManagerClasses.removeSingleButton}
             >
               {t('remove')}
             </button>
@@ -237,9 +313,14 @@ export function MediaManager({
       {allowGallery ? (
         <div className={mediaManagerClasses.section}>
           <div className={mediaManagerClasses.sectionHeader}>
-            <h2 className={mediaManagerClasses.sectionTitle}>
-              {t('gallery')}
-            </h2>
+            <div>
+              <h2 className={mediaManagerClasses.sectionTitle}>
+                {t('gallery')}
+              </h2>
+              <div className={mediaManagerClasses.sectionHint}>
+                {t('galleryFormatHelp')}
+              </div>
+            </div>
             <label className={mediaManagerClasses.uploadLabel}>
               <input
                 type="file"

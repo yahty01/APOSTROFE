@@ -13,7 +13,7 @@ export const newModelClientClasses = {
     'mt-2 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-muted)]',
   clearButton:
     'flex h-9 items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-3 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]',
-  inputsGrid: 'mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2',
+  inputsGrid: 'mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3',
   inputsGridSingle: 'mt-4 grid grid-cols-1 gap-4',
   field: 'space-y-2',
   fieldLabel:
@@ -24,6 +24,8 @@ export const newModelClientClasses = {
   fileInfo: 'font-doc text-[11px] tracking-[0.06em] text-[var(--color-muted)]',
   fileInfoList: 'space-y-1',
   fileName: 'truncate',
+  fieldHint:
+    'font-doc text-[10px] uppercase tracking-[0.16em] text-[var(--color-muted)]',
   warn: 'text-amber-700',
   note:
     'mt-4 font-doc text-[10px] uppercase tracking-[0.18em] text-[var(--color-muted)]'

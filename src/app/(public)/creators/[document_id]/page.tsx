@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {getTranslations} from 'next-intl/server';
@@ -31,6 +32,7 @@ export default async function CreatorDetailPage({
   const tPublic = await getTranslations('public');
   const tCommon = await getTranslations('common');
 
+  let heroUrl: string | null = null;
   let galleryUrls: string[] = [];
   let asset: {
     id: string;
@@ -61,10 +63,22 @@ export default async function CreatorDetailPage({
       .from('asset_media')
       .select('path,kind,order_index')
       .eq('asset_id', data.id)
-      .eq('kind', 'gallery')
+      .order('kind', {ascending: true})
       .order('order_index', {ascending: true});
 
-    const galleryPaths = (media ?? []).map((m) => m.path);
+    const heroPath =
+      media?.find((m) => m.kind === 'hero')?.path ??
+      media?.find((m) => m.kind === 'catalog')?.path ??
+      null;
+    const galleryPaths = (media ?? [])
+      .filter((m) => m.kind === 'gallery')
+      .sort((a, b) => a.order_index - b.order_index)
+      .map((m) => m.path);
+
+    heroUrl = heroPath
+      ? await createSignedImageUrl(supabase, heroPath, {width: 1600, quality: 82})
+      : null;
+
     galleryUrls = (
       await Promise.all(
         galleryPaths.map((p) =>
@@ -105,17 +119,28 @@ export default async function CreatorDetailPage({
         <div className={modelDetailPageClasses.mainGrid}>
           <section className={modelDetailPageClasses.mediaSection}>
             <div className={modelDetailPageClasses.hero}>
-              <div className={modelDetailPageClasses.heroFallback}>
-                <span className="font-condensed text-[clamp(28px,5vw,64px)] tracking-[0.12em] text-[var(--color-ink)]">
-                  {creatorName.toUpperCase()}
-                </span>
-              </div>
+              {heroUrl ? (
+                <Image
+                  src={heroUrl}
+                  alt={creatorName}
+                  fill
+                  className={modelDetailPageClasses.heroImage}
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  priority
+                />
+              ) : (
+                <div className={modelDetailPageClasses.heroFallback}>
+                  <span className="font-condensed text-[clamp(28px,5vw,64px)] tracking-[0.12em] text-[var(--color-ink)]">
+                    {creatorName.toUpperCase()}
+                  </span>
+                </div>
+              )}
             </div>
           </section>
 
           <section className={modelDetailPageClasses.detailsSection}>
             <h1 className={modelDetailPageClasses.title}>
-              {asset.document_id}
+              {creatorName}
             </h1>
             <div className={modelDetailPageClasses.meta}>
               {status} · {license} · {timestamp}
@@ -148,7 +173,7 @@ export default async function CreatorDetailPage({
                 rel="noreferrer"
                 className={modelDetailPageClasses.actionPrimary}
               >
-                {tPublic('cta.requestLicense')}
+                {`[ ${tPublic('cta.creatorCollaborate')} ]`}
               </a>
               <a
                 href={requestInfoHref}
@@ -156,7 +181,7 @@ export default async function CreatorDetailPage({
                 rel="noreferrer"
                 className={modelDetailPageClasses.actionSecondary}
               >
-                {tPublic('cta.requestInfo')}
+                {`[ ${tPublic('cta.creatorRequestDealmemo')} ]`}
               </a>
             </div>
           </section>

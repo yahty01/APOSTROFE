@@ -3,5 +3,7 @@
  * Держим здесь, чтобы `layout.tsx` оставался максимально декларативным.
  */
 export const publicMainClasses = {
-  root: 'space-y-8 md:space-y-12'
+  root: 'space-y-8 md:space-y-12',
+  headingLabel: 'inline-flex items-baseline',
+  headingApostrophe: 'ml-[-0.22em]'
 } as const;

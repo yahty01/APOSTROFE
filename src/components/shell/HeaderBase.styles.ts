@@ -5,7 +5,7 @@
 export const headerBaseClasses = {
   header: "ui-line",
   grid: "grid grid-flow-row-dense grid-cols-[1fr_auto] items-center gap-3 px-4 py-4 md:grid-cols-[1fr_auto_1fr]",
-  brandWrap: "flex items-center gap-2",
+  brandWrap: "flex items-center gap-0",
   mark: "h-6 w-auto shrink-0",
   brandLink: "font-condensed text-m font-bold uppercase tracking-[0.02em]",
   navBase:
@@ -13,5 +13,6 @@ export const headerBaseClasses = {
   tab: "ui-tab md:w-full",
   tabActive: "ui-tab--active",
   actions: "flex flex-wrap items-center justify-end gap-2",
-  apostrophe: "ml-[-0.15em]",
+  navLabel: "inline-flex items-baseline",
+  apostrophe: "mltelegram-cloud-photo-size-2-5233584973971921141-y.jpg",
 } as const;

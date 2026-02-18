@@ -40,8 +40,22 @@ export default async function AdminEditInfluencerPage({
     .order('kind', {ascending: true})
     .order('order_index', {ascending: true});
 
+  const catalogRow = media?.find((m) => m.kind === 'catalog') ?? null;
   const heroRow = media?.find((m) => m.kind === 'hero') ?? null;
   const galleryRows = (media ?? []).filter((m) => m.kind === 'gallery');
+
+  const catalog: AdminMediaItem | null = catalogRow
+    ? {
+        id: catalogRow.id,
+        path: catalogRow.path,
+        kind: 'catalog',
+        order_index: catalogRow.order_index,
+        url: (await createSignedImageUrl(supabase, catalogRow.path, {
+          width: 900,
+          quality: 82
+        })) as string | null
+      }
+    : null;
 
   const hero: AdminMediaItem | null = heroRow
     ? {
@@ -113,6 +127,7 @@ export default async function AdminEditInfluencerPage({
           assetId={asset.id}
           documentId={asset.document_id}
           entityType="influencer"
+          catalog={catalog}
           hero={hero}
           gallery={gallery}
         />

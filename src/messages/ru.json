@@ -37,8 +37,10 @@
       "influencersSubtitle": "РЕЕСТР ЛИЦЕНЗИРОВАННЫХ ИНФЛЮЕНСЕРОВ."
     },
     "cta": {
-      "requestLicense": "[ ЗАПРОСИТЬ ЛИЦЕНЗИЮ ]",
-      "requestInfo": "[ ЗАПРОСИТЬ ИНФОРМАЦИЮ ]"
+      "requestLicense": "ЗАПРОСИТЬ ЛИЦЕНЗИЮ",
+      "requestInfo": "ЗАПРОСИТЬ ИНФОРМАЦИЮ",
+      "creatorCollaborate": "СОТРУДНИЧАТЬ",
+      "creatorRequestDealmemo": "ЗАПРОСИТЬ DEALMEMO"
     },
     "comingSoon": "СКОРО",
     "view": {
@@ -213,7 +215,8 @@
     },
     "media": {
       "title": "Медиа",
-      "hero": "Hero‑изображение",
+      "catalog": "Фото для каталога",
+      "hero": "Фото внутри карточки",
       "gallery": "Галерея",
       "upload": "Загрузить",
       "reorderUp": "Вверх",
@@ -230,10 +233,14 @@
       "clearSelection": "Сбросить",
       "howItWorksTitle": "Как работает загрузка",
       "howItWorksFormats": "Форматы: JPG/PNG/WEBP. Максимум: {mb} MB на файл.",
-      "howItWorksPaths": "Файлы сохраняются в bucket `assets` по пути: {documentId}/hero/* и {documentId}/gallery/*",
+      "howItWorksPaths": "Файлы сохраняются в bucket `assets` по пути: {documentId}/catalog/*, {documentId}/hero/* и {documentId}/gallery/*",
+      "catalogFormatHelp": "Для карточки каталога: кадр 3:4. Важные детали держи ближе к центру.",
+      "heroFormatHelp": "Для фото внутри карточки: квадрат 1:1. Загружай сразу в 1:1, чтобы без обрезки.",
+      "galleryFormatHelp": "Для галереи: 5:4. Загружай в этом формате, чтобы без обрезки.",
       "howItWorksPublish": "Публичный доступ к файлам появляется только после публикации записи.",
       "storageNote": "Если файлы крупные — подготовь их заранее (ресайз/экспорт), иначе лимит Storage может закончиться.",
-      "emptyHero": "Hero‑изображение ещё не загружено",
+      "emptyCatalog": "Фото для каталога ещё не загружено",
+      "emptyHero": "Фото внутри карточки ещё не загружено",
       "emptyGallery": "В галерее пока нет изображений",
       "errorOnlyImages": "Можно загружать только изображения",
       "errorTooLarge": "Файл слишком большой (макс. {mb} MB)"

@@ -38,8 +38,22 @@ export default async function AdminEditCreatorPage({
     .order('kind', {ascending: true})
     .order('order_index', {ascending: true});
 
+  const catalogRow = media?.find((m) => m.kind === 'catalog') ?? null;
   const heroRow = media?.find((m) => m.kind === 'hero') ?? null;
   const galleryRows = (media ?? []).filter((m) => m.kind === 'gallery');
+  const catalog: AdminMediaItem | null = catalogRow
+    ? {
+        id: catalogRow.id,
+        path: catalogRow.path,
+        kind: 'catalog',
+        order_index: catalogRow.order_index,
+        url: (await createSignedImageUrl(supabase, catalogRow.path, {
+          width: 900,
+          quality: 82
+        })) as string | null
+      }
+    : null;
+
   const hero: AdminMediaItem | null = heroRow
     ? {
         id: heroRow.id,
@@ -100,6 +114,7 @@ export default async function AdminEditCreatorPage({
           documentId={asset.document_id}
           entityType="creator"
           allowGallery
+          catalog={catalog}
           hero={hero}
           gallery={gallery}
         />

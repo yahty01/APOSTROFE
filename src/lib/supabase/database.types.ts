@@ -116,7 +116,7 @@ export type Database = {
           id: string;
           asset_id: string;
           path: string;
-          kind: 'hero' | 'gallery';
+          kind: 'catalog' | 'hero' | 'gallery';
           order_index: number;
           created_at: string;
         };
@@ -124,13 +124,13 @@ export type Database = {
           id?: string;
           asset_id: string;
           path: string;
-          kind: 'hero' | 'gallery';
+          kind: 'catalog' | 'hero' | 'gallery';
           order_index?: number;
           created_at?: string;
         };
         Update: {
           path?: string;
-          kind?: 'hero' | 'gallery';
+          kind?: 'catalog' | 'hero' | 'gallery';
           order_index?: number;
         };
         Relationships: [];

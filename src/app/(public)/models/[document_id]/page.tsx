@@ -89,7 +89,10 @@ export default async function ModelDetailPage({
       .order('kind', {ascending: true})
       .order('order_index', {ascending: true});
 
-    const heroPath = media?.find((m) => m.kind === 'hero')?.path ?? null;
+    const heroPath =
+      media?.find((m) => m.kind === 'hero')?.path ??
+      media?.find((m) => m.kind === 'catalog')?.path ??
+      null;
     const galleryPaths = (media ?? [])
       .filter((m) => m.kind === 'gallery')
       .sort((a, b) => a.order_index - b.order_index)
@@ -136,7 +139,7 @@ export default async function ModelDetailPage({
                     alt={asset.title}
                     fill
                     className={modelDetailPageClasses.heroImage}
-                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    sizes="(max-width: 1024px) 100vw, 40vw"
                     priority
                   />
                 ) : (
@@ -149,7 +152,7 @@ export default async function ModelDetailPage({
 
             <section className={modelDetailPageClasses.detailsSection}>
               <h1 className={modelDetailPageClasses.title}>
-                {asset.document_id}
+                {(asset.title || asset.document_id).trim() || asset.document_id}
               </h1>
               <div className={modelDetailPageClasses.meta}>
                 {status} · {license} · {timestamp}
@@ -203,7 +206,7 @@ export default async function ModelDetailPage({
                   rel="noreferrer"
                   className={modelDetailPageClasses.actionPrimary}
                 >
-                  {tPublic('cta.requestLicense')}
+                  {`[ ${tPublic('cta.requestLicense')} ]`}
                 </a>
                 <a
                   href={requestInfoHref}
@@ -211,7 +214,7 @@ export default async function ModelDetailPage({
                   rel="noreferrer"
                   className={modelDetailPageClasses.actionSecondary}
                 >
-                  {tPublic('cta.requestInfo')}
+                  {`[ ${tPublic('cta.requestInfo')} ]`}
                 </a>
               </div>
             </section>

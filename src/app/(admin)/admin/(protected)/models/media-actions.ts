@@ -57,6 +57,7 @@ const uploadSchema = z.object({
 });
 
 type ActionResult = {ok: true} | {ok: false; error: string};
+type SingleMediaKind = 'catalog' | 'hero';
 
 /**
  * Достаёт `document_id` ассета — он используется как "папка" для хранения файлов в Supabase Storage.
@@ -83,7 +84,7 @@ function revalidateEntityMediaPaths(entityType: AssetEntityType, assetId: string
   const adminBase = getAdminBasePathForEntity(entityType);
 
   revalidatePath(publicBase);
-  if (entityType === 'model') revalidatePath(`/models/${documentId}`);
+  revalidatePath(`${publicBase}/${documentId}`);
   revalidatePath(`${adminBase}/${assetId}`);
 }
 
@@ -93,11 +94,10 @@ function revalidateEntityMediaPaths(entityType: AssetEntityType, assetId: string
  */
 const maxUploadBytes = 10 * 1024 * 1024;
 
-/**
- * Server Action: загружает hero изображение (одна штука) и заменяет старое.
- * Используется в `MediaManager` и `NewModelClient`; обновляет Storage + таблицу `asset_media` и делает revalidate.
- */
-export async function uploadHeroAction(formData: FormData): Promise<ActionResult> {
+async function uploadSingleMediaAction(
+  formData: FormData,
+  kind: SingleMediaKind
+): Promise<ActionResult> {
   const parsed = uploadSchema.safeParse({
     asset_id: formData.get('asset_id'),
     entity_type: formData.get('entity_type') ?? 'model'
@@ -120,22 +120,22 @@ export async function uploadHeroAction(formData: FormData): Promise<ActionResult
   );
 
   try {
-    // Remove old hero media (best effort)
-    const {data: oldHero} = await supabase
+    // Для одиночных видов (`catalog`/`hero`) храним только один актуальный файл.
+    const {data: oldMedia} = await supabase
       .from('asset_media')
       .select('id,path')
       .eq('asset_id', parsed.data.asset_id)
-      .eq('kind', 'hero');
+      .eq('kind', kind);
 
-    const oldPaths = (oldHero ?? []).map((m) => m.path);
+    const oldPaths = (oldMedia ?? []).map((m) => m.path);
     if (oldPaths.length) await supabase.storage.from('assets').remove(oldPaths);
     await supabase
       .from('asset_media')
       .delete()
       .eq('asset_id', parsed.data.asset_id)
-      .eq('kind', 'hero');
+      .eq('kind', kind);
 
-    const path = `${documentId}/hero/${crypto.randomUUID()}.${ext}`;
+    const path = `${documentId}/${kind}/${crypto.randomUUID()}.${ext}`;
 
     const {error: uploadError} = await supabase.storage.from('assets').upload(path, file, {
       cacheControl: '3600',
@@ -147,7 +147,7 @@ export async function uploadHeroAction(formData: FormData): Promise<ActionResult
     const {error: insertError} = await supabase.from('asset_media').insert({
       asset_id: parsed.data.asset_id,
       path,
-      kind: 'hero',
+      kind,
       order_index: 0
     });
     if (insertError) return {ok: false, error: insertError.message};
@@ -158,6 +158,21 @@ export async function uploadHeroAction(formData: FormData): Promise<ActionResult
   } catch (e) {
     return {ok: false, error: e instanceof Error ? e.message : 'Upload failed'};
   }
+}
+
+/**
+ * Server Action: загружает изображение для карточки в каталоге (`catalog`) и заменяет старое.
+ */
+export async function uploadCatalogAction(formData: FormData): Promise<ActionResult> {
+  return uploadSingleMediaAction(formData, 'catalog');
+}
+
+/**
+ * Server Action: загружает hero изображение (одна штука) и заменяет старое.
+ * Используется в `MediaManager` и `NewModelClient`; обновляет Storage + таблицу `asset_media` и делает revalidate.
+ */
+export async function uploadHeroAction(formData: FormData): Promise<ActionResult> {
+  return uploadSingleMediaAction(formData, 'hero');
 }
 
 /**
@@ -277,7 +292,12 @@ export async function moveGalleryMediaAction(input: unknown): Promise<ActionResu
     .eq('id', b.id);
   if (err2) return {ok: false, error: err2.message};
 
-  revalidatePath(`${getAdminBasePathForEntity(parsed.data.entity_type)}/${parsed.data.asset_id}`);
+  const documentId = await getAssetDocumentId(
+    supabase,
+    parsed.data.asset_id,
+    parsed.data.entity_type
+  );
+  revalidateEntityMediaPaths(parsed.data.entity_type, parsed.data.asset_id, documentId);
   return {ok: true};
 }
 
@@ -289,7 +309,7 @@ const deleteSchema = z.object({
 
 /**
  * Server Action: удаляет элемент медиа (storage + строка в `asset_media`).
- * Используется в `MediaManager` (кнопки remove для hero и gallery).
+ * Используется в `MediaManager` (кнопки remove для catalog/hero/gallery).
  */
 export async function deleteMediaAction(input: unknown): Promise<ActionResult> {
   const parsed = deleteSchema.safeParse(input);

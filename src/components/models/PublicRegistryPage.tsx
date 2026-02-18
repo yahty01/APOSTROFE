@@ -174,7 +174,7 @@ export async function PublicRegistryPage({
 
       const mediaByAsset = new Map<
         string,
-        {path: string; kind: 'hero' | 'gallery'; order_index: number}[]
+        {path: string; kind: 'catalog' | 'hero' | 'gallery'; order_index: number}[]
       >();
 
       for (const m of mediaData ?? []) {
@@ -190,16 +190,10 @@ export async function PublicRegistryPage({
       items = await Promise.all(
         assets.map(async (a) => {
           const media = mediaByAsset.get(a.id) ?? [];
+          const catalog = media.find((m) => m.kind === 'catalog')?.path ?? null;
           const hero = media.find((m) => m.kind === 'hero')?.path ?? null;
-          const gallery =
-            media
-              .filter((m) => m.kind === 'gallery')
-              .sort((x, y) => x.order_index - y.order_index)[0]?.path ?? null;
 
-          // Для каталога creators используем только явное hero-изображение/лого.
-          // Галерея не должна становиться fallback-обложкой карточки.
-          const previewPath =
-            config.entityType === 'creator' ? hero : hero ?? gallery;
+          const previewPath = catalog ?? hero;
           const previewUrl = previewPath
             ? await createSignedImageUrl(supabase, previewPath, {
                 width: 720,

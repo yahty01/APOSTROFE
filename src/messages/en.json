@@ -37,8 +37,10 @@
       "influencersSubtitle": "REGISTRY OF LICENSED INFLUENCERS."
     },
     "cta": {
-      "requestLicense": "[ REQUEST LICENSE ]",
-      "requestInfo": "[ REQUEST INFO ]"
+      "requestLicense": "REQUEST LICENSE",
+      "requestInfo": "REQUEST INFO",
+      "creatorCollaborate": "COLLABORATE",
+      "creatorRequestDealmemo": "REQUEST DEALMEMO"
     },
     "comingSoon": "COMING SOON",
     "view": {
@@ -213,7 +215,8 @@
     },
     "media": {
       "title": "Media",
-      "hero": "Hero image",
+      "catalog": "Catalog image",
+      "hero": "Detail card image",
       "gallery": "Gallery",
       "upload": "Upload",
       "reorderUp": "Up",
@@ -230,10 +233,14 @@
       "clearSelection": "Clear",
       "howItWorksTitle": "How uploads work",
       "howItWorksFormats": "Formats: JPG/PNG/WEBP. Max: {mb} MB per file.",
-      "howItWorksPaths": "Files are stored in bucket `assets`: {documentId}/hero/* and {documentId}/gallery/*",
+      "howItWorksPaths": "Files are stored in bucket `assets`: {documentId}/catalog/*, {documentId}/hero/* and {documentId}/gallery/*",
+      "catalogFormatHelp": "Catalog card: use 3:4. Keep key details near center.",
+      "heroFormatHelp": "Detail card image: use square 1:1 to avoid crop.",
+      "galleryFormatHelp": "Gallery: use 5:4 to avoid crop.",
       "howItWorksPublish": "Public access to files is only available after the record is published.",
       "storageNote": "If files are large, prepare them beforehand (resize/export) to avoid hitting the Storage limit.",
-      "emptyHero": "No hero image yet",
+      "emptyCatalog": "No catalog image yet",
+      "emptyHero": "No detail card image yet",
       "emptyGallery": "No gallery images yet",
       "errorOnlyImages": "Only image files are allowed",
       "errorTooLarge": "File is too large (max {mb} MB)"
