@@ -6,9 +6,9 @@ import {getTranslations} from 'next-intl/server';
 import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 import {
-  buildLicenseRequestText,
-  buildRequestInfoText,
-  buildTelegramShareUrl
+  buildAssetInfoInquiryText,
+  buildAssetLicenseInquiryText,
+  buildTelegramDirectMessageUrl
 } from '@/lib/telegram';
 
 import {GalleryItem} from './GalleryItem';
@@ -115,8 +115,12 @@ export default async function ModelDetailPage({
     const status = (asset.status || 'AVAILABLE').toUpperCase();
     const description = (asset.description || asset.title || '').trim() || '—';
 
-    const acquireHref = buildTelegramShareUrl(buildLicenseRequestText(asset));
-    const requestInfoHref = buildTelegramShareUrl(buildRequestInfoText(asset));
+    const acquireHref = buildTelegramDirectMessageUrl(
+      buildAssetLicenseInquiryText(asset)
+    );
+    const requestInfoHref = buildTelegramDirectMessageUrl(
+      buildAssetInfoInquiryText(asset)
+    );
 
     return (
       <div className={modelDetailPageClasses.root}>

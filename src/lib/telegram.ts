@@ -1,5 +1,7 @@
 import type {AssetEntityType} from '@/lib/assets/entity';
 
+const TELEGRAM_LICENSE_USERNAME = 'apostrofe_license';
+
 /**
  * Минимальный набор полей ассета, нужный для генерации Telegram-текстов.
  * Тип сделан "мягким", чтобы его могли передавать и публичные страницы, и админские формы.
@@ -35,6 +37,13 @@ function asUpper(value: string | null | undefined, fallback = '—') {
   return v.toUpperCase();
 }
 
+function buildAssetInfo(asset: Pick<AssetLike, 'document_id' | 'title'>) {
+  const title = (asset.title || '').trim();
+  const documentId = (asset.document_id || '').trim();
+  if (title && documentId && title !== documentId) return `${title} (${documentId})`;
+  return title || documentId || '—';
+}
+
 /**
  * Строит ссылку `t.me/share/url`, которая открывает Telegram-share с предзаполненным текстом.
  * Используется в публичном каталоге и карточках моделей как CTA на запрос лицензии/инфо.
@@ -44,6 +53,40 @@ export function buildTelegramShareUrl(text: string, url?: string): string {
   params.set('text', text);
   if (url) params.set('url', url);
   return `https://t.me/share/url?${params.toString()}`;
+}
+
+/**
+ * Строит deep-link в чат Telegram (`@apostrofe_license`) с предзаполненным текстом.
+ */
+export function buildTelegramDirectMessageUrl(
+  text: string,
+  username = TELEGRAM_LICENSE_USERNAME
+): string {
+  const cleanUsername = username.replace(/^@/, '').trim() || TELEGRAM_LICENSE_USERNAME;
+  const params = new URLSearchParams();
+  params.set('text', text);
+  return `https://t.me/${cleanUsername}?${params.toString()}`;
+}
+
+export function buildAssetLicenseInquiryText(
+  asset: Pick<AssetLike, 'document_id' | 'title'>
+): string {
+  return `Хочу запросить у вас лицензию на данный актив: "${buildAssetInfo(asset)}"`;
+}
+
+export function buildAssetInfoInquiryText(
+  asset: Pick<AssetLike, 'document_id' | 'title'>
+): string {
+  return `Хочу запросить у вас информацию о данном активе: "${buildAssetInfo(asset)}"`;
+}
+
+export function buildCreatorCollaborateText(creatorName: string): string {
+  const name = creatorName.trim() || 'креатором';
+  return `Хочу сотрудничать с ${name}`;
+}
+
+export function buildCreatorDealmemoRequestText(): string {
+  return 'Хочу запросить у вас DEALMEMO';
 }
 
 /**

@@ -6,9 +6,9 @@ import {getTranslations} from 'next-intl/server';
 import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 import {
-  buildEntityLicenseRequestText,
-  buildRequestInfoText,
-  buildTelegramShareUrl
+  buildCreatorCollaborateText,
+  buildCreatorDealmemoRequestText,
+  buildTelegramDirectMessageUrl
 } from '@/lib/telegram';
 
 import {GalleryItem} from '../../models/[document_id]/GalleryItem';
@@ -99,10 +99,12 @@ export default async function CreatorDetailPage({
   const direction = (asset.creator_direction || '—').trim() || '—';
   const creatorName = (asset.title || asset.document_id).trim() || asset.document_id;
 
-  const acquireHref = buildTelegramShareUrl(
-    buildEntityLicenseRequestText(asset, 'creator')
+  const acquireHref = buildTelegramDirectMessageUrl(
+    buildCreatorCollaborateText(creatorName)
   );
-  const requestInfoHref = buildTelegramShareUrl(buildRequestInfoText(asset));
+  const requestInfoHref = buildTelegramDirectMessageUrl(
+    buildCreatorDealmemoRequestText()
+  );
 
   return (
     <div className={modelDetailPageClasses.root}>

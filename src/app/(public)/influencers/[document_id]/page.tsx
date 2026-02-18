@@ -6,9 +6,9 @@ import {getTranslations} from 'next-intl/server';
 import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 import {
-  buildEntityLicenseRequestText,
-  buildRequestInfoText,
-  buildTelegramShareUrl
+  buildAssetInfoInquiryText,
+  buildAssetLicenseInquiryText,
+  buildTelegramDirectMessageUrl
 } from '@/lib/telegram';
 
 import {GalleryItem} from '../../models/[document_id]/GalleryItem';
@@ -163,10 +163,12 @@ export default async function InfluencerDetailPage({
     }
   ].filter((entry): entry is SocialLink => Boolean(entry.url));
 
-  const acquireHref = buildTelegramShareUrl(
-    buildEntityLicenseRequestText(asset, 'influencer')
+  const acquireHref = buildTelegramDirectMessageUrl(
+    buildAssetLicenseInquiryText(asset)
   );
-  const requestInfoHref = buildTelegramShareUrl(buildRequestInfoText(asset));
+  const requestInfoHref = buildTelegramDirectMessageUrl(
+    buildAssetInfoInquiryText(asset)
+  );
 
   return (
     <div className={modelDetailPageClasses.root}>

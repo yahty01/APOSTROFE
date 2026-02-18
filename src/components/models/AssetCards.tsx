@@ -3,8 +3,8 @@ import Link from 'next/link';
 import {getTranslations} from 'next-intl/server';
 
 import {
-  buildEntityLicenseRequestText,
-  buildTelegramShareUrl
+  buildAssetLicenseInquiryText,
+  buildTelegramDirectMessageUrl
 } from '@/lib/telegram';
 
 import {getAssetDescription, getAssetFieldValue} from './asset-fields';
@@ -40,8 +40,8 @@ export async function AssetCards({
             ? `${detailBasePath}/${encodeURIComponent(item.document_id)}`
             : null;
 
-          const telegramHref = buildTelegramShareUrl(
-            buildEntityLicenseRequestText(item, entityType)
+          const telegramHref = buildTelegramDirectMessageUrl(
+            buildAssetLicenseInquiryText(item)
           );
 
           const mediaContent =
