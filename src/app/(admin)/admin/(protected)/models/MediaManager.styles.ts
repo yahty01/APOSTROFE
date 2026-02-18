@@ -17,8 +17,8 @@ export const mediaManagerClasses = {
   uploadLabel:
     'flex h-10 cursor-pointer items-center justify-center border border-[color:var(--color-line)] bg-[var(--color-paper)] px-4 font-doc text-[11px] uppercase tracking-[0.18em] hover:bg-[color-mix(in_oklab,var(--color-paper),#000_6%)]',
   hiddenInput: 'hidden',
-  catalogPreview:
-    'relative aspect-[3/4] w-full max-w-[420px] overflow-hidden border border-[color:var(--color-line)] bg-[var(--color-paper)]',
+  catalogPreviewWrap: 'w-full max-w-[420px]',
+  catalogPreview: 'relative aspect-[3/4] w-full bg-[var(--color-paper)]',
   heroPreview:
     'relative aspect-square w-full max-w-[420px] overflow-hidden border border-[color:var(--color-line)] bg-[var(--color-paper)]',
   previewImage: 'object-contain object-center',

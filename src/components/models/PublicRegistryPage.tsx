@@ -197,6 +197,7 @@ export async function PublicRegistryPage({
           const previewUrl = previewPath
             ? await createSignedImageUrl(supabase, previewPath, {
                 width: 720,
+                resize: 'contain',
                 quality: 80
               })
             : null;

@@ -229,20 +229,22 @@ export function MediaManager({
             </label>
           </div>
 
-          <div className={mediaManagerClasses.catalogPreview}>
-            {catalog?.url ? (
-              <Image
-                src={catalog.url}
-                alt="Catalog"
-                fill
-                className={mediaManagerClasses.previewImage}
-                sizes="(max-width: 1024px) 100vw, 40vw"
-              />
-            ) : (
-              <div className={mediaManagerClasses.previewFallback}>
-                {t('emptyCatalog')}
-              </div>
-            )}
+          <div className={mediaManagerClasses.catalogPreviewWrap}>
+            <div className={mediaManagerClasses.catalogPreview}>
+              {catalog?.url ? (
+                <Image
+                  src={catalog.url}
+                  alt="Catalog"
+                  fill
+                  className={mediaManagerClasses.previewImage}
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                />
+              ) : (
+                <div className={mediaManagerClasses.previewFallback}>
+                  {t('emptyCatalog')}
+                </div>
+              )}
+            </div>
           </div>
 
           {catalog ? (

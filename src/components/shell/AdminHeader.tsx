@@ -52,7 +52,7 @@ export function AdminHeader() {
         <div className={adminHeaderClasses.brandWrap}>
           <BrandLogoMark aria-hidden className={adminHeaderClasses.mark} />
           <Link href="/admin/models" className={adminHeaderClasses.brandLink}>
-            APOSTROPHE
+            Apostrofe
           </Link>
         </div>
 

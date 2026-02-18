@@ -47,7 +47,7 @@ export function TopHeader() {
         <div className={topHeaderClasses.brandWrap}>
           <BrandLogoMark aria-hidden className={topHeaderClasses.mark} />
           <Link href="/models" className={topHeaderClasses.brandLink}>
-            APOSTROPHE
+            Apostrofe
           </Link>
         </div>
 
