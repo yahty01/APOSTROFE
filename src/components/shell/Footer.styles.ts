@@ -14,10 +14,10 @@ export const footerClasses = {
   metaStack:
     "space-y-2 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0",
   bottomText:
-    "font-doc text-[10px] uppercase text-[var(--color-muted)] md:flex-1 md:text-[11px] md:whitespace-nowrap",
+    "font-doc text-[clamp(8px,0.9vw,11px)] uppercase text-[var(--color-muted)] md:flex-1 lg:whitespace-nowrap",
   bottomTextCenter:
-    "font-doc text-[10px] uppercase text-[var(--color-muted)] md:flex-1 md:text-center md:text-[11px] md:whitespace-nowrap",
+    "font-doc text-[clamp(8px,0.9vw,11px)] uppercase text-[var(--color-muted)] md:flex-1 md:text-center lg:whitespace-nowrap",
   bottomTextRight:
-    "font-doc text-[10px] uppercase text-[var(--color-muted)] md:flex-1 md:text-right md:text-[11px] md:whitespace-nowrap",
+    "font-doc text-[clamp(8px,0.9vw,11px)] uppercase text-[var(--color-muted)] md:flex-1 md:text-right lg:whitespace-nowrap",
   bottomLink: "inline-block hover:text-[var(--color-ink)]",
 } as const;
