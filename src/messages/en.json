@@ -40,7 +40,8 @@
       "requestLicense": "REQUEST LICENSE",
       "requestInfo": "REQUEST INFO",
       "creatorCollaborate": "COLLABORATE",
-      "creatorRequestDealmemo": "REQUEST DEALMEMO"
+      "creatorRequestDealmemo": "REQUEST DEALMEMO",
+      "collaborateWithUs": "COLLABORATE WITH US"
     },
     "comingSoon": "COMING SOON",
     "view": {

@@ -4,6 +4,7 @@ import {getTranslations} from 'next-intl/server';
 
 import {
   buildAssetLicenseInquiryText,
+  buildCreatorCollaborateText,
   buildTelegramDirectMessageUrl
 } from '@/lib/telegram';
 
@@ -40,9 +41,19 @@ export async function AssetCards({
             ? `${detailBasePath}/${encodeURIComponent(item.document_id)}`
             : null;
 
-          const telegramHref = buildTelegramDirectMessageUrl(
-            buildAssetLicenseInquiryText(item)
-          );
+          const telegramHref =
+            entityType === 'creator'
+              ? buildTelegramDirectMessageUrl(
+                  buildCreatorCollaborateText(
+                    (item.title || item.document_id).trim() || item.document_id
+                  )
+                )
+              : buildTelegramDirectMessageUrl(buildAssetLicenseInquiryText(item));
+
+          const ctaLabel =
+            entityType === 'creator'
+              ? t('cta.creatorCollaborate')
+              : t('cta.requestLicense');
 
           const mediaContent =
             mediaMode === 'title' ? (
@@ -108,7 +119,7 @@ export async function AssetCards({
                   rel="noreferrer"
                   className={assetCardsClasses.cta}
                 >
-                  {t('cta.requestLicense')}
+                  {`[ ${ctaLabel} ]`}
                 </a>
               </div>
             </article>

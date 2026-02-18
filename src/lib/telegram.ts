@@ -89,6 +89,10 @@ export function buildCreatorDealmemoRequestText(): string {
   return 'Хочу запросить у вас DEALMEMO';
 }
 
+export function buildCollaborateWithUsText(): string {
+  return 'Хочу сотрудничать с вами';
+}
+
 /**
  * Формирует многострочный текст запроса лицензии для конкретного ассета.
  * Используется в `AssetCards`, `ModelDetailPage` и других CTA, чтобы упростить коммуникацию в Telegram.

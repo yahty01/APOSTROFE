@@ -7,8 +7,8 @@ import {modelsPageClasses} from '@/app/(public)/models/page.styles';
 import {createSignedImageUrl} from '@/lib/supabase/images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 import {
-  buildGenericLicenseRequestText,
-  buildTelegramShareUrl
+  buildCollaborateWithUsText,
+  buildTelegramDirectMessageUrl
 } from '@/lib/telegram';
 
 import {AssetCards} from './AssetCards';
@@ -228,8 +228,8 @@ export async function PublicRegistryPage({
   const prevPage = page > 1 ? page - 1 : null;
   const nextPage = page < pages ? page + 1 : null;
 
-  const genericTelegramHref = buildTelegramShareUrl(
-    buildGenericLicenseRequestText(config.route)
+  const genericTelegramHref = buildTelegramDirectMessageUrl(
+    buildCollaborateWithUsText()
   );
 
   return (
@@ -336,7 +336,7 @@ export async function PublicRegistryPage({
             rel='noreferrer'
             className={modelsPageClasses.ctaButton}
           >
-            {t('cta.requestLicense')}
+            {`[ ${t('cta.collaborateWithUs')} ]`}
           </a>
         </div>
       </div>
