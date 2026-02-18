@@ -12,7 +12,7 @@ export async function Footer() {
   const contactsSupport = t('contactsSupport');
 
   const version = '1.0.0';
-  const build = '20240815';
+  const build = '20260218';
 
   return (
     <footer className={footerClasses.footer}>
@@ -65,7 +65,14 @@ export async function Footer() {
               {t('systemVersion', {version, build})}
             </div>
             <div className={footerClasses.bottomTextRight}>
-              {t('poweredBy')}{' '}
+              <Link
+                className={footerClasses.bottomLink}
+                href="https://popel.pro"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {t('poweredBy')}
+              </Link>{' '}
               <Link
                 className={footerClasses.bottomLink}
                 href="https://t.me/Sonolbol"
