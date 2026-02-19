@@ -117,6 +117,7 @@ export default async function InfluencerDetailPage({
   const description = (asset.description || asset.title || '').trim() || '—';
   const topic = (asset.influencer_topic || '—').trim() || '—';
   const platforms = (asset.influencer_platforms || '—').trim() || '—';
+  const influencerPageId = (asset.document_id || document_id).trim() || document_id;
   const socialLinks = [
     {
       key: 'instagram',
@@ -204,7 +205,7 @@ export default async function InfluencerDetailPage({
 
           <section className={modelDetailPageClasses.detailsSection}>
             <h1 className={modelDetailPageClasses.title}>
-              {(asset.title || asset.document_id).trim() || asset.document_id}
+              {influencerPageId}
             </h1>
             <div className={modelDetailPageClasses.meta}>
               {topic.toUpperCase()} · {license} · {timestamp}

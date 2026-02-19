@@ -1,36 +1,36 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import {notFound} from 'next/navigation';
-import {getTranslations} from 'next-intl/server';
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
-import {createSignedImageUrl} from '@/lib/supabase/images';
-import {createSupabasePublicClient} from '@/lib/supabase/public';
+import { createSignedImageUrl } from "@/lib/supabase/images";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 import {
   buildCreatorCollaborateText,
   buildCreatorDealmemoRequestText,
-  buildTelegramDirectMessageUrl
-} from '@/lib/telegram';
+  buildTelegramDirectMessageUrl,
+} from "@/lib/telegram";
 
-import {GalleryItem} from '../../models/[document_id]/GalleryItem';
-import {modelDetailPageClasses} from '../../models/[document_id]/page.styles';
+import { GalleryItem } from "../../models/[document_id]/GalleryItem";
+import { modelDetailPageClasses } from "../../models/[document_id]/page.styles";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 function formatIsoDate(value: string | null | undefined) {
-  if (!value) return '—';
+  if (!value) return "—";
   const d = value.slice(0, 10);
   return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
 }
 
 export default async function CreatorDetailPage({
-  params
+  params,
 }: {
-  params: Promise<{document_id: string}>;
+  params: Promise<{ document_id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const {document_id} = await params;
-  const tPublic = await getTranslations('public');
-  const tCommon = await getTranslations('common');
+  const { document_id } = await params;
+  const tPublic = await getTranslations("public");
+  const tCommon = await getTranslations("common");
 
   let heroUrl: string | null = null;
   let galleryUrls: string[] = [];
@@ -47,43 +47,46 @@ export default async function CreatorDetailPage({
 
   try {
     const supabase = createSupabasePublicClient();
-    const {data, error: assetError} = await supabase
-      .from('assets')
+    const { data, error: assetError } = await supabase
+      .from("assets")
       .select(
-        'id,document_id,title,description,license_type,status,creator_direction,updated_at'
+        "id,document_id,title,description,license_type,status,creator_direction,updated_at",
       )
-      .eq('document_id', document_id)
-      .eq('entity_type', 'creator')
+      .eq("document_id", document_id)
+      .eq("entity_type", "creator")
       .maybeSingle();
 
     if (assetError || !data) notFound();
     asset = data;
 
-    const {data: media} = await supabase
-      .from('asset_media')
-      .select('path,kind,order_index')
-      .eq('asset_id', data.id)
-      .order('kind', {ascending: true})
-      .order('order_index', {ascending: true});
+    const { data: media } = await supabase
+      .from("asset_media")
+      .select("path,kind,order_index")
+      .eq("asset_id", data.id)
+      .order("kind", { ascending: true })
+      .order("order_index", { ascending: true });
 
     const heroPath =
-      media?.find((m) => m.kind === 'hero')?.path ??
-      media?.find((m) => m.kind === 'catalog')?.path ??
+      media?.find((m) => m.kind === "hero")?.path ??
+      media?.find((m) => m.kind === "catalog")?.path ??
       null;
     const galleryPaths = (media ?? [])
-      .filter((m) => m.kind === 'gallery')
+      .filter((m) => m.kind === "gallery")
       .sort((a, b) => a.order_index - b.order_index)
       .map((m) => m.path);
 
     heroUrl = heroPath
-      ? await createSignedImageUrl(supabase, heroPath, {width: 1600, quality: 82})
+      ? await createSignedImageUrl(supabase, heroPath, {
+          width: 1600,
+          quality: 82,
+        })
       : null;
 
     galleryUrls = (
       await Promise.all(
         galleryPaths.map((p) =>
-          createSignedImageUrl(supabase, p, {width: 1600, quality: 82})
-        )
+          createSignedImageUrl(supabase, p, { width: 1600, quality: 82 }),
+        ),
       )
     ).filter((u): u is string => Boolean(u));
   } catch {
@@ -93,27 +96,27 @@ export default async function CreatorDetailPage({
   if (!asset) notFound();
 
   const timestamp = formatIsoDate(asset.updated_at);
-  const license = (asset.license_type || 'STANDARD').toUpperCase();
-  const status = (asset.status || 'AVAILABLE').toUpperCase();
-  const description = (asset.description || '').trim() || '—';
-  const direction = (asset.creator_direction || '—').trim() || '—';
-  const creatorName = (asset.title || asset.document_id).trim() || asset.document_id;
+  const license = (asset.license_type || "STANDARD").toUpperCase();
+  const status = (asset.status || "AVAILABLE").toUpperCase();
+  const description = (asset.description || "").trim() || "—";
+  const direction = (asset.creator_direction || "—").trim() || "—";
+  const creatorPageId =
+    (asset.document_id || document_id).trim() || document_id;
+  const creatorName =
+    (asset.title || asset.document_id).trim() || asset.document_id;
 
   const acquireHref = buildTelegramDirectMessageUrl(
-    buildCreatorCollaborateText(creatorName)
+    buildCreatorCollaborateText(creatorName),
   );
   const requestInfoHref = buildTelegramDirectMessageUrl(
-    buildCreatorDealmemoRequestText()
+    buildCreatorDealmemoRequestText(),
   );
 
   return (
     <div className={modelDetailPageClasses.root}>
       <div className={modelDetailPageClasses.topRow}>
-        <Link
-          href="/creators"
-          className={modelDetailPageClasses.backLink}
-        >
-          ← {tCommon('back').toUpperCase()}
+        <Link href="/creators" className={modelDetailPageClasses.backLink}>
+          ← {tCommon("back").toUpperCase()}
         </Link>
       </div>
 
@@ -141,9 +144,7 @@ export default async function CreatorDetailPage({
           </section>
 
           <section className={modelDetailPageClasses.detailsSection}>
-            <h1 className={modelDetailPageClasses.title}>
-              {creatorName}
-            </h1>
+            <h1 className={modelDetailPageClasses.title}>{creatorPageId}</h1>
             <div className={modelDetailPageClasses.meta}>
               {status} · {license} · {timestamp}
             </div>
@@ -151,7 +152,7 @@ export default async function CreatorDetailPage({
             <div className={modelDetailPageClasses.blocks}>
               <div className={modelDetailPageClasses.block}>
                 <div className={modelDetailPageClasses.blockTitle}>
-                  {tPublic('asset.description')}
+                  {tPublic("asset.description")}
                 </div>
                 <div className={modelDetailPageClasses.blockText}>
                   {description}
@@ -160,7 +161,7 @@ export default async function CreatorDetailPage({
 
               <div className={modelDetailPageClasses.block}>
                 <div className={modelDetailPageClasses.blockTitle}>
-                  {tPublic('asset.direction')}
+                  {tPublic("asset.direction")}
                 </div>
                 <div className={modelDetailPageClasses.blockText}>
                   {direction}
@@ -175,7 +176,7 @@ export default async function CreatorDetailPage({
                 rel="noreferrer"
                 className={modelDetailPageClasses.actionPrimary}
               >
-                {`[ ${tPublic('cta.creatorCollaborate')} ]`}
+                {`[ ${tPublic("cta.creatorCollaborate")} ]`}
               </a>
               <a
                 href={requestInfoHref}
@@ -183,7 +184,7 @@ export default async function CreatorDetailPage({
                 rel="noreferrer"
                 className={modelDetailPageClasses.actionSecondary}
               >
-                {`[ ${tPublic('cta.creatorRequestDealmemo')} ]`}
+                {`[ ${tPublic("cta.creatorRequestDealmemo")} ]`}
               </a>
             </div>
           </section>
@@ -194,7 +195,8 @@ export default async function CreatorDetailPage({
             <div className={modelDetailPageClasses.galleryGrid}>
               {galleryUrls.map((url, idx) => {
                 const isSolo =
-                  galleryUrls.length % 2 === 1 && idx === galleryUrls.length - 1;
+                  galleryUrls.length % 2 === 1 &&
+                  idx === galleryUrls.length - 1;
                 return (
                   <GalleryItem
                     key={`${url}-${idx}`}
@@ -207,7 +209,7 @@ export default async function CreatorDetailPage({
             </div>
           ) : (
             <div className={modelDetailPageClasses.galleryFallback}>
-              {tPublic('detail.noThumbnails')}
+              {tPublic("detail.noThumbnails")}
             </div>
           )}
         </section>

@@ -114,6 +114,7 @@ export default async function ModelDetailPage({
     const license = (asset.license_type || 'STANDARD').toUpperCase();
     const status = (asset.status || 'AVAILABLE').toUpperCase();
     const description = (asset.description || asset.title || '').trim() || '—';
+    const modelPageId = (asset.document_id || document_id).trim() || document_id;
 
     const acquireHref = buildTelegramDirectMessageUrl(
       buildAssetLicenseInquiryText(asset)
@@ -156,7 +157,7 @@ export default async function ModelDetailPage({
 
             <section className={modelDetailPageClasses.detailsSection}>
               <h1 className={modelDetailPageClasses.title}>
-                {(asset.title || asset.document_id).trim() || asset.document_id}
+                {modelPageId}
               </h1>
               <div className={modelDetailPageClasses.meta}>
                 {status} · {license} · {timestamp}
