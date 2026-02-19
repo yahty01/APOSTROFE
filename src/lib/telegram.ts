@@ -2,6 +2,10 @@ import type {AssetEntityType} from '@/lib/assets/entity';
 
 const TELEGRAM_LICENSE_USERNAME = 'apostrofe_license';
 
+function encodeTelegramParam(value: string) {
+  return encodeURIComponent(value);
+}
+
 /**
  * Минимальный набор полей ассета, нужный для генерации Telegram-текстов.
  * Тип сделан "мягким", чтобы его могли передавать и публичные страницы, и админские формы.
@@ -49,10 +53,9 @@ function buildAssetInfo(asset: Pick<AssetLike, 'document_id' | 'title'>) {
  * Используется в публичном каталоге и карточках моделей как CTA на запрос лицензии/инфо.
  */
 export function buildTelegramShareUrl(text: string, url?: string): string {
-  const params = new URLSearchParams();
-  params.set('text', text);
-  if (url) params.set('url', url);
-  return `https://t.me/share/url?${params.toString()}`;
+  const params = [`text=${encodeTelegramParam(text)}`];
+  if (url) params.push(`url=${encodeTelegramParam(url)}`);
+  return `https://t.me/share/url?${params.join('&')}`;
 }
 
 /**
@@ -63,9 +66,7 @@ export function buildTelegramDirectMessageUrl(
   username = TELEGRAM_LICENSE_USERNAME
 ): string {
   const cleanUsername = username.replace(/^@/, '').trim() || TELEGRAM_LICENSE_USERNAME;
-  const params = new URLSearchParams();
-  params.set('text', text);
-  return `https://t.me/${cleanUsername}?${params.toString()}`;
+  return `https://t.me/${cleanUsername}?text=${encodeTelegramParam(text)}`;
 }
 
 export function buildAssetLicenseInquiryText(
