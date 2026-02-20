@@ -15,7 +15,17 @@ import type {AssetFieldKey, AssetListItem} from './types';
 
 function normalizeFields(fields: AssetFieldKey[]) {
   const fallback: AssetFieldKey[] = ['name', 'createdAt', 'license', 'status'];
-  return [...fields, ...fallback].slice(0, 4);
+  const result: AssetFieldKey[] = [];
+
+  // Сохраняем порядок входных колонок, а недостающие добираем fallback-ом.
+  // Через dedupe избегаем ситуации, когда в таблицу попадают дубли колонок.
+  for (const field of [...fields, ...fallback]) {
+    if (result.includes(field)) continue;
+    result.push(field);
+    if (result.length === 4) break;
+  }
+
+  return result;
 }
 
 export function AssetsTable({
@@ -27,6 +37,10 @@ export function AssetsTable({
   fields: AssetFieldKey[];
   detailBasePath?: string;
 }) {
+  // `@tanstack/react-virtual` пока не совместим с React Compiler.
+  // Явно выключаем compiler memoization для этого компонента, чтобы избежать warning/нестабильного поведения.
+  'use no memo';
+
   const t = useTranslations('public');
   const parentRef = useRef<HTMLDivElement | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -38,6 +52,7 @@ export function AssetsTable({
   );
 
   // Виртуализация списка: считаем общую высоту и выдаём "виртуальные" индексы для текущего scroll.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
@@ -49,6 +64,7 @@ export function AssetsTable({
 
   return (
     <div className={assetsTableClasses.root}>
+      {/* Мобильный режим: обычный список без виртуализации (объём данных для mobile здесь приемлем). */}
       <div className={assetsTableClasses.mobileList}>
         {items.map((item) => {
           const firstValue = getAssetFieldValue(item, fieldA);
@@ -102,6 +118,7 @@ export function AssetsTable({
         })}
       </div>
 
+      {/* Десктопный режим: таблица с виртуализацией строк для быстрого скролла длинных списков. */}
       <div className="hidden md:block">
         <div
           className={`${assetsTableClasses.headerRow} ${gridCols}`}
