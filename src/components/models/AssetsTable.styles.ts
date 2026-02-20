@@ -6,7 +6,7 @@ import type { CSSProperties } from "react";
  */
 export const assetsTableClasses = {
   gridCols:
-    "grid-cols-[140px_110px_120px_110px_1fr] lg:grid-cols-[180px_140px_160px_140px_1fr] bg-[black]",
+    "grid-cols-[140px_110px_120px_110px_1fr] lg:grid-cols-[180px_140px_160px_140px_1fr]",
   root: "border border-[color:var(--color-line)] bg-[var(--color-paper)]",
   headerRow:
     "grid items-center border-b border-[color:var(--color-line)] bg-black",
@@ -18,17 +18,18 @@ export const assetsTableClasses = {
   virtualContainer: "relative",
   rowBase:
     "absolute left-0 top-0 w-full border-b border-[color:var(--color-line)]",
-  rowSelected: "bg-black text-white",
+  rowSelected:
+    "bg-[color-mix(in_oklab,var(--color-surface),#000_10%)] text-[var(--color-ink)]",
   rowDefault:
     "bg-[var(--color-surface)] text-[var(--color-ink)] hover:bg-[color-mix(in_oklab,var(--color-surface),#000_6%)]",
-  rowGrid: "grid items-center",
+  rowGrid: "grid min-w-0 items-stretch",
   cellBase:
-    "border-r px-3 py-3 font-doc text-[11px] uppercase tracking-[0.18em] lg:px-4",
-  cellBorderSelected: "border-white/20",
+    "flex min-w-0 items-center border-r overflow-hidden text-ellipsis whitespace-nowrap px-3 py-3 font-doc text-[11px] uppercase tracking-[0.18em] lg:px-4",
+  cellBorderSelected: "border-[color:var(--color-line-strong)]",
   cellBorderDefault: "border-[color:var(--color-line)]",
   cellLink: "hover:underline",
   descCell:
-    "px-3 py-3 font-doc text-[11px] uppercase tracking-[0.14em] lg:px-4",
+    "min-w-0 px-3 py-3 font-doc text-[11px] uppercase tracking-[0.14em] leading-[1.45] whitespace-normal break-words [overflow-wrap:anywhere] lg:px-4",
 
   // Mobile stacked list (phone)
   mobileList: "grid gap-px bg-[var(--color-line)] md:hidden",

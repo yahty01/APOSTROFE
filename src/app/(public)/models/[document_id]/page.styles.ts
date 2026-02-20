@@ -55,7 +55,7 @@ export const modelDetailPageClasses = {
   blockBody: "mt-4 lg:mt-2",
   blockPre:
     "overflow-hidden bg-[var(--color-paper)] p-3 font-doc text-[11px] uppercase tracking-[0.14em] text-[var(--color-muted)] whitespace-pre-wrap break-words lg:text-[10px] lg:leading-[1.45]",
-  actions: "mt-8 grid grid-cols-2 gap-3 lg:mt-4 lg:gap-2",
+  actions: "mt-8 grid grid-cols-2 gap-3 max-[454px]:grid-cols-1 lg:mt-4 lg:gap-2",
   actionPrimary:
     "flex h-14 w-full items-center justify-center border border-black bg-black px-4 font-doc text-[12px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-[color-mix(in_oklab,#000,#fff_8%)] lg:h-12 lg:text-[11px] lg:tracking-[0.16em]",
   actionSecondary:

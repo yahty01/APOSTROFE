@@ -41,7 +41,9 @@ export function AssetsTable({
   const rowVirtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 56,
+    estimateSize: () => 68,
+    measureElement: (element) =>
+      element?.getBoundingClientRect().height ?? 68,
     overscan: 10
   });
 
@@ -141,10 +143,12 @@ export function AssetsTable({
 
               return (
                 <div
-                  key={item.id}
+                  key={virtualRow.key}
                   className={`${assetsTableClasses.rowBase} ${
                     isSelected ? assetsTableClasses.rowSelected : assetsTableClasses.rowDefault
                   }`}
+                  data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
                   style={getVirtualRowStyle(virtualRow.start)}
                   onClick={() => setSelectedId(isSelected ? null : item.id)}
                   role="button"
