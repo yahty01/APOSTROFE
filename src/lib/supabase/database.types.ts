@@ -133,7 +133,13 @@ export type Database = {
           kind?: 'catalog' | 'hero' | 'gallery';
           order_index?: number;
         };
-        Relationships: [];
+        Relationships: [{
+          foreignKeyName: 'asset_media_asset_id_fkey';
+          columns: ['asset_id'];
+          isOneToOne: false;
+          referencedRelation: 'assets';
+          referencedColumns: ['id'];
+        }];
       };
       settings_marquee: {
         Row: {

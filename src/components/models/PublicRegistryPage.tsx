@@ -4,7 +4,7 @@ import {getTranslations} from 'next-intl/server';
 
 import {ViewSwitcher} from '@/components/shell/ViewSwitcher';
 import {modelsPageClasses} from '@/app/(public)/models/page.styles';
-import {createPublicImageUrls} from '@/lib/supabase/public-images';
+import {createPublicImages} from '@/lib/supabase/public-images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 import {
   buildCollaborateWithUsText,
@@ -112,12 +112,17 @@ export async function PublicRegistryPage({
       .eq('entity_type', config.entityType)
       .not(config.filterColumn, 'is', null);
 
-    let assetsQuery = supabase
-      .from('assets')
-      .select(
-        'id,entity_type,document_id,title,description,license_type,status,created_at,updated_at,model_type,creator_direction,influencer_topic,influencer_platforms',
-        {count: 'exact'}
-      )
+    const withImages = config.mediaMode === 'image' && viewMode === 'cards';
+    const assetsTable = supabase.from('assets');
+    let assetsQuery = (withImages
+      ? assetsTable.select(
+          'id,entity_type,document_id,title,description,license_type,status,created_at,updated_at,model_type,creator_direction,influencer_topic,influencer_platforms,asset_media(path,kind,order_index)',
+          {count: 'exact'}
+        )
+      : assetsTable.select(
+          'id,entity_type,document_id,title,description,license_type,status,created_at,updated_at,model_type,creator_direction,influencer_topic,influencer_platforms',
+          {count: 'exact'}
+        ))
       .eq('entity_type', config.entityType)
       .order('created_at', {ascending: false})
       .range(from, to);
@@ -164,35 +169,14 @@ export async function PublicRegistryPage({
         preview_url: null
       }));
     } else {
-      const assetIds = assets.map((a) => a.id);
-      const {data: mediaData} = await supabase
-        .from('asset_media')
-        .select('asset_id,path,kind,order_index')
-        .in('asset_id', assetIds)
-        .order('kind', {ascending: true})
-        .order('order_index', {ascending: true});
-
-      const mediaByAsset = new Map<
-        string,
-        {path: string; kind: 'catalog' | 'hero' | 'gallery'; order_index: number}[]
-      >();
-
-      for (const m of mediaData ?? []) {
-        const list = mediaByAsset.get(m.asset_id) ?? [];
-        list.push({
-          path: m.path,
-          kind: m.kind,
-          order_index: m.order_index
-        });
-        mediaByAsset.set(m.asset_id, list);
-      }
-
-      const previewPaths = assets.map((a) => {
-        const media = mediaByAsset.get(a.id) ?? [];
+      const previewPaths = assets.map((asset) => {
+        const media = 'asset_media' in asset
+          ? [...asset.asset_media].sort((a, b) => a.order_index - b.order_index)
+          : [];
         return media.find((m) => m.kind === 'catalog')?.path ??
           media.find((m) => m.kind === 'hero')?.path ?? null;
       });
-      const previewUrls = await createPublicImageUrls(
+      const previewUrls = await createPublicImages(
         previewPaths.filter((path): path is string => Boolean(path))
       );
 
@@ -216,7 +200,8 @@ export async function PublicRegistryPage({
           creator_direction: a.creator_direction,
           influencer_topic: a.influencer_topic,
           influencer_platforms: a.influencer_platforms,
-          preview_url: previewUrl
+          preview_url: previewUrl?.url ?? null,
+          preview_blur_data_url: previewUrl?.blurDataURL
         };
       });
     }

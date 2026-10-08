@@ -3,7 +3,8 @@ import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {getTranslations} from 'next-intl/server';
 
-import {createPublicImageUrls} from '@/lib/supabase/public-images';
+import {createPublicImages, type PublicImage} from '@/lib/supabase/public-images';
+import {PROFILE_IMAGE_SIZES} from '@/components/models/image-sizes';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 import {
   buildAssetInfoInquiryText,
@@ -45,8 +46,8 @@ export default async function ModelDetailPage({
   const tPublic = await getTranslations('public');
   const tCommon = await getTranslations('common');
 
-  let heroUrl: string | null = null;
-  let galleryUrls: string[] = [];
+  let heroUrl: PublicImage | null = null;
+  let galleryUrls: PublicImage[] = [];
 
   // Все обращения к Supabase оборачиваем в try/catch, чтобы в случае проблем показывать корректный 404, а не 500.
   try {
@@ -54,7 +55,7 @@ export default async function ModelDetailPage({
     const {data: asset, error: assetError} = await supabase
       .from('assets')
       .select(
-        'id,document_id,title,description,measurements,details,category,model_type,license_type,status,updated_at'
+        'id,document_id,title,description,measurements,details,category,model_type,license_type,status,updated_at,asset_media(path,kind,order_index)'
       )
       .eq('document_id', document_id)
       .eq('entity_type', 'model')
@@ -62,12 +63,7 @@ export default async function ModelDetailPage({
 
     if (assetError || !asset) notFound();
 
-    const {data: media} = await supabase
-      .from('asset_media')
-      .select('path,kind,order_index')
-      .eq('asset_id', asset.id)
-      .order('kind', {ascending: true})
-      .order('order_index', {ascending: true});
+    const media = [...asset.asset_media].sort((a, b) => a.order_index - b.order_index);
 
     const heroPath =
       media?.find((m) => m.kind === 'hero')?.path ??
@@ -78,14 +74,14 @@ export default async function ModelDetailPage({
       .sort((a, b) => a.order_index - b.order_index)
       .map((m) => m.path);
 
-    const imageUrls = await createPublicImageUrls([
+    const imageUrls = await createPublicImages([
       ...(heroPath ? [heroPath] : []),
       ...galleryPaths
     ]);
     heroUrl = heroPath ? imageUrls.get(heroPath) ?? null : null;
     galleryUrls = galleryPaths
       .map((path) => imageUrls.get(path))
-      .filter((url): url is string => Boolean(url));
+      .filter((image): image is PublicImage => Boolean(image));
 
     const timestamp = formatIsoDate(asset.updated_at);
     const license = (asset.license_type || 'STANDARD').toUpperCase();
@@ -119,11 +115,14 @@ export default async function ModelDetailPage({
               <div className={modelDetailPageClasses.hero}>
                 {heroUrl ? (
                   <Image
-                    src={heroUrl}
+                    src={heroUrl.url}
+                    placeholder={heroUrl.blurDataURL ? "blur" : "empty"}
+                    blurDataURL={heroUrl.blurDataURL}
                     alt={asset.title}
                     fill
                     className={modelDetailPageClasses.heroImage}
-                    sizes="(max-width: 1024px) 100vw, 40vw"
+                    sizes={PROFILE_IMAGE_SIZES}
+                    style={{objectFit: 'contain', objectPosition: 'center'}}
                     priority
                   />
                 ) : (
@@ -210,8 +209,9 @@ export default async function ModelDetailPage({
                     galleryUrls.length % 2 === 1 && idx === galleryUrls.length - 1;
                   return (
                     <GalleryItem
-                      key={`${url}-${idx}`}
-                      src={url}
+                      key={`${url.url}-${idx}`}
+                      src={url.url}
+                      blurDataURL={url.blurDataURL}
                       alt={`${asset.document_id} ${idx + 1}`}
                       isSolo={isSolo}
                     />

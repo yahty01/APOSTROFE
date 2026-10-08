@@ -1,15 +1,18 @@
 'use client';
 
 import Image from 'next/image';
+import {galleryImageSizes} from '@/components/models/image-sizes';
 
 import {modelDetailPageClasses} from './page.styles';
 
 export function GalleryItem({
   src,
+  blurDataURL,
   alt,
   isSolo
 }: {
   src: string;
+  blurDataURL?: string;
   alt: string;
   isSolo: boolean;
 }) {
@@ -21,10 +24,13 @@ export function GalleryItem({
     >
       <Image
         src={src}
+        placeholder={blurDataURL ? 'blur' : 'empty'}
+        blurDataURL={blurDataURL}
         alt={alt}
         fill
         className={modelDetailPageClasses.galleryImage}
-        sizes="(max-width: 640px) 100vw, 50vw"
+        style={{objectFit: 'contain', objectPosition: 'center'}}
+        sizes={galleryImageSizes(isSolo)}
       />
     </div>
   );
