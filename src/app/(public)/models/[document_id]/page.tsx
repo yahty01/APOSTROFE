@@ -11,6 +11,10 @@ import {
   buildTelegramDirectMessageUrl
 } from '@/lib/telegram';
 
+import {PropertyGrid} from '@/components/models/PropertyGrid';
+import {SocialLinks} from '@/components/models/SocialLinks';
+import {hasProperties, splitModelDetails} from '@/lib/assets/model-properties';
+
 import {GalleryItem} from './GalleryItem';
 import {modelDetailPageClasses} from './page.styles';
 
@@ -24,30 +28,6 @@ function formatIsoDate(value: string | null | undefined) {
   if (!value) return '—';
   const d = value.slice(0, 10);
   return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
-}
-
-/**
- * Рендерит объект как список key/value (dl), если это "плоская" структура.
- * Используется для `measurements`/`details`, чтобы красиво показать JSON без принудительного `pre`.
- */
-function renderKeyValue(value: unknown) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
-  const entries = Object.entries(value as Record<string, unknown>);
-  if (!entries.length) return null;
-  return (
-    <dl className={modelDetailPageClasses.kvGrid}>
-      {entries.map(([k, v]) => (
-        <div key={k} className={modelDetailPageClasses.kvItem}>
-          <dt className={modelDetailPageClasses.kvKey}>
-            {k}
-          </dt>
-          <dd className={modelDetailPageClasses.kvValue}>
-            {typeof v === 'string' || typeof v === 'number' ? String(v) : '—'}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  );
 }
 
 /**
@@ -74,7 +54,7 @@ export default async function ModelDetailPage({
     const {data: asset, error: assetError} = await supabase
       .from('assets')
       .select(
-        'id,document_id,title,description,measurements,details,category,license_type,status,updated_at'
+        'id,document_id,title,description,measurements,details,category,model_type,license_type,status,updated_at'
       )
       .eq('document_id', document_id)
       .eq('entity_type', 'model')
@@ -113,8 +93,10 @@ export default async function ModelDetailPage({
     const timestamp = formatIsoDate(asset.updated_at);
     const license = (asset.license_type || 'STANDARD').toUpperCase();
     const status = (asset.status || 'AVAILABLE').toUpperCase();
+    const modelType = asset.model_type || asset.category;
     const description = (asset.description || asset.title || '').trim() || '—';
-    const modelPageId = (asset.document_id || document_id).trim() || document_id;
+    const modelName = (asset.title || document_id).replace(/_/g, ' ').trim();
+    const {links: socialLinks, properties: details} = splitModelDetails(asset.details);
 
     const acquireHref = buildTelegramDirectMessageUrl(
       buildAssetLicenseInquiryText(asset)
@@ -157,10 +139,16 @@ export default async function ModelDetailPage({
 
             <section className={modelDetailPageClasses.detailsSection}>
               <h1 className={modelDetailPageClasses.title}>
-                {modelPageId}
+                {modelName}
               </h1>
               <div className={modelDetailPageClasses.meta}>
                 {status} · {license} · {timestamp}
+                {modelType ? <span className="mt-2 block">{tPublic('asset.modelType')}: {modelType.replace(/_/g, ' ')}</span> : null}
+                <span className={modelDetailPageClasses.documentId}>{asset.document_id}</span>
+              </div>
+
+              <div className={modelDetailPageClasses.socialSection}>
+                <SocialLinks links={socialLinks} label={tPublic('detail.socialLinks')} />
               </div>
 
               <div className={modelDetailPageClasses.blocks}>
@@ -173,32 +161,24 @@ export default async function ModelDetailPage({
                   </div>
                 </div>
 
-                {asset.measurements ? (
+                {hasProperties(asset.measurements) ? (
                   <div className={modelDetailPageClasses.block}>
                     <div className={modelDetailPageClasses.blockTitle}>
                       {tPublic('detail.measurements').toUpperCase()}
                     </div>
                     <div className={modelDetailPageClasses.blockBody}>
-                      {renderKeyValue(asset.measurements) ?? (
-                        <pre className={modelDetailPageClasses.blockPre}>
-                          {JSON.stringify(asset.measurements, null, 2)}
-                        </pre>
-                      )}
+                      <PropertyGrid value={asset.measurements} />
                     </div>
                   </div>
                 ) : null}
 
-                {asset.details ? (
+                {hasProperties(details) ? (
                   <div className={modelDetailPageClasses.block}>
                     <div className={modelDetailPageClasses.blockTitle}>
                       {tPublic('detail.details').toUpperCase()}
                     </div>
                     <div className={modelDetailPageClasses.blockBody}>
-                      {renderKeyValue(asset.details) ?? (
-                        <pre className={modelDetailPageClasses.blockPre}>
-                          {JSON.stringify(asset.details, null, 2)}
-                        </pre>
-                      )}
+                      <PropertyGrid value={details} />
                     </div>
                   </div>
                 ) : null}

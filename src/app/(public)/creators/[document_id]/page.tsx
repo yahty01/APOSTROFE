@@ -144,9 +144,10 @@ export default async function CreatorDetailPage({
           </section>
 
           <section className={modelDetailPageClasses.detailsSection}>
-            <h1 className={modelDetailPageClasses.title}>{creatorPageId}</h1>
+            <h1 className={modelDetailPageClasses.title}>{creatorName}</h1>
             <div className={modelDetailPageClasses.meta}>
               {status} · {license} · {timestamp}
+              <span className={modelDetailPageClasses.documentId}>{creatorPageId}</span>
             </div>
 
             <div className={modelDetailPageClasses.blocks}>
