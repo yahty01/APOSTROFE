@@ -1,4 +1,5 @@
 import contentTranslations from './content-translations.json';
+import {propertyKey} from './property-labels';
 import type {Json} from '@/lib/supabase/database.types';
 
 const KEY = '__apostrofe_i18n';
@@ -15,12 +16,15 @@ function record(value: unknown): value is Record<string, unknown> {
 /** A partly translated property object keeps the other original properties visible. */
 function translatedProperties(base: unknown, translation: unknown): unknown {
   if (!record(base) || !record(translation)) return translation;
-  const result = {...base};
+  const result = new Map(Object.entries(base));
   for (const [key, value] of Object.entries(translation)) {
     if (value == null || (typeof value === 'string' && !value.trim())) continue;
-    result[key] = translatedProperties(base[key], value);
+    const originalKey = [...result.keys()].find((existing) => propertyKey(existing) === propertyKey(key));
+    const originalValue = originalKey === undefined ? undefined : result.get(originalKey);
+    if (originalKey !== undefined && originalKey !== key) result.delete(originalKey);
+    result.set(key, translatedProperties(originalValue, value));
   }
-  return result;
+  return Object.fromEntries(result);
 }
 
 /** Store translations in the existing details JSON; no schema migration is needed. */

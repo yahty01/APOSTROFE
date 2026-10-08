@@ -1,7 +1,7 @@
 "use client";
 
+import {localizedMarqueeText} from '@/lib/marquee-text';
 import { useEffect, useMemo, useState } from "react";
-import {localizedMarqueeText} from "@/lib/marquee-localization";
 
 import { getMarqueeVars, marqueeClasses } from "./Marquee.styles";
 
@@ -61,8 +61,8 @@ export function Marquee({
   );
 
   const direction = settings.direction === "right" ? "right" : "left";
-  const rawText = localizedMarqueeText(pickText(settings, locale).trim(), locale);
-  const text = rawText || getFallbackText(locale);
+  const rawText = pickText(settings, locale).trim();
+  const text = localizedMarqueeText(rawText || getFallbackText(locale), locale);
   const style = getMarqueeVars(durationSeconds, direction);
 
   // Периодически обновляем настройки, чтобы изменения из админки появлялись без перезагрузки страницы.
