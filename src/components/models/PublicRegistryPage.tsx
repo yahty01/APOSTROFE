@@ -1,6 +1,7 @@
+import {localizeAsset, localizedAssetValue} from '@/lib/assets/localization';
 import Link from 'next/link';
 import {cookies} from 'next/headers';
-import {getTranslations} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
 import {ViewSwitcher} from '@/components/shell/ViewSwitcher';
 import {modelsPageClasses} from '@/app/(public)/models/page.styles';
@@ -73,6 +74,7 @@ export async function PublicRegistryPage({
   config: RegistryPageConfig;
 }) {
   const sp = await searchParams;
+  const locale = await getLocale();
 
   const t = await getTranslations('public');
   const tCommon = await getTranslations('common');
@@ -99,7 +101,7 @@ export async function PublicRegistryPage({
   const to = from + PAGE_SIZE - 1;
 
   let items: AssetListItem[] = [];
-  let categories: string[] = [];
+  let categories: {value: string; label: string}[] = [];
   let count = 0;
   let errorMessage: string | null = null;
 
@@ -108,7 +110,7 @@ export async function PublicRegistryPage({
 
     const categoriesPromise = supabase
       .from('assets')
-      .select(config.filterColumn)
+      .select('model_type,creator_direction,influencer_topic,model_type_en:details->__apostrofe_i18n->en->>model_type,creator_direction_en:details->__apostrofe_i18n->en->>creator_direction,influencer_topic_en:details->__apostrofe_i18n->en->>influencer_topic')
       .eq('entity_type', config.entityType)
       .not(config.filterColumn, 'is', null);
 
@@ -116,11 +118,11 @@ export async function PublicRegistryPage({
     const assetsTable = supabase.from('assets');
     let assetsQuery = (withImages
       ? assetsTable.select(
-          'id,entity_type,document_id,title,description,license_type,status,created_at,updated_at,model_type,creator_direction,influencer_topic,influencer_platforms,asset_media(path,kind,order_index)',
+          'id,entity_type,document_id,title,description,details,license_type,status,created_at,updated_at,model_type,creator_direction,influencer_topic,influencer_platforms,asset_media(path,kind,order_index)',
           {count: 'exact'}
         )
       : assetsTable.select(
-          'id,entity_type,document_id,title,description,license_type,status,created_at,updated_at,model_type,creator_direction,influencer_topic,influencer_platforms',
+          'id,entity_type,document_id,title,description,details,license_type,status,created_at,updated_at,model_type,creator_direction,influencer_topic,influencer_platforms',
           {count: 'exact'}
         ))
       .eq('entity_type', config.entityType)
@@ -134,21 +136,21 @@ export async function PublicRegistryPage({
       assetsQuery
     ]);
 
-    const rawCategories = (categoriesData ?? [])
-      .map((row) => {
-        const value = (row as Record<string, unknown>)[config.filterColumn];
-        return typeof value === 'string' ? value.trim() : '';
-      })
-      .filter(Boolean);
-
-    categories = Array.from(new Set(rawCategories)).sort((a, b) =>
-      a.localeCompare(b, 'ru')
-    );
+    const categoryLabels = new Map<string, string>();
+    for (const row of categoriesData ?? []) {
+      const value = row[config.filterColumn]?.trim();
+      if (value && !categoryLabels.has(value)) {
+        const translated = row[`${config.filterColumn}_en`];
+        const label = locale === 'en' && typeof translated === 'string' && translated.trim() ? translated : value;
+        categoryLabels.set(value, localizedAssetValue(label, locale));
+      }
+    }
+    categories = Array.from(categoryLabels, ([value, label]) => ({value, label})).sort((a, b) => a.label.localeCompare(b.label, locale));
 
     if (assetsRes.error) throw assetsRes.error;
     count = assetsRes.count ?? 0;
 
-    const assets = assetsRes.data ?? [];
+    const assets = (assetsRes.data ?? []).map((asset) => localizeAsset(asset, locale));
     if (!assets.length) {
       items = [];
     } else if (config.mediaMode === 'title' || viewMode === 'list') {
@@ -205,8 +207,8 @@ export async function PublicRegistryPage({
         };
       });
     }
-  } catch (e) {
-    errorMessage = e instanceof Error ? e.message : 'Failed to load assets';
+  } catch {
+    errorMessage = t('loadError');
   }
 
   const pages = Math.max(1, Math.ceil(count / PAGE_SIZE));
@@ -214,7 +216,7 @@ export async function PublicRegistryPage({
   const nextPage = page < pages ? page + 1 : null;
 
   const genericTelegramHref = buildTelegramDirectMessageUrl(
-    buildCollaborateWithUsText()
+    buildCollaborateWithUsText(locale)
   );
 
   return (

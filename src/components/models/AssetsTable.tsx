@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {useTranslations} from 'next-intl';
+import {useLocale, useTranslations} from 'next-intl';
 import {useVirtualizer} from '@tanstack/react-virtual';
 import {useMemo, useRef, useState} from 'react';
 
@@ -42,6 +42,7 @@ export function AssetsTable({
   'use no memo';
 
   const t = useTranslations('public');
+  const locale = useLocale();
   const parentRef = useRef<HTMLDivElement | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -67,10 +68,10 @@ export function AssetsTable({
       {/* Мобильный режим: обычный список без виртуализации (объём данных для mobile здесь приемлем). */}
       <div className={assetsTableClasses.mobileList}>
         {items.map((item) => {
-          const firstValue = getAssetFieldValue(item, fieldA);
-          const secondValue = getAssetFieldValue(item, fieldB);
-          const thirdValue = getAssetFieldValue(item, fieldC);
-          const fourthValue = getAssetFieldValue(item, fieldD);
+          const firstValue = getAssetFieldValue(item, fieldA, locale);
+          const secondValue = getAssetFieldValue(item, fieldB, locale);
+          const thirdValue = getAssetFieldValue(item, fieldC, locale);
+          const fourthValue = getAssetFieldValue(item, fieldD, locale);
           const description = getAssetDescription(item);
           const detailHref = detailBasePath
             ? `${detailBasePath}/${encodeURIComponent(item.document_id)}`
@@ -149,10 +150,10 @@ export function AssetsTable({
               const item = items[virtualRow.index];
               const isSelected = selectedId === item.id;
 
-              const firstValue = getAssetFieldValue(item, fieldA);
-              const secondValue = getAssetFieldValue(item, fieldB);
-              const thirdValue = getAssetFieldValue(item, fieldC);
-              const fourthValue = getAssetFieldValue(item, fieldD);
+              const firstValue = getAssetFieldValue(item, fieldA, locale);
+              const secondValue = getAssetFieldValue(item, fieldB, locale);
+              const thirdValue = getAssetFieldValue(item, fieldC, locale);
+              const fourthValue = getAssetFieldValue(item, fieldD, locale);
               const description = getAssetDescription(item);
               const detailHref = detailBasePath
                 ? `${detailBasePath}/${encodeURIComponent(item.document_id)}`

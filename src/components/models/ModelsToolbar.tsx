@@ -17,7 +17,7 @@ export function ModelsToolbar({
   label,
   paramName = 'category'
 }: {
-  categories: string[];
+  categories: {value: string; label: string}[];
   label: string;
   paramName?: string;
 }) {
@@ -57,8 +57,8 @@ export function ModelsToolbar({
         >
           <option value="all">{tCommon('all')}</option>
           {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
+            <option key={c.value} value={c.value}>
+              {c.label}
             </option>
           ))}
         </select>

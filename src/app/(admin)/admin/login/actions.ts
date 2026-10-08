@@ -2,6 +2,7 @@
 
 import {redirect} from 'next/navigation';
 import {z} from 'zod';
+import {getTranslations} from 'next-intl/server';
 
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 
@@ -31,19 +32,20 @@ export async function loginAction(
   _prevState: LoginActionState,
   formData: FormData
 ): Promise<LoginActionState> {
+  const t = await getTranslations('admin.login');
   const parsed = schema.safeParse({
     email: formData.get('email'),
     password: formData.get('password')
   });
 
   if (!parsed.success) {
-    return {error: 'Invalid email/password'};
+    return {error: t('invalidCredentials')};
   }
 
   const supabase = await createSupabaseServerClient();
   const {error} = await supabase.auth.signInWithPassword(parsed.data);
 
-  if (error) return {error: error.message};
+  if (error) return {error: t(error.code === 'invalid_credentials' ? 'invalidCredentials' : 'error')};
 
   redirect('/admin/models');
 }

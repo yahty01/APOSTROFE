@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useLocale } from "next-intl";
+import {toast} from "sonner";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useRef, useTransition } from "react";
 
@@ -68,6 +69,8 @@ function LocaleFlagIcon({ locale }: { locale: "ru" | "en" }) {
  */
 export function LanguageDropdown() {
   const locale = asLocale(useLocale());
+  const t = useTranslations("common");
+  const switching = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -83,7 +86,7 @@ export function LanguageDropdown() {
     event: React.MouseEvent<HTMLAnchorElement>,
     href: string,
   ) {
-    if (isPending) {
+    if (switching.current || isPending) {
       event.preventDefault();
       return;
     }
@@ -91,24 +94,28 @@ export function LanguageDropdown() {
     if (!isPlainLeftClick(event)) return;
 
     event.preventDefault();
+    switching.current = true;
     startTransition(async () => {
       try {
-        await fetch(href, {
+        const response = await fetch(href, {
           headers: { "x-locale-switch": "1" },
           credentials: "same-origin",
           cache: "no-store",
         });
+        if (!response.ok) throw new Error("Locale switch failed");
+        if (detailsRef.current) detailsRef.current.open = false;
+        router.refresh();
       } catch {
-        // ignore
+        toast.error(t("languageError"));
+      } finally {
+        switching.current = false;
       }
-      if (detailsRef.current) detailsRef.current.open = false;
-      router.refresh();
     });
   }
 
   return (
-    <details ref={detailsRef} className={languageDropdownClasses.root}>
-      <summary className={languageDropdownClasses.summary}>
+    <details aria-busy={isPending} ref={detailsRef} className={languageDropdownClasses.root}>
+      <summary aria-label={t("language")} className={languageDropdownClasses.summary}>
         <LocaleFlagIcon locale={locale} />
         <span>{locale.toUpperCase()}</span>
         <span aria-hidden className={languageDropdownClasses.caret}>

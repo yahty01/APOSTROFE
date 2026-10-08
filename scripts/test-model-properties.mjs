@@ -3,7 +3,12 @@ import {readFile} from 'node:fs/promises';
 import ts from 'typescript';
 
 const source = await readFile(new URL('../src/lib/assets/model-properties.ts', import.meta.url), 'utf8');
-const {outputText} = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022}});
+const localization = await readFile(new URL('../src/lib/assets/localization.ts', import.meta.url), 'utf8');
+const seed = await readFile(new URL('../src/lib/assets/content-translations.json', import.meta.url), 'utf8');
+const localizedSource = localization.replace("import contentTranslations from './content-translations.json';", `const contentTranslations = ${seed};`);
+const localizedJS = ts.transpileModule(localizedSource, {compilerOptions: {module: ts.ModuleKind.ESNext}}).outputText;
+const localizationURL = `data:text/javascript;base64,${Buffer.from(localizedJS).toString('base64')}`;
+const {outputText} = ts.transpileModule(source.replace("'./localization'", JSON.stringify(localizationURL)), {compilerOptions: {module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022}});
 const {httpUrl, splitModelDetails, propertyRows, socialPlatformForKey, hasProperties} = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
 
 for (const url of ['javascript:alert(1)', 'data:text/html,test', '/relative', 'https://user:pass@example.com', 'not a url']) {

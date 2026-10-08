@@ -1,13 +1,14 @@
 'use client';
 
 import {zodResolver} from '@hookform/resolvers/zod';
-import {useTranslations} from 'next-intl';
+import {useLocale, useTranslations} from 'next-intl';
 import {useRouter} from 'next/navigation';
 import {useTransition} from 'react';
 import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
 import {z} from 'zod';
 
+import {localizedActionError} from '@/lib/action-error';
 import {useReportPending} from '@/lib/pending';
 
 import {saveMarqueeSettingsAction} from './actions';
@@ -35,6 +36,7 @@ export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
   const t = useTranslations('admin.marquee');
   const tCommon = useTranslations('common');
   const tToast = useTranslations('admin.toast');
+  const locale = useLocale();
 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -54,7 +56,7 @@ export function MarqueeForm({initialValues}: {initialValues: FormValues}) {
         ...values
       });
       if (!res.ok) {
-        toast.error(res.error || tToast('error'));
+        toast.error(localizedActionError(res.error, locale));
         return;
       }
       toast.success(tToast('saved'));

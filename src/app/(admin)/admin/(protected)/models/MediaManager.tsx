@@ -3,9 +3,10 @@
 import Image from 'next/image';
 import {useRouter} from 'next/navigation';
 import {useTransition} from 'react';
-import {useTranslations} from 'next-intl';
+import {useLocale, useTranslations} from 'next-intl';
 import {toast} from 'sonner';
 
+import {localizedActionError} from '@/lib/action-error';
 import {useReportPending} from '@/lib/pending';
 import type {AssetEntityType} from '@/lib/assets/entity';
 
@@ -57,6 +58,7 @@ export function MediaManager({
 }) {
   const t = useTranslations('admin.media');
   const tToast = useTranslations('admin.toast');
+  const locale = useLocale();
   const tCommon = useTranslations('common');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -108,7 +110,7 @@ export function MediaManager({
         kind === 'catalog'
           ? await uploadCatalogAction(fd)
           : await uploadHeroAction(fd);
-      if (!res.ok) toast.error(res.error || tToast('error'));
+      if (!res.ok) toast.error(localizedActionError(res.error, locale));
       else toast.success(tToast('saved'));
       router.refresh();
     });
@@ -133,7 +135,7 @@ export function MediaManager({
     const list = Array.from(files);
     const firstError = list.map(validateFile).find(Boolean) ?? null;
     if (firstError) {
-      toast.error(firstError);
+      toast.error(localizedActionError(firstError, locale));
       return;
     }
 
@@ -151,7 +153,7 @@ export function MediaManager({
       fd.set('entity_type', entityType);
       list.forEach((f) => fd.append('files', f));
       const res = await uploadGalleryAction(fd);
-      if (!res.ok) toast.error(res.error || tToast('error'));
+      if (!res.ok) toast.error(localizedActionError(res.error, locale));
       else toast.success(tToast('saved'));
       router.refresh();
     });
@@ -168,7 +170,7 @@ export function MediaManager({
         media_id: mediaId,
         direction
       });
-      if (!res.ok) toast.error(res.error || tToast('error'));
+      if (!res.ok) toast.error(localizedActionError(res.error, locale));
       router.refresh();
     });
   }
@@ -183,7 +185,7 @@ export function MediaManager({
         entity_type: entityType,
         media_id: mediaId
       });
-      if (!res.ok) toast.error(res.error || tToast('error'));
+      if (!res.ok) toast.error(localizedActionError(res.error, locale));
       else toast.success(tToast('saved'));
       router.refresh();
     });

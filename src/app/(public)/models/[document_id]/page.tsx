@@ -1,7 +1,8 @@
+import {localizeAsset, localizedAssetValue} from '@/lib/assets/localization';
 import Image from 'next/image';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {getTranslations} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
 import {createPublicImages, type PublicImage} from '@/lib/supabase/public-images';
 import {PROFILE_IMAGE_SIZES} from '@/components/models/image-sizes';
@@ -43,6 +44,7 @@ export default async function ModelDetailPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const {document_id} = await params;
+  const locale = await getLocale();
   const tPublic = await getTranslations('public');
   const tCommon = await getTranslations('common');
 
@@ -52,7 +54,7 @@ export default async function ModelDetailPage({
   // Все обращения к Supabase оборачиваем в try/catch, чтобы в случае проблем показывать корректный 404, а не 500.
   try {
     const supabase = createSupabasePublicClient();
-    const {data: asset, error: assetError} = await supabase
+    const {data: sourceAsset, error: assetError} = await supabase
       .from('assets')
       .select(
         'id,document_id,title,description,measurements,details,category,model_type,license_type,status,updated_at,asset_media(path,kind,order_index)'
@@ -61,8 +63,9 @@ export default async function ModelDetailPage({
       .eq('entity_type', 'model')
       .maybeSingle();
 
-    if (assetError || !asset) notFound();
+    if (assetError || !sourceAsset) notFound();
 
+    const asset = localizeAsset(sourceAsset, locale);
     const media = [...asset.asset_media].sort((a, b) => a.order_index - b.order_index);
 
     const heroPath =
@@ -84,18 +87,19 @@ export default async function ModelDetailPage({
       .filter((image): image is PublicImage => Boolean(image));
 
     const timestamp = formatIsoDate(asset.updated_at);
-    const license = (asset.license_type || 'STANDARD').toUpperCase();
-    const status = (asset.status || 'AVAILABLE').toUpperCase();
-    const modelType = asset.model_type || asset.category;
+    const license = localizedAssetValue(asset.license_type, locale, 'STANDARD').toUpperCase();
+    const status = localizedAssetValue(asset.status, locale, 'AVAILABLE').toUpperCase();
+    const modelType = localizedAssetValue(asset.model_type || asset.category, locale);
     const description = (asset.description || asset.title || '').trim() || '—';
     const modelName = (asset.title || document_id).replace(/_/g, ' ').trim();
-    const {links: socialLinks, properties: details} = splitModelDetails(asset.details);
+    const {links: socialLinks} = splitModelDetails(sourceAsset.details);
+    const {properties: details} = splitModelDetails(asset.details);
 
     const acquireHref = buildTelegramDirectMessageUrl(
-      buildAssetLicenseInquiryText(asset)
+      buildAssetLicenseInquiryText(asset, locale)
     );
     const requestInfoHref = buildTelegramDirectMessageUrl(
-      buildAssetInfoInquiryText(asset)
+      buildAssetInfoInquiryText(asset, locale)
     );
 
     return (

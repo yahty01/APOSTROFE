@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import {IBM_Plex_Mono, Tiny5} from 'next/font/google';
 import {NextIntlClientProvider} from 'next-intl';
-import {getLocale, getMessages} from 'next-intl/server';
+import {getLocale, getMessages, getTranslations} from 'next-intl/server';
 import {Toaster} from 'sonner';
 
 import './globals.css';
@@ -24,10 +24,10 @@ const tiny5 = Tiny5({
   weight: '400'
 });
 
-export const metadata: Metadata = {
-  title: "Apostrofe",
-  description: "Models catalog + admin",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('app');
+  return {title: 'Apostrofe', description: t('description')};
+}
 
 /**
  * Root layout всего приложения.
