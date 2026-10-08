@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import {useState} from 'react';
-import {useTranslations} from 'next-intl';
+import {localizedActionError} from '@/lib/action-error';
+import {useLocale, useTranslations} from 'next-intl';
 import {useRouter} from 'next/navigation';
 import {toast} from 'sonner';
 
@@ -48,7 +49,7 @@ export function NewModelClient({
   const t = useTranslations('admin.modelForm');
   const tMedia = useTranslations('admin.media');
   const tCommon = useTranslations('common');
-  const tToast = useTranslations('admin.toast');
+  const locale = useLocale();
   const router = useRouter();
   const adminBasePath = redirectBasePath ?? getAdminBasePathForEntity(entityType);
   const canUploadCatalog = withMedia && allowCatalog;
@@ -87,7 +88,7 @@ export function NewModelClient({
       fd.set('entity_type', entityType);
       fd.set('file', catalogFile);
       const res = await uploadCatalogAction(fd);
-      if (!res.ok) toast.error(res.error || tToast('error'));
+      if (!res.ok) toast.error(localizedActionError(res.error, locale));
     }
 
     if (canUploadHero && heroFile) {
@@ -96,7 +97,7 @@ export function NewModelClient({
       fd.set('entity_type', entityType);
       fd.set('file', heroFile);
       const res = await uploadHeroAction(fd);
-      if (!res.ok) toast.error(res.error || tToast('error'));
+      if (!res.ok) toast.error(localizedActionError(res.error, locale));
     }
 
     if (canUploadGallery && galleryFiles.length) {
@@ -105,7 +106,7 @@ export function NewModelClient({
       fd.set('entity_type', entityType);
       galleryFiles.forEach((f) => fd.append('files', f));
       const res = await uploadGalleryAction(fd);
-      if (!res.ok) toast.error(res.error || tToast('error'));
+      if (!res.ok) toast.error(localizedActionError(res.error, locale));
     }
   }
 

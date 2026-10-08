@@ -1,6 +1,9 @@
+import {getLocale} from 'next-intl/server';
 import type {SocialLink} from '@/lib/assets/model-properties';
 
-export function SocialLinks({links, label}: {links: SocialLink[]; label: string}) {
+export async function SocialLinks({links, label}: {links: SocialLink[]; label: string}) {
+  const locale = await getLocale();
+  links = links.map((link) => ({...link, label: locale === 'ru' && link.key === 'yandex-music' ? 'Яндекс Музыка' : link.label}));
   if (!links.length) return null;
   return (
     <nav aria-label={label} className="grid grid-cols-2 gap-px border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-3 max-sm:[&>a:last-child:nth-child(odd)]:col-span-2 sm:[&>a:last-child:nth-child(3n+1)]:col-span-3 sm:[&>a:last-child:nth-child(3n+2)]:col-span-2">

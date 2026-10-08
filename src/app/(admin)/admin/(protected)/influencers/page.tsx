@@ -1,5 +1,6 @@
+import {localizeAsset, localizedAssetValue} from '@/lib/assets/localization';
 import Link from 'next/link';
-import {getTranslations} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
 import {PendingFormStatusReporter} from '@/components/pending/PendingFormStatusReporter';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
@@ -16,18 +17,20 @@ export default async function AdminInfluencersPage({}: {
 }) {
   const t = await getTranslations('admin.influencers');
   const tCommon = await getTranslations('common');
+  const locale = await getLocale();
+  const tToast = await getTranslations('admin.toast');
 
   const supabase = await createSupabaseServerClientReadOnly();
   const {data: assets, error} = await supabase
     .from('assets')
     .select(
-      'id,document_id,title,influencer_topic,influencer_platforms,license_type,is_published,updated_at'
+      'id,document_id,title,details,influencer_topic,influencer_platforms,license_type,is_published,updated_at'
     )
     .eq('entity_type', 'influencer')
     .order('updated_at', {ascending: false});
 
   if (error) {
-    return <div className={adminModelsPageClasses.error}>{error.message}</div>;
+    return <div className={adminModelsPageClasses.error}>{tToast('error')}</div>;
   }
 
   return (
@@ -50,7 +53,7 @@ export default async function AdminInfluencersPage({}: {
             <div className={adminModelsPageClasses.headerCellLast}>{tCommon('actions')}</div>
           </div>
 
-          {(assets ?? []).map((a) => (
+          {(assets ?? []).map((row) => localizeAsset(row, locale)).map((a) => (
             <div key={a.id} className={adminModelsPageClasses.row}>
               <div className={adminModelsPageClasses.cellMuted}>{a.document_id}</div>
 
@@ -62,13 +65,13 @@ export default async function AdminInfluencersPage({}: {
               </Link>
 
               <div className={adminModelsPageClasses.cellMuted}>
-                {a.influencer_topic ?? '—'}
+                {localizedAssetValue(a.influencer_topic, locale)}
               </div>
               <div className={adminModelsPageClasses.cellMuted}>
                 {a.is_published ? t('publishedYes') : '—'}
               </div>
               <div className={adminModelsPageClasses.cellMuted}>
-                {a.influencer_platforms ?? '—'}
+                {localizedAssetValue(a.influencer_platforms, locale)}
               </div>
 
               <div className={adminModelsPageClasses.actions}>

@@ -1,5 +1,6 @@
+import {localizeAsset, localizedAssetValue} from '@/lib/assets/localization';
 import Link from 'next/link';
-import {getTranslations} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
 import {PendingFormStatusReporter} from '@/components/pending/PendingFormStatusReporter';
 import {createSupabaseServerClientReadOnly} from '@/lib/supabase/server';
@@ -20,18 +21,20 @@ export default async function AdminModelsPage({}: {
 }) {
   const t = await getTranslations('admin.models');
   const tCommon = await getTranslations('common');
+  const locale = await getLocale();
+  const tToast = await getTranslations('admin.toast');
 
   const supabase = await createSupabaseServerClientReadOnly();
   const {data: assets, error} = await supabase
     .from('assets')
-    .select('id,document_id,title,model_type,license_type,status,is_published,updated_at')
+    .select('id,document_id,title,details,model_type,license_type,status,is_published,updated_at')
     .eq('entity_type', 'model')
     .order('updated_at', {ascending: false});
 
   if (error) {
     return (
       <div className={adminModelsPageClasses.error}>
-        {error.message}
+        {tToast('error')}
       </div>
     );
   }
@@ -73,7 +76,7 @@ export default async function AdminModelsPage({}: {
             </div>
           </div>
 
-          {(assets ?? []).map((a) => (
+          {(assets ?? []).map((row) => localizeAsset(row, locale)).map((a) => (
             <div
               key={a.id}
               className={adminModelsPageClasses.row}
@@ -90,13 +93,13 @@ export default async function AdminModelsPage({}: {
               </Link>
 
               <div className={adminModelsPageClasses.cellMuted}>
-                {a.model_type ?? '—'}
+                {localizedAssetValue(a.model_type, locale)}
               </div>
               <div className={adminModelsPageClasses.cellMuted}>
                 {a.is_published ? t('publishedYes') : '—'}
               </div>
               <div className={adminModelsPageClasses.cellMuted}>
-                {a.status ?? '—'}
+                {localizedAssetValue(a.status, locale)}
               </div>
 
               <div className={adminModelsPageClasses.actions}>

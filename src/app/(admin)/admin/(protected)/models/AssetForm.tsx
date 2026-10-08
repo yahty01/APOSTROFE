@@ -13,6 +13,7 @@ import {
   getAssetEntitySection,
   type AssetEntityType
 } from '@/lib/assets/entity';
+import {englishFormFields} from '@/lib/assets/translation-form';
 import {useReportPending} from '@/lib/pending';
 
 import {saveAssetAction} from './model-actions';
@@ -58,7 +59,7 @@ function buildSchema(messages: {
     }, messages.invalidUrl);
 
   return z.object({
-    title: z.string().min(1, messages.titleRequired),
+    title: z.string().trim().min(1, messages.titleRequired),
     description: z.string().optional(),
     model_type: z.string().optional(),
     creator_direction: z.string().optional(),
@@ -75,6 +76,9 @@ function buildSchema(messages: {
     status: z.string().optional(),
     measurements: jsonOrEmpty,
     details: jsonOrEmpty,
+    ...englishFormFields,
+    measurements_en: jsonOrEmpty,
+    details_en: jsonOrEmpty,
     is_published: z.boolean()
   });
 }
@@ -113,7 +117,7 @@ export function AssetForm({
 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [propertyValidity, setPropertyValidity] = useState({measurements: true, details: true});
+  const [propertyValidity, setPropertyValidity] = useState({measurements: true, details: true, measurements_en: true, details_en: true});
   useReportPending(isPending);
 
   const schema = useMemo(
@@ -131,6 +135,7 @@ export function AssetForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
+      ...Object.fromEntries(Object.keys(englishFormFields).map((key) => [key, initialValues[key as keyof FormValues] ?? ''])),
       title: initialValues.title ?? '',
       description: initialValues.description ?? '',
       model_type: initialValues.model_type ?? '',
@@ -152,7 +157,7 @@ export function AssetForm({
     }
   });
 
-  const [measurementsValue, detailsValue] = useWatch({control: form.control, name: ['measurements', 'details']});
+  const [measurementsValue, detailsValue, measurementsEn, detailsEn] = useWatch({control: form.control, name: ['measurements', 'details', 'measurements_en', 'details_en']});
 
   /**
    * Отправка формы: сохраняем ассет через server action, показываем toast и обновляем страницу.
@@ -192,306 +197,94 @@ export function AssetForm({
     });
   }
 
-  return (
-    <form
-      className={assetFormClasses.form}
-      onSubmit={form.handleSubmit(onSubmit)}
-      noValidate
-    >
-      <div className={assetFormClasses.grid2}>
-        <div>
-          <label className={assetFormClasses.label}>
-            {tEntity('documentId')}
-          </label>
-          <div className={assetFormClasses.readonlyValue}>
-            {assetId ? documentIdValue || '—' : t('documentIdAutoValue')}
-          </div>
-          <p className={assetFormClasses.help}>
-            {assetId ? t('documentIdReadonlyHelp') : t('documentIdAutoHelp')}
-          </p>
-        </div>
+  const classification = entityType === 'model' ? 'model_type' : entityType === 'creator' ? 'creator_direction' : 'influencer_topic';
+  const classificationLabel = entityType === 'model' ? tEntity('modelType') : entityType === 'creator' ? tEntity('direction') : tEntity('topic');
+  const statusField = entityType === 'influencer' ? 'influencer_platforms' : 'status';
 
-        <div>
-          <label className={assetFormClasses.label}>
-            {tEntity('titleField')}
-          </label>
-          <input
-            {...form.register('title')}
-            className={assetFormClasses.input}
-            placeholder={tEntity('titleField')}
-          />
-          <p className={assetFormClasses.help}>
-            {t('titleHelp')}
-          </p>
-          {form.formState.errors.title?.message ? (
-            <p className={assetFormClasses.error}>
-              {form.formState.errors.title.message}
-            </p>
-          ) : null}
-        </div>
-
-        <div>
-          <label className={assetFormClasses.label}>
-            {entityType === 'model'
-              ? tEntity('modelType')
-              : entityType === 'creator'
-                ? tEntity('direction')
-                : tEntity('topic')}
-          </label>
-          <input
-            {...form.register(
-              entityType === 'model'
-                ? 'model_type'
-                : entityType === 'creator'
-                  ? 'creator_direction'
-                  : 'influencer_topic'
-            )}
-            className={assetFormClasses.input}
-            placeholder={
-              entityType === 'model'
-                ? '3d / avatar / ...'
-                : entityType === 'creator'
-                  ? 'music / fashion / ...'
-                  : 'music / sport / ...'
-            }
-          />
-          <p className={assetFormClasses.help}>
-            {entityType === 'model'
-              ? t('modelTypeHelp')
-              : entityType === 'creator'
-                ? t('directionHelp')
-                : t('topicHelp')}
-          </p>
-        </div>
-
-        <div>
-          <label className={assetFormClasses.label}>
-            {tEntity('licenseType')}
-          </label>
-          <input
-            {...form.register('license_type')}
-            className={assetFormClasses.input}
-            placeholder="CC-BY"
-          />
-          <p className={assetFormClasses.help}>
-            {t('licenseHelp')}
-          </p>
-        </div>
-
-        <div>
-          <label className={assetFormClasses.label}>
-            {entityType === 'influencer' ? tEntity('platforms') : tEntity('status')}
-          </label>
-          <input
-            {...form.register(
-              entityType === 'influencer' ? 'influencer_platforms' : 'status'
-            )}
-            className={assetFormClasses.input}
-            placeholder={
-              entityType === 'influencer'
-                ? 'instagram, youtube, tiktok'
-                : 'DRAFT / READY / ...'
-            }
-          />
-          <p className={assetFormClasses.help}>
-            {entityType === 'influencer' ? t('platformsHelp') : t('statusHelp')}
-          </p>
-        </div>
-
-        <div className={assetFormClasses.checkboxWrap}>
-          <label className={assetFormClasses.checkboxLabel}>
-            <input
-              type="checkbox"
-              {...form.register('is_published')}
-              className={assetFormClasses.checkboxInput}
-            />
-            {tEntity('published')}
-          </label>
-          <p className={assetFormClasses.help}>
-            {t('publishedHelp')}
-          </p>
-        </div>
+  function textField(name: keyof FormValues, label: string, multiline = false, required = false) {
+    const id = `asset-${name}`;
+    const english = name.endsWith('_en');
+    const error = form.formState.errors[name]?.message;
+    return (
+      <div className={multiline ? 'min-w-0 sm:col-span-2' : 'min-w-0'} key={name}>
+        <label htmlFor={id} className={assetFormClasses.label}>{label}{required ? ' *' : ''}</label>
+        {multiline ? <textarea id={id} {...form.register(name)} rows={4} className={assetFormClasses.textarea} />
+          : <input id={id} {...form.register(name)} lang={english ? 'en' : 'ru'} className={assetFormClasses.input} />}
+        {error ? <p role="alert" className={assetFormClasses.error}>{error}</p> : null}
       </div>
+    );
+  }
 
-      <div>
-        <label className={assetFormClasses.label}>
-          {t('description')}
-        </label>
-        <textarea
-          {...form.register('description')}
-          rows={4}
-          className={assetFormClasses.textarea}
-        />
-        <p className={assetFormClasses.help}>
-          {t('descriptionHelp')}
-        </p>
-      </div>
-
-      {entityType === 'influencer' ? (
+  function languageSection(language: 'ru' | 'en') {
+    const suffix = language === 'en' ? '_en' : '';
+    const field = (name: string) => `${name}${suffix}` as keyof FormValues;
+    const measurementsKey = field('measurements') as 'measurements' | 'measurements_en';
+    const detailsKey = field('details') as 'details' | 'details_en';
+    return (
+      <fieldset className="min-w-0 space-y-6 border border-[var(--color-line)] p-4 md:p-6" lang={language}>
+        <legend className="px-2 font-doc text-sm uppercase tracking-[0.1em]">{t(language === 'ru' ? 'russianContent' : 'englishContent')}</legend>
+        <p className={assetFormClasses.help}>{t(language === 'ru' ? 'russianHelp' : 'englishHelp')}</p>
         <div className={assetFormClasses.grid2}>
-          <div>
-            <label className={assetFormClasses.label}>
-              {tEntity('instagramUrl')}
-            </label>
-            <input
-              {...form.register('influencer_instagram_url')}
-              className={assetFormClasses.input}
-              placeholder="https://instagram.com/username"
-            />
-            <p className={assetFormClasses.help}>
-              {t('socialUrlHelp')}
-            </p>
-            {form.formState.errors.influencer_instagram_url?.message ? (
-              <p className={assetFormClasses.error}>
-                {form.formState.errors.influencer_instagram_url.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <label className={assetFormClasses.label}>
-              {tEntity('youtubeUrl')}
-            </label>
-            <input
-              {...form.register('influencer_youtube_url')}
-              className={assetFormClasses.input}
-              placeholder="https://youtube.com/@channel"
-            />
-            <p className={assetFormClasses.help}>
-              {t('socialUrlHelp')}
-            </p>
-            {form.formState.errors.influencer_youtube_url?.message ? (
-              <p className={assetFormClasses.error}>
-                {form.formState.errors.influencer_youtube_url.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <label className={assetFormClasses.label}>
-              {tEntity('tiktokUrl')}
-            </label>
-            <input
-              {...form.register('influencer_tiktok_url')}
-              className={assetFormClasses.input}
-              placeholder="https://tiktok.com/@username"
-            />
-            <p className={assetFormClasses.help}>
-              {t('socialUrlHelp')}
-            </p>
-            {form.formState.errors.influencer_tiktok_url?.message ? (
-              <p className={assetFormClasses.error}>
-                {form.formState.errors.influencer_tiktok_url.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <label className={assetFormClasses.label}>
-              {tEntity('telegramUrl')}
-            </label>
-            <input
-              {...form.register('influencer_telegram_url')}
-              className={assetFormClasses.input}
-              placeholder="https://t.me/username"
-            />
-            <p className={assetFormClasses.help}>
-              {t('socialUrlHelp')}
-            </p>
-            {form.formState.errors.influencer_telegram_url?.message ? (
-              <p className={assetFormClasses.error}>
-                {form.formState.errors.influencer_telegram_url.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <label className={assetFormClasses.label}>
-              {tEntity('vkUrl')}
-            </label>
-            <input
-              {...form.register('influencer_vk_url')}
-              className={assetFormClasses.input}
-              placeholder="https://vk.com/username"
-            />
-            <p className={assetFormClasses.help}>
-              {t('socialUrlHelp')}
-            </p>
-            {form.formState.errors.influencer_vk_url?.message ? (
-              <p className={assetFormClasses.error}>
-                {form.formState.errors.influencer_vk_url.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <label className={assetFormClasses.label}>
-              {tEntity('yandexMusicUrl')}
-            </label>
-            <input
-              {...form.register('influencer_yandex_music_url')}
-              className={assetFormClasses.input}
-              placeholder="https://music.yandex.ru/..."
-            />
-            <p className={assetFormClasses.help}>
-              {t('socialUrlHelp')}
-            </p>
-            {form.formState.errors.influencer_yandex_music_url?.message ? (
-              <p className={assetFormClasses.error}>
-                {form.formState.errors.influencer_yandex_music_url.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <label className={assetFormClasses.label}>
-              {tEntity('spotifyUrl')}
-            </label>
-            <input
-              {...form.register('influencer_spotify_url')}
-              className={assetFormClasses.input}
-              placeholder="https://open.spotify.com/..."
-            />
-            <p className={assetFormClasses.help}>
-              {t('socialUrlHelp')}
-            </p>
-            {form.formState.errors.influencer_spotify_url?.message ? (
-              <p className={assetFormClasses.error}>
-                {form.formState.errors.influencer_spotify_url.message}
-              </p>
-            ) : null}
-          </div>
+          {textField(field('title'), tEntity('titleField'), false, language === 'ru')}
+          {textField(field(classification), classificationLabel)}
+          {textField(field('license_type'), tEntity('licenseType'))}
+          {textField(field(statusField), entityType === 'influencer' ? tEntity('platforms') : tEntity('status'))}
+          {textField(field('description'), t('description'), true)}
         </div>
-      ) : null}
-
-      {entityType === 'model' ? (
-        <div className="space-y-6">
+        {entityType === 'model' ? <div className="space-y-6">
           <ModelPropertiesEditor
             label={t('measurements')}
-            value={measurementsValue ?? ''}
-            onChange={(value) => form.setValue('measurements', value, {shouldDirty: true})}
-            onValidityChange={(valid) => { setPropertyValidity((previous) => ({...previous, measurements: valid})); }}
+            value={(language === 'ru' ? measurementsValue : measurementsEn) ?? ''}
+            onChange={(value) => form.setValue(measurementsKey, value, {shouldDirty: true})}
+            onValidityChange={(valid) => setPropertyValidity((previous) => ({...previous, [measurementsKey]: valid}))}
           />
           <ModelPropertiesEditor
-            label={t('details')}
-            value={detailsValue ?? ''}
-            withSocial
-            onChange={(value) => form.setValue('details', value, {shouldDirty: true})}
-            onValidityChange={(valid) => { setPropertyValidity((previous) => ({...previous, details: valid})); }}
+            label={language === 'ru' ? t('details') : t('translatedDetails')}
+            value={(language === 'ru' ? detailsValue : detailsEn) ?? ''}
+            withSocial={language === 'ru'}
+            onChange={(value) => form.setValue(detailsKey, value, {shouldDirty: true})}
+            onValidityChange={(valid) => setPropertyValidity((previous) => ({...previous, [detailsKey]: valid}))}
           />
-          {form.formState.errors.measurements?.message || form.formState.errors.details?.message ? (
-            <p role="alert" className={assetFormClasses.error}>{t('errors.invalidJson')}</p>
-          ) : null}
-        </div>
-      ) : null}
+          {form.formState.errors[measurementsKey]?.message || form.formState.errors[detailsKey]?.message ? <p role="alert" className={assetFormClasses.error}>{t('errors.invalidJson')}</p> : null}
+        </div> : null}
+      </fieldset>
+    );
+  }
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className={assetFormClasses.submit}
-      >
-        {isPending ? tCommon('saving') : tCommon('save')}
-      </button>
+  const socialFields = ['instagram', 'youtube', 'tiktok', 'telegram', 'vk', 'yandex_music', 'spotify'] as const;
+  const socialLabels = ['instagramUrl', 'youtubeUrl', 'tiktokUrl', 'telegramUrl', 'vkUrl', 'yandexMusicUrl', 'spotifyUrl'] as const;
+  return (
+    <form className={assetFormClasses.form} onSubmit={form.handleSubmit(onSubmit)} noValidate>
+      <div className={assetFormClasses.grid2}>
+        <div>
+          <span className={assetFormClasses.label}>{tEntity('documentId')}</span>
+          <div className={assetFormClasses.readonlyValue}>{assetId ? documentIdValue || '—' : t('documentIdAutoValue')}</div>
+          <p className={assetFormClasses.help}>{assetId ? t('documentIdReadonlyHelp') : t('documentIdAutoHelp')}</p>
+        </div>
+        <div className={assetFormClasses.checkboxWrap}>
+          <label className={assetFormClasses.checkboxLabel}>
+            <input type="checkbox" {...form.register('is_published')} className={assetFormClasses.checkboxInput} />
+            {tEntity('published')}
+          </label>
+          <p className={assetFormClasses.help}>{t('publishedHelp')}</p>
+        </div>
+      </div>
+      {languageSection('ru')}
+      {languageSection('en')}
+      <p className={assetFormClasses.help}>{t('sharedMediaHelp')}</p>
+      {entityType === 'influencer' ? <fieldset className="min-w-0 space-y-4 border-t border-[var(--color-line)] pt-5">
+        <legend className={assetFormClasses.label}>{t('socialLinks')}</legend>
+        <div className={assetFormClasses.grid2}>{socialFields.map((platform, index) => {
+          const name = `influencer_${platform}_url` as keyof FormValues;
+          return <div key={name} className="min-w-0">
+            <label htmlFor={`asset-${name}`} className={assetFormClasses.label}>{tEntity(socialLabels[index])}</label>
+            <input id={`asset-${name}`} type="url" {...form.register(name)} className={assetFormClasses.input} placeholder="https://…" />
+            {form.formState.errors[name]?.message ? <p className={assetFormClasses.error}>{form.formState.errors[name]?.message}</p> : null}
+          </div>;
+        })}</div>
+        <p className={assetFormClasses.help}>{t('socialUrlHelp')}</p>
+      </fieldset> : null}
+      <button type="submit" disabled={isPending} className={assetFormClasses.submit}>{isPending ? tCommon('saving') : tCommon('save')}</button>
     </form>
   );
 }

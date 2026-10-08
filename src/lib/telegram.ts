@@ -70,28 +70,31 @@ export function buildTelegramDirectMessageUrl(
 }
 
 export function buildAssetLicenseInquiryText(
-  asset: Pick<AssetLike, 'document_id' | 'title'>
+  asset: Pick<AssetLike, 'document_id' | 'title'>, locale = 'ru'
 ): string {
+  if (locale === 'en') return `I would like to request a license for "${buildAssetInfo(asset)}"`;
   return `Хочу запросить у вас лицензию на данный актив: "${buildAssetInfo(asset)}"`;
 }
 
 export function buildAssetInfoInquiryText(
-  asset: Pick<AssetLike, 'document_id' | 'title'>
+  asset: Pick<AssetLike, 'document_id' | 'title'>, locale = 'ru'
 ): string {
+  if (locale === 'en') return `I would like more information about "${buildAssetInfo(asset)}"`;
   return `Хочу запросить у вас информацию о данном активе: "${buildAssetInfo(asset)}"`;
 }
 
-export function buildCreatorCollaborateText(creatorName: string): string {
+export function buildCreatorCollaborateText(creatorName: string, locale = 'ru'): string {
+  if (locale === 'en') return `I would like to collaborate with ${creatorName.trim() || 'this creator'}`;
   const name = creatorName.trim() || 'креатором';
   return `Хочу сотрудничать с ${name}`;
 }
 
-export function buildCreatorDealmemoRequestText(): string {
-  return 'Хочу запросить у вас DEALMEMO';
+export function buildCreatorDealmemoRequestText(locale = 'ru'): string {
+  return locale === 'en' ? 'I would like to request a deal memo' : 'Хочу запросить условия сотрудничества';
 }
 
-export function buildCollaborateWithUsText(): string {
-  return 'Хочу сотрудничать с вами';
+export function buildCollaborateWithUsText(locale = 'ru'): string {
+  return locale === 'en' ? 'I would like to collaborate with you' : 'Хочу сотрудничать с вами';
 }
 
 /**

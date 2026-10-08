@@ -3,6 +3,9 @@
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 import {z} from 'zod';
+import {getTranslations} from 'next-intl/server';
+import {englishFormFields} from '@/lib/assets/translation-form';
+import {readAssetLocalization, writeAssetLocalization, translatedTextFields, type AssetTranslation} from '@/lib/assets/localization';
 
 import {
   getAdminBasePathForEntity,
@@ -19,7 +22,7 @@ import type {Json} from '@/lib/supabase/database.types';
 const schema = z.object({
   id: z.string().uuid().optional(),
   entity_type: z.enum(['model', 'creator', 'influencer']).default('model'),
-  title: z.string().min(1),
+  title: z.string().trim().min(1),
   description: z.string().optional(),
   category: z.string().optional(),
   model_type: z.string().optional(),
@@ -37,6 +40,7 @@ const schema = z.object({
   status: z.string().optional(),
   measurements: z.string().optional(),
   details: z.string().optional(),
+  ...englishFormFields,
   is_published: z.boolean()
 });
 
@@ -142,9 +146,11 @@ function isDocumentIdUniqueViolation(error: SupabaseWriteError | null | undefine
  * проверяет URL полей соцсетей инфлюенсера и делает `revalidatePath` для публичных/админских маршрутов.
  */
 export async function saveAssetAction(input: unknown): Promise<SaveResult> {
+  const t = await getTranslations('admin.modelForm.errors');
+  const tToast = await getTranslations('admin.toast');
   const parsed = schema.safeParse(input);
   if (!parsed.success) {
-    return {ok: false, error: 'Validation failed'};
+    return {ok: false, error: t('validationFailed')};
   }
 
   const supabase = await requireAdminOrEditor();
@@ -152,16 +158,37 @@ export async function saveAssetAction(input: unknown): Promise<SaveResult> {
   const publicBase = getPublicBasePathForEntity(entityType);
   const adminBase = getAdminBasePathForEntity(entityType);
 
-  let measurements: Json | null = null;
-  let details: Json | null = null;
-  if (entityType === 'model') {
-    try {
-      measurements = parseJsonOrNull(parsed.data.measurements);
-      details = parseJsonOrNull(parsed.data.details);
-    } catch {
-      return {ok: false, error: 'Invalid JSON in measurements/details'};
-    }
+  let previousDetails: Json | null = null;
+  if (parsed.data.id) {
+    const previous = await supabase.from('assets').select('details').eq('id', parsed.data.id).eq('entity_type', entityType).maybeSingle();
+    if (previous.error || !previous.data) return {ok: false, error: tToast('error')};
+    previousDetails = previous.data.details;
   }
+  const previousLocalization = readAssetLocalization(previousDetails);
+  let measurements: Json | null = null;
+  let baseDetails: Json | null = previousLocalization.base;
+  let english: AssetTranslation = previousLocalization.en;
+  try {
+    if (entityType === 'model') {
+      measurements = parseJsonOrNull(parsed.data.measurements);
+      baseDetails = readAssetLocalization(parseJsonOrNull(parsed.data.details)).base;
+    }
+    // Older open forms can still save without erasing previously saved translations.
+    if (Object.keys(englishFormFields).some((key) => key in parsed.data)) {
+      english = {};
+      for (const key of translatedTextFields) {
+        const value = parsed.data[`${key}_en`];
+        if (value?.trim()) english[key] = value.trim();
+      }
+      if (entityType === 'model') {
+        english.measurements = parseJsonOrNull(parsed.data.measurements_en);
+        english.details = parseJsonOrNull(parsed.data.details_en);
+      }
+    }
+  } catch {
+    return {ok: false, error: t('invalidJson')};
+  }
+  const details = writeAssetLocalization(baseDetails, english);
 
   const modelType = asNullableText(parsed.data.model_type) ?? asNullableText(parsed.data.category);
   const creatorDirection = asNullableText(parsed.data.creator_direction);
@@ -186,12 +213,12 @@ export async function saveAssetAction(input: unknown): Promise<SaveResult> {
   ].some((entry) => !entry.isValid);
 
   if (invalidSocialUrl) {
-    return {ok: false, error: 'Invalid social URL'};
+    return {ok: false, error: t('invalidUrl')};
   }
 
   const payload = {
     entity_type: entityType,
-    title: parsed.data.title,
+    title: parsed.data.title.trim(),
     description: asNullableText(parsed.data.description),
     category: entityType === 'model' ? modelType : null,
     model_type: entityType === 'model' ? modelType : null,
@@ -206,9 +233,7 @@ export async function saveAssetAction(input: unknown): Promise<SaveResult> {
       entityType === 'influencer' ? influencerTiktokUrl.value : null,
     influencer_telegram_url:
       entityType === 'influencer' ? influencerTelegramUrl.value : null,
-    influencer_website_url: null,
     influencer_vk_url: entityType === 'influencer' ? influencerVkUrl.value : null,
-    influencer_other_url: null,
     influencer_yandex_music_url:
       entityType === 'influencer' ? influencerYandexMusicUrl.value : null,
     influencer_spotify_url:
@@ -216,7 +241,7 @@ export async function saveAssetAction(input: unknown): Promise<SaveResult> {
     license_type: asNullableText(parsed.data.license_type),
     status: entityType === 'influencer' ? null : asNullableText(parsed.data.status),
     measurements: entityType === 'model' ? measurements : null,
-    details: entityType === 'model' ? details : null,
+    details,
     is_published: parsed.data.is_published
   };
 
@@ -229,10 +254,10 @@ export async function saveAssetAction(input: unknown): Promise<SaveResult> {
       .select('id,document_id')
       .maybeSingle();
 
-    if (error || !data) return {ok: false, error: error?.message ?? 'Not found'};
+    if (error || !data) return {ok: false, error: tToast('error')};
 
     revalidatePath(publicBase);
-    if (entityType === 'model') revalidatePath(`/models/${data.document_id}`);
+    revalidatePath(`${publicBase}/${data.document_id}`);
     revalidatePath(adminBase);
     revalidatePath(`${adminBase}/${data.id}`);
 
@@ -245,7 +270,6 @@ export async function saveAssetAction(input: unknown): Promise<SaveResult> {
   }
 
   let created: {id: string; document_id: string} | null = null;
-  let createError: SupabaseWriteError | null = null;
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const documentId = buildGeneratedDocumentId(entityType, parsed.data.title);
@@ -260,20 +284,18 @@ export async function saveAssetAction(input: unknown): Promise<SaveResult> {
 
     if (!error && data) {
       created = data;
-      createError = null;
       break;
     }
 
-    createError = error;
     if (!isDocumentIdUniqueViolation(error)) break;
   }
 
   if (!created) {
-    return {ok: false, error: createError?.message ?? 'Create failed'};
+    return {ok: false, error: tToast('error')};
   }
 
   revalidatePath(publicBase);
-  if (entityType === 'model') revalidatePath(`/models/${created.document_id}`);
+  revalidatePath(`${publicBase}/${created.document_id}`);
   revalidatePath(adminBase);
 
   return {
