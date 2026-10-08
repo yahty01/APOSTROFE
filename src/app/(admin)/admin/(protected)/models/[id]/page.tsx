@@ -1,3 +1,4 @@
+import {assetTranslationFormValues, readAssetLocalization} from '@/lib/assets/localization';
 import {notFound} from 'next/navigation';
 import {getTranslations} from 'next-intl/server';
 
@@ -126,8 +127,9 @@ export default async function AdminEditModelPage({
             license_type: asset.license_type ?? '',
             status: asset.status ?? '',
             measurements: jsonToTextarea(asset.measurements),
-            details: jsonToTextarea(asset.details),
-            is_published: asset.is_published
+            details: jsonToTextarea(readAssetLocalization(asset.details).base),
+            is_published: asset.is_published,
+            ...assetTranslationFormValues(asset)
           }}
         />
       </div>

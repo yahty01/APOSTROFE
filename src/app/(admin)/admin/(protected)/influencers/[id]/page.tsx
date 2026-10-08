@@ -1,3 +1,4 @@
+import {assetTranslationFormValues, readAssetLocalization} from '@/lib/assets/localization';
 import {notFound} from 'next/navigation';
 import {getTranslations} from 'next-intl/server';
 
@@ -25,7 +26,7 @@ export default async function AdminEditInfluencerPage({
   const {data: asset, error: assetError} = await supabase
     .from('assets')
     .select(
-      'id,document_id,title,description,influencer_topic,influencer_platforms,influencer_instagram_url,influencer_youtube_url,influencer_tiktok_url,influencer_telegram_url,influencer_vk_url,influencer_yandex_music_url,influencer_spotify_url,license_type,is_published'
+      'id,document_id,title,description,details,influencer_topic,influencer_platforms,influencer_instagram_url,influencer_youtube_url,influencer_tiktok_url,influencer_telegram_url,influencer_vk_url,influencer_yandex_music_url,influencer_spotify_url,license_type,is_published'
     )
     .eq('id', id)
     .eq('entity_type', 'influencer')
@@ -105,6 +106,7 @@ export default async function AdminEditInfluencerPage({
           redirectBasePath="/admin/influencers"
           initialValues={{
             document_id: asset.document_id,
+            details: JSON.stringify(readAssetLocalization(asset.details).base),
             title: asset.title,
             description: asset.description ?? '',
             influencer_topic: asset.influencer_topic ?? '',
@@ -117,7 +119,8 @@ export default async function AdminEditInfluencerPage({
             influencer_yandex_music_url: asset.influencer_yandex_music_url ?? '',
             influencer_spotify_url: asset.influencer_spotify_url ?? '',
             license_type: asset.license_type ?? '',
-            is_published: asset.is_published
+            is_published: asset.is_published,
+            ...assetTranslationFormValues(asset)
           }}
         />
       </div>

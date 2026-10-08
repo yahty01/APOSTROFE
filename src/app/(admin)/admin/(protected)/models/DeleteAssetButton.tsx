@@ -1,10 +1,11 @@
 'use client';
 
 import {useRouter} from 'next/navigation';
-import {useTranslations} from 'next-intl';
+import {useLocale, useTranslations} from 'next-intl';
 import {useTransition} from 'react';
 import {toast} from 'sonner';
 
+import {localizedActionError} from '@/lib/action-error';
 import {useReportPending} from '@/lib/pending';
 import {
   getAdminBasePathForEntity,
@@ -30,6 +31,7 @@ export function DeleteAssetButton({
 }) {
   const t = useTranslations(`admin.${getAssetEntitySection(entityType)}`);
   const tToast = useTranslations('admin.toast');
+  const locale = useLocale();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   useReportPending(isPending);
@@ -48,7 +50,7 @@ export function DeleteAssetButton({
       fd.set('entity_type', entityType);
       const res = await deleteAssetAction(fd);
       if (!res.ok) {
-        toast.error(res.error || tToast('error'));
+        toast.error(localizedActionError(res.error, locale));
         return;
       }
 

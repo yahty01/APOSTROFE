@@ -1,8 +1,12 @@
 import type {Metadata} from 'next';
 
-export const metadata: Metadata = {
-  title: 'Политика конфиденциальности | Apostrofe'
-};
+import {getLocale} from 'next-intl/server';
+import {privacyPolicyEn} from '@/lib/privacy-policy-en';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return {title: `${locale === 'ru' ? 'Политика конфиденциальности' : 'Privacy policy'} | Apostrofe`};
+}
 
 const policyText = `1. Общие положения
 Настоящая политика обработки персональных данных составлена в соответствии с требованиями Федерального закона от 27.07.2006. № 152-ФЗ «О персональных данных» (далее — Закон о персональных данных) и определяет порядок обработки персональных данных и меры по обеспечению безопасности персональных данных, предпринимаемые администрацией сайта APOSTROFE (далее — Оператор).
@@ -116,15 +120,16 @@ const policyText = `1. Общие положения
 12.2. В данном документе будут отражены любые изменения политики обработки персональных данных Оператора. Политика действует бессрочно до замены ее новой версией.
 12.3. Актуальная версия Политики в свободном доступе расположена в сети Интернет по адресу https://apostrofe.org/policy.`;
 
-export default function PolicyPage() {
+export default async function PolicyPage() {
+  const locale = await getLocale();
   return (
     <main className="px-4 py-6 md:px-6 md:py-8">
       <article className="ui-panel p-4 md:p-6">
         <h1 className="font-condensed text-xl uppercase tracking-[0.12em] md:text-2xl">
-          Политика конфиденциальности
+          {locale === 'ru' ? 'Политика конфиденциальности' : 'Privacy policy'}
         </h1>
         <pre className="mt-4 whitespace-pre-wrap font-doc text-[11px] leading-[1.5] text-[var(--color-ink)]">
-          {policyText}
+          {locale === 'ru' ? policyText : privacyPolicyEn}
         </pre>
       </article>
     </main>

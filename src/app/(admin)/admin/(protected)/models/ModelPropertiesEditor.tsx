@@ -1,7 +1,7 @@
 'use client';
 
 import {useId, useRef, useState} from 'react';
-import {useTranslations} from 'next-intl';
+import {useLocale, useTranslations} from 'next-intl';
 import {hasProperties, httpUrl, isPropertyObject, socialPlatformForKey, socialPlatforms} from '@/lib/assets/model-properties';
 import {assetFormClasses as styles} from './AssetForm.styles';
 
@@ -15,6 +15,7 @@ export function ModelPropertiesEditor({value, onChange, onValidityChange, label,
   withSocial?: boolean;
 }) {
   const t = useTranslations('admin.modelForm');
+  const locale = useLocale();
   const fieldId = useId();
   const nextId = useRef(10000);
   const [rows, setRows] = useState<Row[]>(() => {
@@ -75,7 +76,7 @@ export function ModelPropertiesEditor({value, onChange, onValidityChange, label,
                     <div key={platform.key} className="min-w-0">
                       <label htmlFor={`${fieldId}-${platform.key}`} className={`${styles.label} flex items-center gap-2`}>
                         <span aria-hidden="true" className="h-4 w-4 bg-current" style={{mask: `url(/social/${platform.key}.svg) center / contain no-repeat`}} />
-                        {platform.label}
+                        {locale === 'ru' && platform.key === 'yandex-music' ? 'Яндекс Музыка' : platform.label}
                       </label>
                       <input id={`${fieldId}-${platform.key}`} type="url" inputMode="url" value={typeof entry?.value === 'string' ? entry.value : ''} placeholder="https://…" className={styles.input} onChange={(event) => updateSocial(platform.key, platform.label, event.target.value)} />
                     </div>

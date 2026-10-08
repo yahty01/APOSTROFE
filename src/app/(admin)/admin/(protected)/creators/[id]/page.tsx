@@ -1,3 +1,4 @@
+import {assetTranslationFormValues, readAssetLocalization} from '@/lib/assets/localization';
 import {notFound} from 'next/navigation';
 import {getTranslations} from 'next-intl/server';
 
@@ -24,7 +25,7 @@ export default async function AdminEditCreatorPage({
 
   const {data: asset, error: assetError} = await supabase
     .from('assets')
-    .select('id,document_id,title,description,creator_direction,license_type,status,is_published')
+    .select('id,document_id,title,description,details,creator_direction,license_type,status,is_published')
     .eq('id', id)
     .eq('entity_type', 'creator')
     .maybeSingle();
@@ -98,12 +99,14 @@ export default async function AdminEditCreatorPage({
           redirectBasePath="/admin/creators"
           initialValues={{
             document_id: asset.document_id,
+            details: JSON.stringify(readAssetLocalization(asset.details).base),
             title: asset.title,
             description: asset.description ?? '',
             creator_direction: asset.creator_direction ?? '',
             license_type: asset.license_type ?? '',
             status: asset.status ?? '',
-            is_published: asset.is_published
+            is_published: asset.is_published,
+            ...assetTranslationFormValues(asset)
           }}
         />
       </div>

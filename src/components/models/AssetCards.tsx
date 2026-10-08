@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import {getTranslations} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
 import {
   buildAssetLicenseInquiryText,
@@ -31,6 +31,7 @@ export async function AssetCards({
   detailBasePath?: string;
 }) {
   const t = await getTranslations('public');
+  const locale = await getLocale();
 
   return (
     <div className={assetCardsClasses.root}>
@@ -45,10 +46,10 @@ export async function AssetCards({
             entityType === 'creator'
               ? buildTelegramDirectMessageUrl(
                   buildCreatorCollaborateText(
-                    (item.title || item.document_id).trim() || item.document_id
+                    (item.title || item.document_id).trim() || item.document_id, locale
                   )
                 )
-              : buildTelegramDirectMessageUrl(buildAssetLicenseInquiryText(item));
+              : buildTelegramDirectMessageUrl(buildAssetLicenseInquiryText(item, locale));
 
           const ctaLabel =
             entityType === 'creator'
@@ -58,7 +59,7 @@ export async function AssetCards({
           const mediaContent =
             mediaMode === 'title' ? (
               <div className={assetCardsClasses.mediaTitle}>
-                {getAssetFieldValue(item, 'name')}
+                {getAssetFieldValue(item, 'name', locale)}
               </div>
             ) : item.preview_url ? (
               <Image
@@ -75,7 +76,7 @@ export async function AssetCards({
               />
             ) : entityType === 'creator' ? (
               <div className={assetCardsClasses.mediaTitle}>
-                {getAssetFieldValue(item, 'name')}
+                {getAssetFieldValue(item, 'name', locale)}
               </div>
             ) : (
               <div className={assetCardsClasses.mediaFallback}>
@@ -104,7 +105,7 @@ export async function AssetCards({
                         {t(`asset.${field}`)}
                       </div>
                       <div className={assetCardsClasses.rowValue}>
-                        {getAssetFieldValue(item, field)}
+                        {getAssetFieldValue(item, field, locale)}
                       </div>
                     </div>
                   ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {localizedMarqueeText} from "@/lib/marquee-localization";
 
 import { getMarqueeVars, marqueeClasses } from "./Marquee.styles";
 
@@ -60,7 +61,7 @@ export function Marquee({
   );
 
   const direction = settings.direction === "right" ? "right" : "left";
-  const rawText = pickText(settings, locale).trim();
+  const rawText = localizedMarqueeText(pickText(settings, locale).trim(), locale);
   const text = rawText || getFallbackText(locale);
   const style = getMarqueeVars(durationSeconds, direction);
 

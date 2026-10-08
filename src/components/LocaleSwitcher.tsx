@@ -1,9 +1,10 @@
 'use client';
 
-import {useLocale} from 'next-intl';
+import {useLocale, useTranslations} from 'next-intl';
 import {usePathname, useRouter, useSearchParams} from 'next/navigation';
-import {useTransition} from 'react';
+import {useRef, useTransition} from 'react';
 
+import {toast} from 'sonner';
 import {useReportPending} from '@/lib/pending';
 
 import {localeSwitcherClasses} from './LocaleSwitcher.styles';
@@ -41,6 +42,8 @@ function isPlainLeftClick(event: React.MouseEvent<HTMLAnchorElement>) {
  */
 export function LocaleSwitcher() {
   const locale = useLocale();
+  const t = useTranslations('common');
+  const switching = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -55,7 +58,7 @@ export function LocaleSwitcher() {
     event: React.MouseEvent<HTMLAnchorElement>,
     href: string
   ) {
-    if (isPending) {
+    if (switching.current || isPending) {
       event.preventDefault();
       return;
     }
@@ -63,17 +66,21 @@ export function LocaleSwitcher() {
     if (!isPlainLeftClick(event)) return;
 
     event.preventDefault();
+    switching.current = true;
     startTransition(async () => {
       try {
-        await fetch(href, {
+        const response = await fetch(href, {
           headers: {'x-locale-switch': '1'},
           credentials: 'same-origin',
           cache: 'no-store'
         });
+        if (!response.ok) throw new Error('Locale switch failed');
+        router.refresh();
       } catch {
-        // ignore
+        toast.error(t('languageError'));
+      } finally {
+        switching.current = false;
       }
-      router.refresh();
     });
   }
 

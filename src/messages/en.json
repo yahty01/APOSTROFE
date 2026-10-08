@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "Apostrofe"
+    "name": "Apostrofe",
+    "description": "A catalog of digital models, creators and influencers"
   },
   "nav": {
     "models": "Models",
@@ -26,7 +27,11 @@
     "disabled": "Disabled",
     "actions": "ACTIONS",
     "systemOnline": "SYSTEM: ONLINE",
-    "assetsCount": "ASSETS: {count}"
+    "assetsCount": "ASSETS: {count}",
+    "language": "Site language",
+    "languageError": "Could not change language. Please try again.",
+    "notFound": "Page not found",
+    "backToCatalog": "Back to catalog"
   },
   "public": {
     "catalogTitle": "ASSET CATALOG",
@@ -96,7 +101,8 @@
       "telegramCta": "Ask in Telegram",
       "noHeroImage": "NO HERO IMAGE",
       "noThumbnails": "NO THUMBNAILS"
-    }
+    },
+    "loadError": "Could not load the catalog. Please refresh the page."
   },
   "footer": {
     "contactsTitle": "CONTACTS",
@@ -119,7 +125,9 @@
       "email": "Email",
       "password": "Password",
       "submit": "Sign in",
-      "submitting": "Signing in…"
+      "submitting": "Signing in…",
+      "invalidCredentials": "Please check your email and password",
+      "error": "Could not sign in. Please try again."
     },
     "accessDenied": "Access denied",
     "signOut": "Sign out",
@@ -207,7 +215,8 @@
         "documentIdInvalid": "Only letters, numbers, _ and -",
         "titleRequired": "Enter a title",
         "invalidJson": "Invalid JSON",
-        "invalidUrl": "Invalid URL (http/https expected)"
+        "invalidUrl": "Invalid URL (http/https expected)",
+        "validationFailed": "Please check the form fields"
       },
       "socialLinks": "Character profiles",
       "propertyName": "Property",
@@ -219,7 +228,13 @@
       "listHelp": "One list item per line",
       "propertyError": "Check links, values and duplicate property names",
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "russianContent": "Russian content",
+      "englishContent": "English content",
+      "russianHelp": "The primary card content. A title is required.",
+      "englishHelp": "Add translations for the English version. Empty fields use the primary content.",
+      "translatedDetails": "English characteristics",
+      "sharedMediaHelp": "Images, social links and the card URL are shared across both languages."
     },
     "media": {
       "title": "Media",

@@ -1,7 +1,8 @@
+import {localizeAsset, localizedAssetValue} from '@/lib/assets/localization';
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { createPublicImages, type PublicImage } from "@/lib/supabase/public-images";
 import {PROFILE_IMAGE_SIZES} from "@/components/models/image-sizes";
@@ -30,6 +31,7 @@ export default async function CreatorDetailPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { document_id } = await params;
+  const locale = await getLocale();
   const tPublic = await getTranslations("public");
   const tCommon = await getTranslations("common");
 
@@ -51,14 +53,14 @@ export default async function CreatorDetailPage({
     const { data, error: assetError } = await supabase
       .from("assets")
       .select(
-        "id,document_id,title,description,license_type,status,creator_direction,updated_at,asset_media(path,kind,order_index)",
+        "id,document_id,title,description,details,license_type,status,creator_direction,updated_at,asset_media(path,kind,order_index)",
       )
       .eq("document_id", document_id)
       .eq("entity_type", "creator")
       .maybeSingle();
 
     if (assetError || !data) notFound();
-    asset = data;
+    asset = localizeAsset(data, locale);
 
     const media = [...data.asset_media].sort((a, b) => a.order_index - b.order_index);
 
@@ -86,20 +88,20 @@ export default async function CreatorDetailPage({
   if (!asset) notFound();
 
   const timestamp = formatIsoDate(asset.updated_at);
-  const license = (asset.license_type || "STANDARD").toUpperCase();
-  const status = (asset.status || "AVAILABLE").toUpperCase();
+  const license = localizedAssetValue(asset.license_type, locale, "STANDARD").toUpperCase();
+  const status = localizedAssetValue(asset.status, locale, "AVAILABLE").toUpperCase();
   const description = (asset.description || "").trim() || "—";
-  const direction = (asset.creator_direction || "—").trim() || "—";
+  const direction = localizedAssetValue(asset.creator_direction, locale);
   const creatorPageId =
     (asset.document_id || document_id).trim() || document_id;
   const creatorName =
     (asset.title || asset.document_id).trim() || asset.document_id;
 
   const acquireHref = buildTelegramDirectMessageUrl(
-    buildCreatorCollaborateText(creatorName),
+    buildCreatorCollaborateText(creatorName, locale),
   );
   const requestInfoHref = buildTelegramDirectMessageUrl(
-    buildCreatorDealmemoRequestText(),
+    buildCreatorDealmemoRequestText(locale),
   );
 
   return (
