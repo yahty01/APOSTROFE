@@ -32,4 +32,5 @@ export type AssetListItem = {
   influencer_topic: string | null;
   influencer_platforms: string | null;
   preview_url: string | null;
+  preview_blur_data_url?: string;
 };

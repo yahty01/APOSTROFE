@@ -3,7 +3,8 @@ import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {getTranslations} from 'next-intl/server';
 
-import {createPublicImageUrls} from '@/lib/supabase/public-images';
+import {createPublicImages, type PublicImage} from '@/lib/supabase/public-images';
+import {PROFILE_IMAGE_SIZES} from '@/components/models/image-sizes';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 import {
   buildAssetInfoInquiryText,
@@ -35,8 +36,8 @@ export default async function InfluencerDetailPage({
   const tPublic = await getTranslations('public');
   const tCommon = await getTranslations('common');
 
-  let heroUrl: string | null = null;
-  let galleryUrls: string[] = [];
+  let heroUrl: PublicImage | null = null;
+  let galleryUrls: PublicImage[] = [];
   let asset: {
     id: string;
     document_id: string;
@@ -60,7 +61,7 @@ export default async function InfluencerDetailPage({
     const {data, error: assetError} = await supabase
       .from('assets')
       .select(
-        'id,document_id,title,description,license_type,influencer_topic,influencer_platforms,influencer_instagram_url,influencer_youtube_url,influencer_tiktok_url,influencer_telegram_url,influencer_vk_url,influencer_yandex_music_url,influencer_spotify_url,updated_at'
+        'id,document_id,title,description,license_type,influencer_topic,influencer_platforms,influencer_instagram_url,influencer_youtube_url,influencer_tiktok_url,influencer_telegram_url,influencer_vk_url,influencer_yandex_music_url,influencer_spotify_url,updated_at,asset_media(path,kind,order_index)'
       )
       .eq('document_id', document_id)
       .eq('entity_type', 'influencer')
@@ -69,12 +70,7 @@ export default async function InfluencerDetailPage({
     if (assetError || !data) notFound();
     asset = data;
 
-    const {data: media} = await supabase
-      .from('asset_media')
-      .select('path,kind,order_index')
-      .eq('asset_id', data.id)
-      .order('kind', {ascending: true})
-      .order('order_index', {ascending: true});
+    const media = [...data.asset_media].sort((a, b) => a.order_index - b.order_index);
 
     const heroPath =
       media?.find((m) => m.kind === 'hero')?.path ??
@@ -85,14 +81,14 @@ export default async function InfluencerDetailPage({
       .sort((a, b) => a.order_index - b.order_index)
       .map((m) => m.path);
 
-    const imageUrls = await createPublicImageUrls([
+    const imageUrls = await createPublicImages([
       ...(heroPath ? [heroPath] : []),
       ...galleryPaths
     ]);
     heroUrl = heroPath ? imageUrls.get(heroPath) ?? null : null;
     galleryUrls = galleryPaths
       .map((path) => imageUrls.get(path))
-      .filter((url): url is string => Boolean(url));
+      .filter((image): image is PublicImage => Boolean(image));
   } catch {
     notFound();
   }
@@ -167,11 +163,14 @@ export default async function InfluencerDetailPage({
             <div className={modelDetailPageClasses.hero}>
               {heroUrl ? (
                 <Image
-                  src={heroUrl}
+                  src={heroUrl.url}
+                  placeholder={heroUrl.blurDataURL ? "blur" : "empty"}
+                  blurDataURL={heroUrl.blurDataURL}
                   alt={asset.title}
                   fill
                   className={modelDetailPageClasses.heroImage}
-                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  sizes={PROFILE_IMAGE_SIZES}
+                  style={{objectFit: 'contain', objectPosition: 'center'}}
                   priority
                 />
               ) : (
@@ -255,8 +254,9 @@ export default async function InfluencerDetailPage({
                   galleryUrls.length % 2 === 1 && idx === galleryUrls.length - 1;
                 return (
                   <GalleryItem
-                    key={`${url}-${idx}`}
-                    src={url}
+                    key={`${url.url}-${idx}`}
+                    src={url.url}
+                    blurDataURL={url.blurDataURL}
                     alt={`${asset.document_id} ${idx + 1}`}
                     isSolo={isSolo}
                   />

@@ -63,6 +63,8 @@ export async function AssetCards({
             ) : item.preview_url ? (
               <Image
                 src={item.preview_url}
+                placeholder={item.preview_blur_data_url ? 'blur' : 'empty'}
+                blurDataURL={item.preview_blur_data_url}
                 alt={item.title}
                 fill
                 className={assetCardsClasses.mediaImage}
