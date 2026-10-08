@@ -90,8 +90,8 @@
       "items": "Всего: {count}"
     },
     "detail": {
-      "measurements": "Размеры",
-      "details": "Детали",
+      "measurements": "Внешность",
+      "details": "Характеристики",
       "socialLinks": "Соцсети",
       "telegramCta": "Спросить в Telegram",
       "noHeroImage": "НЕТ ОСНОВНОГО ИЗОБРАЖЕНИЯ",
@@ -198,9 +198,9 @@
       "publishedHelp": "Если включено — запись видна в публичном реестре, а медиа доступны по правилам RLS",
       "description": "Описание",
       "descriptionHelp": "Короткий текст для карточки",
-      "measurements": "Размеры (JSON)",
+      "measurements": "Параметры внешности",
       "measurementsHelp": "JSON‑объект (ключ → значение). Оставь пустым, если не нужно",
-      "details": "Детали (JSON)",
+      "details": "Характеристики и соцсети",
       "detailsHelp": "JSON‑объект характеристик (ключ → значение). Оставь пустым, если не нужно",
       "errors": {
         "documentIdRequired": "Введите document_id",
@@ -208,7 +208,18 @@
         "titleRequired": "Введите название",
         "invalidJson": "Неверный JSON",
         "invalidUrl": "Неверный URL (ожидается http/https)"
-      }
+      },
+      "socialLinks": "Профили персонажа",
+      "propertyName": "Параметр",
+      "propertyValue": "Значение",
+      "addProperty": "+ Добавить параметр",
+      "removeProperty": "Удалить параметр",
+      "advancedJson": "Расширенный редактор JSON",
+      "simpleFields": "Вернуться к полям",
+      "listHelp": "Каждый пункт списка — с новой строки",
+      "propertyError": "Проверьте ссылки, значения и повторяющиеся названия параметров",
+      "yes": "Да",
+      "no": "Нет"
     },
     "media": {
       "title": "Медиа",

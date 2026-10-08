@@ -3,8 +3,8 @@
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useTranslations} from 'next-intl';
 import {useRouter} from 'next/navigation';
-import {useMemo, useTransition} from 'react';
-import {useForm} from 'react-hook-form';
+import {useMemo, useState, useTransition} from 'react';
+import {useForm, useWatch} from 'react-hook-form';
 import {toast} from 'sonner';
 import {z} from 'zod';
 
@@ -16,6 +16,7 @@ import {
 import {useReportPending} from '@/lib/pending';
 
 import {saveAssetAction} from './model-actions';
+import {ModelPropertiesEditor} from './ModelPropertiesEditor';
 import {assetFormClasses} from './AssetForm.styles';
 
 /**
@@ -112,6 +113,7 @@ export function AssetForm({
 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [propertyValidity, setPropertyValidity] = useState({measurements: true, details: true});
   useReportPending(isPending);
 
   const schema = useMemo(
@@ -150,11 +152,17 @@ export function AssetForm({
     }
   });
 
+  const [measurementsValue, detailsValue] = useWatch({control: form.control, name: ['measurements', 'details']});
+
   /**
    * Отправка формы: сохраняем ассет через server action, показываем toast и обновляем страницу.
    * При создании может редиректить на страницу редактирования (зависит от `redirectToEdit`).
    */
   function onSubmit(values: FormValues) {
+    if (entityType === 'model' && Object.values(propertyValidity).some((valid) => !valid)) {
+      toast.error(t('propertyError'));
+      return;
+    }
     startTransition(async () => {
       const res = await saveAssetAction({
         id: assetId,
@@ -457,46 +465,23 @@ export function AssetForm({
       ) : null}
 
       {entityType === 'model' ? (
-        <div className={assetFormClasses.jsonGrid}>
-          <div>
-            <label className={assetFormClasses.label}>
-              {t('measurements')}
-            </label>
-            <textarea
-              {...form.register('measurements')}
-              rows={8}
-              className={assetFormClasses.textarea}
-              placeholder='{"width_mm": 123, "height_mm": 456}'
-            />
-            <p className={assetFormClasses.help}>
-              {t('measurementsHelp')}
-            </p>
-            {form.formState.errors.measurements?.message ? (
-              <p className={assetFormClasses.error}>
-                {form.formState.errors.measurements.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <label className={assetFormClasses.label}>
-              {t('details')}
-            </label>
-            <textarea
-              {...form.register('details')}
-              rows={8}
-              className={assetFormClasses.textarea}
-              placeholder='{"polycount": 12000}'
-            />
-            <p className={assetFormClasses.help}>
-              {t('detailsHelp')}
-            </p>
-            {form.formState.errors.details?.message ? (
-              <p className={assetFormClasses.error}>
-                {form.formState.errors.details.message}
-              </p>
-            ) : null}
-          </div>
+        <div className="space-y-6">
+          <ModelPropertiesEditor
+            label={t('measurements')}
+            value={measurementsValue ?? ''}
+            onChange={(value) => form.setValue('measurements', value, {shouldDirty: true})}
+            onValidityChange={(valid) => { setPropertyValidity((previous) => ({...previous, measurements: valid})); }}
+          />
+          <ModelPropertiesEditor
+            label={t('details')}
+            value={detailsValue ?? ''}
+            withSocial
+            onChange={(value) => form.setValue('details', value, {shouldDirty: true})}
+            onValidityChange={(valid) => { setPropertyValidity((previous) => ({...previous, details: valid})); }}
+          />
+          {form.formState.errors.measurements?.message || form.formState.errors.details?.message ? (
+            <p role="alert" className={assetFormClasses.error}>{t('errors.invalidJson')}</p>
+          ) : null}
         </div>
       ) : null}
 

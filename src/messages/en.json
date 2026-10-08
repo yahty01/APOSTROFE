@@ -90,8 +90,8 @@
       "items": "{count} total"
     },
     "detail": {
-      "measurements": "Measurements",
-      "details": "Details",
+      "measurements": "Appearance",
+      "details": "Properties",
       "socialLinks": "Social links",
       "telegramCta": "Ask in Telegram",
       "noHeroImage": "NO HERO IMAGE",
@@ -198,9 +198,9 @@
       "publishedHelp": "If enabled, the entry is visible in the public registry and media is accessible via RLS rules",
       "description": "Description",
       "descriptionHelp": "Short text shown in cards",
-      "measurements": "Measurements (JSON)",
+      "measurements": "Appearance",
       "measurementsHelp": "JSON object (key → value). Leave empty if not needed",
-      "details": "Details (JSON)",
+      "details": "Properties and social links",
       "detailsHelp": "JSON object of properties (key → value). Leave empty if not needed",
       "errors": {
         "documentIdRequired": "Enter document_id",
@@ -208,7 +208,18 @@
         "titleRequired": "Enter a title",
         "invalidJson": "Invalid JSON",
         "invalidUrl": "Invalid URL (http/https expected)"
-      }
+      },
+      "socialLinks": "Character profiles",
+      "propertyName": "Property",
+      "propertyValue": "Value",
+      "addProperty": "+ Add property",
+      "removeProperty": "Remove property",
+      "advancedJson": "Advanced JSON editor",
+      "simpleFields": "Back to fields",
+      "listHelp": "One list item per line",
+      "propertyError": "Check links, values and duplicate property names",
+      "yes": "Yes",
+      "no": "No"
     },
     "media": {
       "title": "Media",

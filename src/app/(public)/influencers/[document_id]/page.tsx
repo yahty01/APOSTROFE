@@ -11,6 +11,9 @@ import {
   buildTelegramDirectMessageUrl
 } from '@/lib/telegram';
 
+import {SocialLinks} from '@/components/models/SocialLinks';
+import {httpUrl, type SocialLink} from '@/lib/assets/model-properties';
+
 import {GalleryItem} from '../../models/[document_id]/GalleryItem';
 import {modelDetailPageClasses} from '../../models/[document_id]/page.styles';
 
@@ -21,19 +24,6 @@ function formatIsoDate(value: string | null | undefined) {
   const d = value.slice(0, 10);
   return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : value;
 }
-
-function asNullableUrl(value: string | null | undefined) {
-  const text = (value ?? '').trim();
-  return text || null;
-}
-
-type SocialLink = {
-  key: string;
-  label: string;
-  url: string;
-  iconPath: string;
-  iconMode?: 'mask' | 'image';
-};
 
 export default async function InfluencerDetailPage({
   params
@@ -117,52 +107,44 @@ export default async function InfluencerDetailPage({
   const description = (asset.description || asset.title || '').trim() || '—';
   const topic = (asset.influencer_topic || '—').trim() || '—';
   const platforms = (asset.influencer_platforms || '—').trim() || '—';
-  const influencerPageId = (asset.document_id || document_id).trim() || document_id;
-  const socialLinks = [
+  const influencerName = (asset.title || document_id).replace(/_/g, ' ').trim();
+  const socialLinks: SocialLink[] = [
     {
       key: 'instagram',
       label: tPublic('asset.instagram'),
-      url: asNullableUrl(asset.influencer_instagram_url),
-      iconPath: '/social/instagram.svg'
+      url: httpUrl(asset.influencer_instagram_url)
     },
     {
       key: 'youtube',
       label: tPublic('asset.youtube'),
-      url: asNullableUrl(asset.influencer_youtube_url),
-      iconPath: '/social/youtube.svg'
+      url: httpUrl(asset.influencer_youtube_url)
     },
     {
       key: 'tiktok',
       label: tPublic('asset.tiktok'),
-      url: asNullableUrl(asset.influencer_tiktok_url),
-      iconPath: '/social/tiktok.svg'
+      url: httpUrl(asset.influencer_tiktok_url)
     },
     {
       key: 'telegram',
       label: tPublic('asset.telegram'),
-      url: asNullableUrl(asset.influencer_telegram_url),
-      iconPath: '/social/telegram.svg'
+      url: httpUrl(asset.influencer_telegram_url)
     },
     {
       key: 'vk',
       label: tPublic('asset.vk'),
-      url: asNullableUrl(asset.influencer_vk_url),
-      iconPath: '/social/vk.svg'
+      url: httpUrl(asset.influencer_vk_url)
     },
     {
-      key: 'yandexMusic',
+      key: 'yandex-music',
       label: tPublic('asset.yandexMusic'),
-      url: asNullableUrl(asset.influencer_yandex_music_url),
-      iconPath: '/social/yandex-music.svg',
-      iconMode: 'image'
+      url: httpUrl(asset.influencer_yandex_music_url)
     },
     {
       key: 'spotify',
       label: tPublic('asset.spotify'),
-      url: asNullableUrl(asset.influencer_spotify_url),
-      iconPath: '/social/spotify.svg'
+      url: httpUrl(asset.influencer_spotify_url)
     }
-  ].filter((entry): entry is SocialLink => Boolean(entry.url));
+  ].flatMap((entry) => entry.url ? [{...entry, key: entry.key as SocialLink['key'], url: entry.url}] : []);
 
   const acquireHref = buildTelegramDirectMessageUrl(
     buildAssetLicenseInquiryText(asset)
@@ -205,10 +187,15 @@ export default async function InfluencerDetailPage({
 
           <section className={modelDetailPageClasses.detailsSection}>
             <h1 className={modelDetailPageClasses.title}>
-              {influencerPageId}
+              {influencerName}
             </h1>
             <div className={modelDetailPageClasses.meta}>
               {topic.toUpperCase()} · {license} · {timestamp}
+              <span className={modelDetailPageClasses.documentId}>{asset.document_id}</span>
+            </div>
+
+            <div className={modelDetailPageClasses.socialSection}>
+              <SocialLinks links={socialLinks} label={tPublic('detail.socialLinks')} />
             </div>
 
             <div className={modelDetailPageClasses.blocks}>
@@ -239,56 +226,7 @@ export default async function InfluencerDetailPage({
                 </div>
               </div>
 
-              {socialLinks.length ? (
-                <div className={modelDetailPageClasses.block}>
-                  <div className={modelDetailPageClasses.blockTitle}>
-                    {tPublic('detail.socialLinks')}
-                  </div>
-                  <div className={modelDetailPageClasses.socialLinksList}>
-                    {socialLinks.map((entry) => (
-                      <a
-                        key={entry.key}
-                        href={entry.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={
-                          entry.iconMode === 'image'
-                            ? `${modelDetailPageClasses.socialIconAnchor} ${modelDetailPageClasses.socialIconAnchorStatic}`
-                            : modelDetailPageClasses.socialIconAnchor
-                        }
-                        aria-label={entry.label}
-                        title={entry.label}
-                      >
-                        {entry.iconMode === 'image' ? (
-                          <Image
-                            src={entry.iconPath}
-                            alt=""
-                            width={24}
-                            height={24}
-                            aria-hidden
-                            className={modelDetailPageClasses.socialIconImage}
-                          />
-                        ) : (
-                          <span
-                            aria-hidden
-                            className={modelDetailPageClasses.socialIconGlyph}
-                            style={{
-                              WebkitMaskImage: `url(${entry.iconPath})`,
-                              maskImage: `url(${entry.iconPath})`,
-                              WebkitMaskPosition: 'center',
-                              maskPosition: 'center',
-                              WebkitMaskRepeat: 'no-repeat',
-                              maskRepeat: 'no-repeat',
-                              WebkitMaskSize: 'contain',
-                              maskSize: 'contain'
-                            }}
-                          />
-                        )}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
+
             </div>
 
             <div className={modelDetailPageClasses.actions}>
