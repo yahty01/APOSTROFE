@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
-import { createSignedImageUrl } from "@/lib/supabase/images";
+import { createPublicImageUrls } from "@/lib/supabase/public-images";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import {
   buildCreatorCollaborateText,
@@ -75,20 +75,14 @@ export default async function CreatorDetailPage({
       .sort((a, b) => a.order_index - b.order_index)
       .map((m) => m.path);
 
-    heroUrl = heroPath
-      ? await createSignedImageUrl(supabase, heroPath, {
-          width: 1600,
-          quality: 82,
-        })
-      : null;
-
-    galleryUrls = (
-      await Promise.all(
-        galleryPaths.map((p) =>
-          createSignedImageUrl(supabase, p, { width: 1600, quality: 82 }),
-        ),
-      )
-    ).filter((u): u is string => Boolean(u));
+    const imageUrls = await createPublicImageUrls([
+      ...(heroPath ? [heroPath] : []),
+      ...galleryPaths
+    ]);
+    heroUrl = heroPath ? imageUrls.get(heroPath) ?? null : null;
+    galleryUrls = galleryPaths
+      .map((path) => imageUrls.get(path))
+      .filter((url): url is string => Boolean(url));
   } catch {
     notFound();
   }
