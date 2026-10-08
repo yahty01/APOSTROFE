@@ -7,7 +7,10 @@ async function moduleFrom(path, replace = (text) => text) {
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 }
 const seed = await readFile(new URL('../src/lib/assets/content-translations.json', import.meta.url), 'utf8');
-const {localizeAsset, readAssetLocalization, writeAssetLocalization, assetTranslationFormValues, localizedAssetValue} = await moduleFrom('../src/lib/assets/localization.ts', (source) => source.replace("import contentTranslations from './content-translations.json';", `const contentTranslations = ${seed};`));
+const labelSource = await readFile(new URL('../src/lib/assets/property-labels.ts', import.meta.url), 'utf8');
+const labelJS = ts.transpileModule(labelSource, {compilerOptions: {module: ts.ModuleKind.ESNext}}).outputText;
+const labelURL = `data:text/javascript;base64,${Buffer.from(labelJS).toString('base64')}`;
+const {localizeAsset, readAssetLocalization, writeAssetLocalization, assetTranslationFormValues, localizedAssetValue} = await moduleFrom('../src/lib/assets/localization.ts', (source) => source.replace("import contentTranslations from './content-translations.json';", `const contentTranslations = ${seed};`).replace("'./property-labels'",JSON.stringify(labelURL)));
 const {detectLocaleFromAcceptLanguage: detect} = await moduleFrom('../src/i18n/locale.ts');
 assert.equal(detect('en-US,en;q=0.9,ru;q=0.5'), 'en');
 assert.equal(detect('en;q=0.2,ru-RU;q=0.9'), 'ru');
@@ -23,8 +26,11 @@ const asset = {document_id: 'model-person', title: 'Персонаж', descripti
 assert.equal(localizeAsset(asset, 'ru').title, 'Персонаж');
 assert.equal(localizeAsset(asset, 'en').title, 'Person');
 assert.deepEqual(localizeAsset(asset, 'ru').details, base);
-assert.deepEqual(localizeAsset(asset, 'en').details, english.details);
-assert.deepEqual(localizeAsset(asset, 'en').measurements, english.measurements);
+const otherBase = {...base};
+delete otherBase.age;
+delete otherBase.active;
+assert.deepEqual(localizeAsset(asset, 'en').details, {...otherBase, ...english.details});
+assert.deepEqual(localizeAsset(asset, 'en').measurements, {...asset.measurements, ...english.measurements});
 assert.equal(asset.title, 'Персонаж');
 assert.equal(assetTranslationFormValues(asset).title_en, 'Person');
 assert.deepEqual(JSON.parse(assetTranslationFormValues(asset).details), base);
@@ -34,6 +40,10 @@ for (const legacy of [null, 0, false, ['legacy'], 'scalar', {__apostrofe_i18n: '
 }
 const partial = {...asset, details: writeAssetLocalization(base, {title: '  '})};
 assert.equal(localizeAsset(partial, 'en').title, 'Персонаж');
+const propertyPartial = {...asset, details: writeAssetLocalization(base, {details: {nested: {height: 0, clothing: 'Wool'}, active: false, list: ['English'], age: ''}})};
+assert.deepEqual(localizeAsset(propertyPartial, 'en').details, {...base, nested: {height: 0, clothing: 'Wool'}, active: false, list: ['English']});
+const namedProperties = {document_id:'custom', details:writeAssetLocalization({Глаза:'Зелёные',Волосы:'Рыжие',custom:'Keep'}, {details:{Eyes:'Green'}})};
+assert.deepEqual(localizeAsset(namedProperties,'en').details,{Eyes:'Green',Волосы:'Рыжие',custom:'Keep'});
 assert.equal(localizedAssetValue('READY', 'ru'), 'Готов');
 assert.equal(localizedAssetValue('FULL_ACCESS', 'ru'), 'Полный доступ');
 assert.equal(localizedAssetValue('Custom type', 'en'), 'Custom type');

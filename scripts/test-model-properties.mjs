@@ -5,10 +5,13 @@ import ts from 'typescript';
 const source = await readFile(new URL('../src/lib/assets/model-properties.ts', import.meta.url), 'utf8');
 const localization = await readFile(new URL('../src/lib/assets/localization.ts', import.meta.url), 'utf8');
 const seed = await readFile(new URL('../src/lib/assets/content-translations.json', import.meta.url), 'utf8');
-const localizedSource = localization.replace("import contentTranslations from './content-translations.json';", `const contentTranslations = ${seed};`);
+const labels = await readFile(new URL('../src/lib/assets/property-labels.ts', import.meta.url), 'utf8');
+const labelJS = ts.transpileModule(labels, {compilerOptions: {module: ts.ModuleKind.ESNext}}).outputText;
+const labelURL = `data:text/javascript;base64,${Buffer.from(labelJS).toString('base64')}`;
+const localizedSource = localization.replace("import contentTranslations from './content-translations.json';", `const contentTranslations = ${seed};`).replace("'./property-labels'",JSON.stringify(labelURL));
 const localizedJS = ts.transpileModule(localizedSource, {compilerOptions: {module: ts.ModuleKind.ESNext}}).outputText;
 const localizationURL = `data:text/javascript;base64,${Buffer.from(localizedJS).toString('base64')}`;
-const {outputText} = ts.transpileModule(source.replace("'./localization'", JSON.stringify(localizationURL)), {compilerOptions: {module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022}});
+const {outputText} = ts.transpileModule(source.replace("'./localization'", JSON.stringify(localizationURL)).replace("'./property-labels'",JSON.stringify(labelURL)), {compilerOptions: {module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022}});
 const {httpUrl, splitModelDetails, propertyRows, socialPlatformForKey, hasProperties} = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
 
 for (const url of ['javascript:alert(1)', 'data:text/html,test', '/relative', 'https://user:pass@example.com', 'not a url']) {

@@ -1,4 +1,5 @@
 import {readAssetLocalization} from './localization';
+import {propertyKey, propertyLabels} from './property-labels';
 
 export const socialPlatforms = [
   {key: 'instagram', label: 'Instagram', aliases: ['instagram', 'инстаграм']},
@@ -64,19 +65,8 @@ export function hasProperties(value: unknown): boolean {
   return true;
 }
 
-const labels: Record<string, [string, string]> = {
-  eyes: ['Глаза', 'Eyes'], hair: ['Волосы', 'Hair'], build: ['Телосложение', 'Build'],
-  height_cm: ['Рост, см', 'Height, cm'], age: ['Возраст', 'Age'], city: ['Город', 'City'],
-  roles: ['Род деятельности', 'Roles'], topics: ['Тематики', 'Topics'],
-  formats: ['Форматы', 'Formats'], audience: ['Аудитория', 'Audience'],
-  style: ['Стиль', 'Style'], name: ['Имя', 'Name'], era: ['Эпоха', 'Era'], character: ['Характер', 'Personality'],
-  beard: ['Борода', 'Beard'], geography: ['География', 'Geography'], languages: ['Языки', 'Languages'],
-  height: ['Рост', 'Height'], clothing: ['Одежда', 'Clothing'], weight: ['Вес', 'Weight']
-};
-
 export function propertyLabel(key: string, locale: string) {
-  const normalized = key.toLowerCase();
-  const entry = labels[key] ?? Object.values(labels).find(([ru, en]) => ru.toLowerCase() === normalized || en.toLowerCase() === normalized);
+  const entry = propertyLabels[propertyKey(key)];
   return entry?.[locale === 'ru' ? 0 : 1] ?? key.replace(/_/g, ' ');
 }
 
