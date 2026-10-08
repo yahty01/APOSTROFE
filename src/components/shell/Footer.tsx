@@ -5,7 +5,7 @@ import {footerClasses} from './Footer.styles';
 
 /**
  * Общий футер проекта (публичная часть и админка).
- * Содержит юридическую информацию, контакты и ссылочные заглушки для документов.
+ * Содержит контакты и ссылочные заглушки для документов.
  */
 export async function Footer() {
   const t = await getTranslations('footer');
@@ -17,17 +17,6 @@ export async function Footer() {
   return (
     <footer className={footerClasses.footer}>
       <div className={footerClasses.topGrid}>
-        <div className={footerClasses.topPanel}>
-          <div className={footerClasses.topTitle}>
-            {t('legalTitle')}
-          </div>
-          <div className={footerClasses.topList}>
-            <div>{t('legalCompany')}</div>
-            <div>{t('legalRegNo')}</div>
-            <div>{t('legalJurisdiction')}</div>
-          </div>
-        </div>
-
         <div className={footerClasses.topPanel}>
           <div className={footerClasses.topTitle}>
             {t('contactsTitle')}

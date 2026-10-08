@@ -4,9 +4,9 @@
  */
 export const footerClasses = {
   footer: "border-t ui-line",
-  topGrid: "grid grid-cols-2 gap-px bg-[var(--color-line)] md:grid-cols-3",
+  topGrid: "grid grid-cols-2 gap-px bg-[var(--color-line)]",
   topPanel: "bg-[var(--color-paper)] p-4 md:p-6",
-  metaPanel: "bg-[var(--color-paper)] p-4 md:col-span-3 md:px-6 md:py-4",
+  metaPanel: "bg-[var(--color-paper)] p-4 col-span-2 md:px-6 md:py-4",
   topTitle: "font-condensed text-[11px] uppercase tracking-[0.18em] md:text-xs",
   topList:
     "mt-3 space-y-1 font-doc text-[10px] uppercase text-[var(--color-muted)] md:text-[11px]",
