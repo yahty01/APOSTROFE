@@ -4,7 +4,7 @@ import {getTranslations} from 'next-intl/server';
 
 import {ViewSwitcher} from '@/components/shell/ViewSwitcher';
 import {modelsPageClasses} from '@/app/(public)/models/page.styles';
-import {createSignedImageUrl} from '@/lib/supabase/images';
+import {createPublicImageUrls} from '@/lib/supabase/public-images';
 import {createSupabasePublicClient} from '@/lib/supabase/public';
 import {
   buildCollaborateWithUsText,
@@ -146,7 +146,7 @@ export async function PublicRegistryPage({
     const assets = assetsRes.data ?? [];
     if (!assets.length) {
       items = [];
-    } else if (config.mediaMode === 'title') {
+    } else if (config.mediaMode === 'title' || viewMode === 'list') {
       items = assets.map((a) => ({
         id: a.id,
         entity_type: (a.entity_type ?? config.entityType) as AssetEntityType,
@@ -187,39 +187,38 @@ export async function PublicRegistryPage({
         mediaByAsset.set(m.asset_id, list);
       }
 
-      items = await Promise.all(
-        assets.map(async (a) => {
-          const media = mediaByAsset.get(a.id) ?? [];
-          const catalog = media.find((m) => m.kind === 'catalog')?.path ?? null;
-          const hero = media.find((m) => m.kind === 'hero')?.path ?? null;
-
-          const previewPath = catalog ?? hero;
-          const previewUrl = previewPath
-            ? await createSignedImageUrl(supabase, previewPath, {
-                width: 720,
-                resize: 'contain',
-                quality: 80
-              })
-            : null;
-
-          return {
-            id: a.id,
-            entity_type: (a.entity_type ?? config.entityType) as AssetEntityType,
-            document_id: a.document_id,
-            title: a.title,
-            description: a.description,
-            license_type: a.license_type,
-            status: a.status,
-            created_at: a.created_at,
-            updated_at: a.updated_at,
-            model_type: a.model_type,
-            creator_direction: a.creator_direction,
-            influencer_topic: a.influencer_topic,
-            influencer_platforms: a.influencer_platforms,
-            preview_url: previewUrl
-          };
-        })
+      const previewPaths = assets.map((a) => {
+        const media = mediaByAsset.get(a.id) ?? [];
+        return media.find((m) => m.kind === 'catalog')?.path ??
+          media.find((m) => m.kind === 'hero')?.path ?? null;
+      });
+      const previewUrls = await createPublicImageUrls(
+        previewPaths.filter((path): path is string => Boolean(path))
       );
+
+      items = assets.map((a, index) => {
+        const previewPath = previewPaths[index];
+        const previewUrl = previewPath
+          ? previewUrls.get(previewPath) ?? null
+          : null;
+
+        return {
+          id: a.id,
+          entity_type: (a.entity_type ?? config.entityType) as AssetEntityType,
+          document_id: a.document_id,
+          title: a.title,
+          description: a.description,
+          license_type: a.license_type,
+          status: a.status,
+          created_at: a.created_at,
+          updated_at: a.updated_at,
+          model_type: a.model_type,
+          creator_direction: a.creator_direction,
+          influencer_topic: a.influencer_topic,
+          influencer_platforms: a.influencer_platforms,
+          preview_url: previewUrl
+        };
+      });
     }
   } catch (e) {
     errorMessage = e instanceof Error ? e.message : 'Failed to load assets';

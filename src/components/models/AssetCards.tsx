@@ -35,7 +35,7 @@ export async function AssetCards({
   return (
     <div className={assetCardsClasses.root}>
       <div className={assetCardsClasses.grid}>
-        {items.map((item) => {
+        {items.map((item, index) => {
           const description = getAssetDescription(item);
           const cardHref = detailBasePath
             ? `${detailBasePath}/${encodeURIComponent(item.document_id)}`
@@ -67,7 +67,9 @@ export async function AssetCards({
                 fill
                 className={assetCardsClasses.mediaImage}
                 style={{objectFit: 'contain', objectPosition: 'center'}}
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                sizes="(max-width: 639px) calc(100vw - 34px), (max-width: 767px) calc(50vw - 25px), (max-width: 1279px) calc(33.333vw - 28px), (max-width: 2399px) calc(25vw - 26px), 574px"
+                preload={index === 0}
+                fetchPriority={index < 4 ? 'high' : undefined}
               />
             ) : entityType === 'creator' ? (
               <div className={assetCardsClasses.mediaTitle}>
